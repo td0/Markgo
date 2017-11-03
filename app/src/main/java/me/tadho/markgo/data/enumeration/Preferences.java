@@ -9,5 +9,4 @@ public final class Preferences {
     public static final String PREF_KEY_NOTIFICATION_DEBUG = "subscribe_debug";
     public static final String PREF_KEY_NOTIFICATION_NEWS = "subscribe_news";
     public static final String PREF_KEY_NOTIFICATION_ANNOUNCEMENT = "subscribe_announcement";
-    public static final String PREF_KEY_IN_APP_BROWSER = "in_app_browser";
 }
