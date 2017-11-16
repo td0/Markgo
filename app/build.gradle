@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 def keystorePropsFile = rootProject.file("keystore.properties")
 def keystoreProps = null
-if(keystorePropsFile.exists()) {
+if (keystorePropsFile.exists()) {
     keystoreProps = new Properties()
     keystoreProps.load(new FileInputStream(keystorePropsFile))
 }
@@ -11,7 +11,7 @@ if(keystorePropsFile.exists()) {
 android {
     signingConfigs {
         debug {
-            if(keystoreProps!=null){
+            if (keystoreProps != null) {
                 storeFile file(keystoreProps['STORE_FILE_DEBUG'])
                 storePassword keystoreProps['STORE_PASSWORD_DEBUG']
                 keyAlias keystoreProps['KEY_ALIAS_DEBUG']
@@ -62,13 +62,15 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.android.support:design:26.1.0'
     implementation 'com.android.support:support-v4:26.1.0'
-    implementation 'com.google.android.gms:play-services-maps:11.4.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.1', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    implementation 'com.google.android.gms:play-services-maps:11.4.2'
+    implementation 'com.google.android.gms:play-services-location:11.4.2'
     implementation 'com.google.firebase:firebase-core:11.4.2'
     implementation 'com.google.firebase:firebase-messaging:11.4.2'
+
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.1.4'
     implementation 'com.github.bumptech.glide:glide:4.0.0'
