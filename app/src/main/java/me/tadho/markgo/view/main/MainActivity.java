@@ -29,6 +29,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -69,11 +71,11 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         mPresenter.runFirstStart(firstRun);
         mPresenter.runInDebug(BuildConfig.DEBUG);
 
+
+        // TODO : move to presenter
         mFab = findViewById(R.id.mFab);
         mFab.setOnClickListener( v -> {
-            Timber.d("Moving to maps intent");
-            Intent intent = new Intent(this, MapsActivity.class);
-            startActivity(intent);
+            Timber.d("FAB Pressed");
         });
     }
 
@@ -100,5 +102,22 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     public void unsubscribeTopic(String key) {
         Timber.d("subscribeTopic() called on: key = [" + key + "]");
         FirebaseMessaging.getInstance().subscribeToTopic(key);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.map_action_button:
+                Timber.d("Map Action Button pressed");
+                startActivity(new Intent(this, MapsActivity.class));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
