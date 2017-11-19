@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Markgo</string>
     <string name="title_activity_maps">Map</string>
+    <string name="maps">Maps</string>
+    <string name="reports_on_map">Reports Maps</string>
+    <string name="test_activity">Test Activity</string>
 </resources>
