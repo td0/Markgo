@@ -22,50 +22,44 @@
 
 package me.tadho.markgo.view.maps;
 
+import android.content.Context;
+import android.support.annotation.AttrRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
+import android.util.AttributeSet;
+import android.widget.FrameLayout;
 
-import me.tadho.markgo.R;
-import timber.log.Timber;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends AppCompatActivity implements MapsContract.View {
-    private MapsContract.Presenter mPresenter;
+import io.reactivex.subjects.Subject;
+import io.reactivex.Observable;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.Subject;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+public class MapsFrame extends FrameLayout {
 
-        mPresenter = new MapsPresenter(this);
+    private Subject<GoogleMap> mapSubject;
 
-        setTitle(getString(R.string.maps));
-        if(getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-        }
+    public MapsFrame(@NonNull Context context) {
+        super(context);
     }
 
-    @Override
-    public void placeholder() {
-        Timber.d("placeholder interface method");
+    public MapsFrame(@NonNull Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
     }
 
-    @Override
-    public void setPresenter(@NonNull MapsContract.Presenter presenter) {
-        Timber.d("setPresenter() called on: presenter = [" + presenter + "]");
-        mPresenter = presenter;
+    public MapsFrame(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            super.onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+    public MapsFrame(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
     }
-
 }
