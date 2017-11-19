@@ -31,6 +31,7 @@ public class MainPresenter implements MainContract.Presenter {
     private final MainContract.View mView;
 
     MainPresenter(MainContract.View mView) {
+        // Set View-Presenter Bind
         if (mView != null) {
             this.mView = mView;
             this.mView.setPresenter(this);
@@ -41,26 +42,14 @@ public class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void start() {
-        Timber.d("halo");
+        Timber.d("Main Presenter started");
     }
 
     @Override
     public void runFirstStart(boolean firstStart) {
         if (firstStart) {
-            mView.subscribeTopic(Preferences.PREF_KEY_NOTIFICATION_NEWS);
-            mView.subscribeTopic(Preferences.PREF_KEY_NOTIFICATION_ANNOUNCEMENT);
-            mView.changePreferences(Preferences.PREF_KEY_NOTIFICATION_NEWS, true);
-            mView.changePreferences(Preferences.PREF_KEY_NOTIFICATION_ANNOUNCEMENT, true);
             mView.changePreferences(Preferences.PREF_KEY_FIRST_RUN, false);
         }
     }
 
-    @Override
-    public void runInDebug(boolean debug) {
-        if (debug) {
-            mView.subscribeTopic(Preferences.PREF_KEY_NOTIFICATION_DEBUG);
-        } else {
-            mView.unsubscribeTopic(Preferences.PREF_KEY_NOTIFICATION_DEBUG);
-        }
-    }
 }

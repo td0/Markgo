@@ -25,7 +25,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/map_action_button"
-        android:title=""
-        app:showAsAction="always"
+        android:title="@string/reports_on_map"
+        app:showAsAction="ifRoom"
         android:icon="@drawable/ic_map_white_24dp" />
+    <item
+        android:id="@+id/more_action_button"
+        android:title=""
+        android:orderInCategory="9999"
+        app:showAsAction="always"
+        android:icon="@drawable/ic_more_vert_white_48dp">
+        <menu>
+            <item
+                android:id="@+id/reset_submenu"
+                android:title="Reset Preferences"
+                app:showAsAction="never"/>
+            <item
+                android:id="@+id/about_submenu"
+                android:title="About"
+                app:showAsAction="never"/>
+        </menu>
+    </item>
 </menu>
