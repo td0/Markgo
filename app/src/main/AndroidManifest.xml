@@ -42,6 +42,7 @@
             android:value="@integer/google_play_services_version" />
 
 
+        <!-- Activity -->
         <activity
             android:name=".view.main.MainActivity"
             android:screenOrientation="portrait">
@@ -52,7 +53,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.maps.MapsActivity"></activity>
+        <activity android:name=".view.maps.MapsActivity" />
+
 
     </application>
 
