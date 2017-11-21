@@ -21,5 +21,17 @@
   -->
 
 <resources>
+    <!--Toolbar-->
+    <dimen name="toolbar_elevation">4dp</dimen>
+
+    <!--FAB-->
     <dimen name="fab_margin">16dp</dimen>
+
+    <!--FabSheet-->
+    <dimen name="sheet_width">180dp</dimen>
+    <dimen name="sheet_spacing">10dp</dimen>
+    <dimen name="sheet_item_spacing">@dimen/fab_margin</dimen>
+    <dimen name="sheet_item_image_spacing">24dp</dimen>
+    <dimen name="sheet_item_text_size">16sp</dimen>
+    <dimen name="fab_sheet_elevation">0dp</dimen>
 </resources>

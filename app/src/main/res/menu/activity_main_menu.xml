@@ -27,13 +27,13 @@
         android:id="@+id/map_action_button"
         android:title="@string/reports_on_map"
         app:showAsAction="ifRoom"
-        android:icon="@drawable/ic_map_white_24dp" />
+        android:icon="@drawable/ic_map_white_24dp"/>
     <item
         android:id="@+id/more_action_button"
         android:title=""
         android:orderInCategory="9999"
         app:showAsAction="always"
-        android:icon="@drawable/ic_more_vert_white_48dp">
+        android:icon="@drawable/ic_more_vert_white_24dp">
         <menu>
             <item
                 android:id="@+id/reset_submenu"

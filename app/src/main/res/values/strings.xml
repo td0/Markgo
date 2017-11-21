@@ -1,7 +1,15 @@
 <resources>
+    <!--Activities Title-->
     <string name="app_name">Markgo</string>
     <string name="title_activity_maps">Map</string>
-    <string name="maps">Maps</string>
-    <string name="reports_on_map">Reports Maps</string>
     <string name="test_activity">Test Activity</string>
+    <string name="reports_on_map">Reports Maps</string>
+
+    <string name="maps">Maps</string>
+    <!--FAB-->
+    <string name="fab_gallery">Gallery</string>
+    <string name="fab_camera">Camera</string>
+    <!--Dialog-->
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

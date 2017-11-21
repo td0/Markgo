@@ -1,11 +1,15 @@
 <!--?xml version="1.0" encoding="UTF-8"?-->
 <resources>
-  <color name="colorPrimary">#212121</color>
-  <color name="colorPrimaryLight">#484848</color>
-  <color name="colorPrimaryDark">#000000</color>
-  <color name="colorSecondary">#ffab40</color>
-  <color name="colorSecondaryLight">#ffdd71</color>
-  <color name="colorSecondaryDark">#c77c02</color>
-  <color name="textColorPrimary">#ffffff</color>
-  <color name="textColorSecondary">#000000</color>
+    <color name="colorPrimary">#212121</color>
+    <color name="colorPrimaryLight">#484848</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorSecondary">#ffab40</color>
+    <color name="colorSecondaryLight">#ffdd71</color>
+    <color name="colorSecondaryDark">#c77c02</color>
+    <color name="textColorPrimary">#ffffff</color>
+    <color name="textColorSecondary">#000000</color>
+
+    <color name="background_card">#fff</color>
+    <color name="text_black_87">#de000000</color>
+    <color name="text_white_87">#deFFFFFF</color>
 </resources>

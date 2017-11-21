@@ -22,23 +22,25 @@
 
 package me.tadho.markgo.view.main;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
+import com.gordonwong.materialsheetfab.MaterialSheetFab;
+import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Preferences;
+import me.tadho.markgo.utils.Fab;
 import me.tadho.markgo.view.maps.MapsActivity;
 import timber.log.Timber;
 
@@ -47,13 +49,16 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
 
     private MainContract.Presenter mPresenter;
     private SharedPreferences mSharedPreferences;
-    private FloatingActionButton mFab;
+    private Fab mFab;
+    private MaterialSheetFab<Fab> msFab;
+    private int statusBarColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        setSupportActionBar(findViewById(R.id.toolbar));
+        setupFab();
 
         // Set View-Presenter Bind
         mPresenter = new MainPresenter(this);
@@ -63,13 +68,6 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         Timber.d("firstRun -> "+((firstRun)?"true":"false"));
         // Call Presenter runFirstStart
         mPresenter.runFirstStart(firstRun);
-        // Set FAB
-        mFab = findViewById(R.id.mFab);
-        mFab.setOnClickListener( v -> {
-            Timber.d("FAB Pressed");
-            Snackbar.make(v, "FAB Pressed", Snackbar.LENGTH_SHORT)
-                    .setAction("Action", null).show();
-        });
     }
 
     @Override
@@ -111,22 +109,64 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Do you want to exit?");
         // alert.setMessage("Message");
-
-        alert.setPositiveButton("Ok", (dialog, whichButton) -> {
+        alert.setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
             this.finishAffinity();
+        }).setNegativeButton(R.string.dialog_cancel, null).show();
+    }
+
+    private void setupFab() {
+        mFab = findViewById(R.id.mFab);
+        View sheetView = findViewById(R.id.fab_sheet);
+        View overlay = findViewById(R.id.overlay);
+        int sheetColor = getResources().getColor(R.color.background_card);
+        int fabColor = getResources().getColor(R.color.colorSecondary);
+
+
+        msFab = new MaterialSheetFab<>(mFab, sheetView, overlay, sheetColor, fabColor);
+        msFab.setEventListener(new MaterialSheetFabEventListener() {
+            @Override
+            public void onShowSheet() {
+                statusBarColor = getStatusBarColor();
+                setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+            }
+
+            @Override
+            public void onHideSheet() {
+                setStatusBarColor(statusBarColor);
+            }
         });
-
-        alert.setNegativeButton("Cancel", null);
-
-        alert.show();
     }
 
     private void clearPreferences(){
         SharedPreferences.Editor editor = mSharedPreferences.edit();
         editor.clear();
-        editor.commit();
+        editor.apply();
 
         Snackbar.make(mFab, "Preferences Cleared", Snackbar.LENGTH_SHORT)
-                .setAction("Action", null).show();
+                .addCallback(new Snackbar.Callback(){
+                    @Override
+                    public void onDismissed(Snackbar transientBottomBar, int event) {
+                        super.onDismissed(transientBottomBar, event);
+                        mFab.setEnabled(true);
+                    }
+                    @Override
+                    public void onShown(Snackbar sb) {
+                        super.onShown(sb);
+                        mFab.setEnabled(false);
+                    }
+                }).show();
+    }
+
+    private int getStatusBarColor() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return getWindow().getStatusBarColor();
+        }
+        return 0;
+    }
+
+    private void setStatusBarColor(int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(color);
+        }
     }
 }

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -8,16 +8,57 @@
         <item name="colorAccent">@color/colorSecondary</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
+    <!--No Action Bar-->
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar" >
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorSecondary</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="AppTheme.ExpandedTitleOverlay" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:textColor">@android:color/transparent</item>
+    <!--Theme Overlay Dark-->
+    <style name="AppTheme.NoActionBar.Overlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlHighlight">#8fff</item>
+        <item name="colorControlActivated">@color/colorSecondary</item>
     </style>
+    <!--Theme Overlay Light-->
+    <style name="AppTheme.NoActionBar.Overlay.Popup" parent="ThemeOverlay.AppCompat.Light" />
+
+    <!--Custom Toolbar-->
+    <style name="Widget.AppTheme.ToolBar" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">?attr/actionBarSize</item>
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="android:theme">@style/AppTheme.NoActionBar.Overlay</item>
+        <item name="popupTheme">@style/AppTheme.NoActionBar.Overlay.Popup</item>
+        <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
+        <item name="layout_scrollFlags">scroll|enterAlways</item>
+    </style>
+
+    <!--FabSheet-->
+    <style name="Widget.AppTheme.Sheet" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">@dimen/sheet_spacing</item>
+        <item name="android:layout_marginBottom">@dimen/sheet_spacing</item>
+        <item name="android:layout_marginLeft">@dimen/sheet_spacing</item>
+        <item name="android:layout_marginRight">@dimen/sheet_spacing</item>
+        <item name="cardBackgroundColor">@color/colorSecondary</item>
+        <item name="cardElevation">@dimen/fab_sheet_elevation</item>
+        <item name="cardMaxElevation">@dimen/fab_sheet_elevation</item>
+        <item name="contentPadding">-3dp</item>
+    </style>
+    <style name="TextAppearance.FabSheet.Item" parent="">
+        <item name="android:layout_width">@dimen/sheet_width</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">@dimen/sheet_item_spacing</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textSize">@dimen/sheet_item_text_size</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:drawablePadding">@dimen/sheet_item_image_spacing</item>
+    </style>
+
 </resources>
