@@ -36,12 +36,16 @@
         android:icon="@drawable/ic_more_vert_white_24dp">
         <menu>
             <item
+                android:id="@+id/edit_name_submenu"
+                android:title="@string/edit_name_submenu"
+                app:showAsAction="never" />
+            <item
                 android:id="@+id/reset_submenu"
                 android:title="Reset Preferences"
                 app:showAsAction="never"/>
             <item
                 android:id="@+id/about_submenu"
-                android:title="About"
+                android:title="@string/about_submenu"
                 app:showAsAction="never"/>
         </menu>
     </item>
