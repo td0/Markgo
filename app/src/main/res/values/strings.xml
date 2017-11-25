@@ -5,11 +5,16 @@
     <string name="test_activity">Test Activity</string>
     <string name="reports_on_map">Reports Maps</string>
 
-    <string name="maps">Maps</string>
+    <!--Activity title-->
+    <string name="title_maps">Maps</string>
+    <string name="title_post">Post Review</string>
     <!--FAB-->
     <string name="fab_gallery">Gallery</string>
     <string name="fab_camera">Camera</string>
     <!--Dialog-->
+    <string name="dialog_exit">Do you want to quit the app?</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="about_submenu">About</string>
+    <string name="edit_name_submenu">Edit Name</string>
 </resources>
