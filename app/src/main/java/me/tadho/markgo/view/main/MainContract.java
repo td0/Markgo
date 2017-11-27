@@ -33,6 +33,7 @@ interface MainContract {
 
     @SuppressWarnings("SameParameterValue")
     interface View extends BaseView<Presenter> {
-        void changePreferences(String key, boolean value);
+//        void changePreferences(String key, boolean value);
+        void runIntro();
     }
 }

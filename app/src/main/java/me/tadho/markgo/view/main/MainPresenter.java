@@ -48,7 +48,7 @@ public class MainPresenter implements MainContract.Presenter {
     @Override
     public void runFirstStart(boolean firstStart) {
         if (firstStart) {
-            mView.changePreferences(Preferences.PREF_KEY_FIRST_RUN, false);
+            mView.runIntro();
         }
     }
 

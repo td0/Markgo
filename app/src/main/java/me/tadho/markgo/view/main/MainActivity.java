@@ -35,6 +35,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import me.tadho.markgo.view.intro.IntroActivity;
 import timber.log.Timber;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
@@ -47,7 +48,9 @@ import me.tadho.markgo.view.maps.MapsActivity;
 import me.tadho.markgo.view.post.PostActivity;
 
 
-public class MainActivity extends AppCompatActivity implements MainContract.View, View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements
+        MainContract.View,
+        View.OnClickListener {
 
     private MainContract.Presenter mPresenter;
     private SharedPreferences mSharedPreferences;
@@ -79,10 +82,9 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     }
 
     @Override
-    public void changePreferences(String key, boolean value) {
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean(key, value);
-        editor.apply();
+    public void runIntro() {
+        Timber.d("should run intro");
+        startActivity(new Intent(this, IntroActivity.class));
     }
 
     private void setupFab() {
@@ -170,22 +172,27 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
     }
 
     private void clearPreferences(){
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-
-        Snackbar.make(mFab, "Preferences Cleared", Snackbar.LENGTH_SHORT)
-                .addCallback(new Snackbar.Callback(){
-                    @Override
-                    public void onDismissed(Snackbar transientBottomBar, int event) {
-                        super.onDismissed(transientBottomBar, event);
-                        mFab.setEnabled(true);
-                    }
-                    @Override
-                    public void onShown(Snackbar sb) {
-                        super.onShown(sb);
-                        mFab.setEnabled(false);
-                    }
-                }).show();
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Clear Preferences and exit app?")
+        .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.clear();
+            editor.apply();
+            this.finishAffinity();
+        }).setNegativeButton(R.string.dialog_cancel, null).show();
+//
+//        Snackbar.make(mFab, "Preferences Cleared", Snackbar.LENGTH_SHORT)
+//                .addCallback(new Snackbar.Callback(){
+//                    @Override
+//                    public void onDismissed(Snackbar transientBottomBar, int event) {
+//                        super.onDismissed(transientBottomBar, event);
+//                        mFab.setEnabled(true);
+//                    }
+//                    @Override
+//                    public void onShown(Snackbar sb) {
+//                        super.onShown(sb);
+//                        mFab.setEnabled(false);
+//                    }
+//                }).show();
     }
 }
