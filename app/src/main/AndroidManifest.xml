@@ -17,8 +17,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
-    <uses-feature android:name="android.hardware.camera" android:required="true" />
-    <uses-feature android:name="android.hardware.location.gps" android:required="true" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="true" />
 
     <application
         android:name=".App"
@@ -26,8 +30,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
+        android:allowBackup="false"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:supportsRtl, android:allowBackup" >
 
         <!-- Activity -->
         <activity
@@ -46,6 +52,11 @@
         <activity
             android:name=".view.tes.testActivity"
             android:screenOrientation="portrait" />
+        <activity android:name=".view.post.PostActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".view.intro.IntroActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Intro"/>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -62,7 +73,7 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <!-- Image Provider -->
+        <!-- File Provider of Image -->
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -72,8 +83,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/fileprovider" />
         </provider>
-
-        <activity android:name=".view.post.PostActivity" />
     </application>
 
 </manifest>
