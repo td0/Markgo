@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/fab_sheet_item_photo"
+                android:id="@+id/fab_sheet_item_camera"
                 style="@style/TextAppearance.FabSheet.Item"
                 android:drawableLeft="@drawable/ic_photo_camera_black_24dp"
                 android:drawableStart="@drawable/ic_photo_camera_black_24dp"
