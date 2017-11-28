@@ -27,7 +27,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -43,7 +42,7 @@ import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.data.enumeration.Preferences;
-import me.tadho.markgo.utils.Fab;
+import me.tadho.markgo.utils.customModules.Fab;
 import me.tadho.markgo.view.maps.MapsActivity;
 import me.tadho.markgo.view.post.PostActivity;
 
@@ -61,9 +60,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        setSupportActionBar(findViewById(R.id.toolbar));
-        setupFab();
 
         // Set View-Presenter Bind
         mPresenter = new MainPresenter(this);
@@ -73,6 +69,10 @@ public class MainActivity extends AppCompatActivity implements
         Timber.d("firstRun -> "+((firstRun)?"true":"false"));
         // Call Presenter runFirstStart
         mPresenter.runFirstStart(firstRun);
+
+        setContentView(R.layout.activity_main);
+        setSupportActionBar(findViewById(R.id.toolbar));
+        setupFab();
     }
 
     @Override

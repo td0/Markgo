@@ -17,4 +17,14 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="about_submenu">About</string>
     <string name="edit_name_submenu">Edit Name</string>
+
+    <!--intro-->
+    <string name="intro_welcome_title">Markgo</string>
+    <string name="intro_welcome_description">Report broken/damaged road.</string>
+    <string name="intro_permission_description">This apps requires GPS permission to tag your report with geo-location data.</string>
+    <string name="intro_form_error">Please fill the name!</string>
+    <string name="intro_form_name">Name</string>
+    <string name="intro_form_title">Please enter your name</string>
+    <string name="intro_form_description">It\'s not a unique username. You can change it later, but you really need to fill it now..</string>
+
 </resources>

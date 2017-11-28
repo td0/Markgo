@@ -27,9 +27,12 @@ import me.tadho.markgo.view.BaseView;
 
 public interface IntroContract {
     interface Presenter extends BasePresenter {
-//        void setIntroPages();
+        void introFinish();
     }
     interface  View extends BaseView<Presenter>{
+        void setupIntroSlides();
         void changePreferences(String key, boolean value);
+        void changePreferences(String key, String value);
+        String getUserName();
     }
 }

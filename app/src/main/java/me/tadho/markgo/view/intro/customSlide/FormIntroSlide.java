@@ -20,54 +20,56 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.post;
+package me.tadho.markgo.view.intro.customSlide;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.EditText;
 
-import timber.log.Timber;
-
+import agency.tango.materialintroscreen.SlideFragment;
 import me.tadho.markgo.R;
-import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.view.intro.IntroActivity;
 
-public class PostActivity extends AppCompatActivity implements PostContract.View {
+public class FormIntroSlide extends SlideFragment{
 
-    private PostContract.Presenter mPresenter;
+    public EditText editText;
+
+    @Nullable
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post);
-        setTitle(getString(R.string.title_post));
-
-        mPresenter = new PostPresenter(this);
-        mPresenter.start();
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        final View view = inflater.inflate(R.layout.layout_introslide_form, container, false);
+        editText = view.findViewById(R.id.intro_name_input);
+        return view;
     }
 
     @Override
-    public void setPresenter(@NonNull PostContract.Presenter presenter) {
-        mPresenter = presenter;
+    public int backgroundColor() {
+        return R.color.teal_700;
     }
 
     @Override
-    public int getTakeMode() {
-        Bundle bundle = getIntent().getExtras();
-        if (bundle!=null){
-            return (int) bundle.get(Constants.TAKE_MODE);
+    public int buttonsColor() {
+        return R.color.teal_300;
+    }
+
+    @Override
+    public boolean canMoveFurther() {
+        String userName = editText.getText().toString();
+        if((userName.trim().length() > 0)) {
+            ((IntroActivity) getActivity()).setUserName(userName);
+            return true;
         }
-        return 0;
+        return false;
     }
 
     @Override
-    public void launchCamera() {
-        Timber.d("Launch Camera here");
-//        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-    }
-
-    @Override
-    public void launchGallery() {
-        Timber.d("Launch Gallery here");
+    public String cantMoveFurtherErrorMessage() {
+        return getString(R.string.intro_form_error);
     }
 
 }

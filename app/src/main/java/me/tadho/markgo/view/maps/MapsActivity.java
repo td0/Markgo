@@ -32,6 +32,7 @@ import me.tadho.markgo.R;
 import timber.log.Timber;
 
 public class MapsActivity extends AppCompatActivity implements MapsContract.View {
+
     private MapsContract.Presenter mPresenter;
 
     @Override
@@ -41,7 +42,7 @@ public class MapsActivity extends AppCompatActivity implements MapsContract.View
 
         mPresenter = new MapsPresenter(this);
 
-        setTitle(getString(R.string.maps));
+        setTitle(getString(R.string.title_maps));
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);

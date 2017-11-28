@@ -38,4 +38,6 @@
     <color name="teal_500">#009688</color>
     <color name="teal_700">#00796b</color>
 
+    <color name="colorMainIntro">#5b5f76</color>
+    <color name="colorMainIntroAccent">#6b6f86</color>
 </resources>

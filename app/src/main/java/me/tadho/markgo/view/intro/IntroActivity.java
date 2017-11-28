@@ -25,34 +25,55 @@ package me.tadho.markgo.view.intro;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 
 
 import agency.tango.materialintroscreen.MaterialIntroActivity;
+import agency.tango.materialintroscreen.SlideFragment;
+import agency.tango.materialintroscreen.SlideFragmentBuilder;
+
 import me.tadho.markgo.R;
+import me.tadho.markgo.view.intro.customSlide.FormIntroSlide;
 
 public class IntroActivity extends MaterialIntroActivity implements IntroContract.View {
 
     private IntroContract.Presenter mPresenter;
     private SharedPreferences mSharedPreferences;
+    private SlideFragment formSlide;
+    private String userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_intro);
-        setTitle("Intro");
 
         mPresenter = new IntroPresenter(this);
         mPresenter.start();
 
-        Snackbar.make(getWindow().getDecorView(),"intro",Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
     public void setPresenter(@NonNull IntroContract.Presenter presenter) {
         mPresenter = presenter;
+    }
+
+    @Override
+    public void setupIntroSlides() {
+        formSlide = new FormIntroSlide();
+        addSlide(new SlideFragmentBuilder()
+                .backgroundColor(R.color.colorMainIntro)
+                .buttonsColor(R.color.colorMainIntroAccent)
+                .image(R.drawable.ic_markgo_logo)
+                .title(getString(R.string.intro_welcome_title))
+                .description(getString(R.string.intro_welcome_description))
+                .build());
+        addSlide(new SlideFragmentBuilder()
+                .backgroundColor(R.color.indigo_700)
+                .buttonsColor(R.color.indigo_300)
+                .image(R.drawable.ic_markgo_intro_gps)
+                .neededPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION})
+                .description(getString(R.string.intro_permission_description))
+                .build());
+        addSlide(formSlide);
     }
 
     @Override
@@ -62,4 +83,29 @@ public class IntroActivity extends MaterialIntroActivity implements IntroContrac
         editor.putBoolean(key, value);
         editor.apply();
     }
+
+    @Override
+    public void changePreferences(String key, String value) {
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(key, value);
+        editor.apply();
+    }
+
+    @Override
+    public void onFinish() {
+        mPresenter.introFinish();
+    }
+
+    @Override
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName){
+        this.userName=userName;
+    }
+
+    @Override
+    public void onBackPressed() {}
 }

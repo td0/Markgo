@@ -42,21 +42,15 @@ public class PostPresenter implements PostContract.Presenter {
     public void start() {
         switch (mView.getTakeMode()){
             case R.id.fab_sheet_item_camera:
-                Timber.d("Launch camera here");
-                mView.onLaunchCamera();
+                Timber.d("Call Camera here");
+                mView.launchCamera();
                 break;
             case R.id.fab_sheet_item_gallery:
-                Timber.d("Launch gallery here");
+                Timber.d("Call Gallery here");
+                mView.launchGallery();
                 break;
             default:
                 throw new RuntimeException("Can't get intent extras");
         }
-
-    }
-
-    @Override
-    public void boilerplate() {
-        //TODO : change PostPresenter boilerplate() into something
-        Timber.d("PostPresenter boilerplate()");
     }
 }

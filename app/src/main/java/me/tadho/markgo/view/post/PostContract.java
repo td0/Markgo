@@ -27,11 +27,10 @@ import me.tadho.markgo.view.BaseView;
 
 public interface PostContract {
     interface Presenter extends BasePresenter{
-        void boilerplate();
     }
     interface View extends BaseView<Presenter> {
         int getTakeMode();
-        void onLaunchCamera();
-        void onLaunchGallery();
+        void launchCamera();
+        void launchGallery();
     }
 }
