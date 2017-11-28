@@ -35,6 +35,6 @@ interface MainContract {
 //        void changePreferences(String key, boolean value);
         boolean checkFirstStart();
         void runIntro();
-        void buildView();
+        void setupView();
     }
 }

@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void buildView(){
+    public void setupView(){
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         setupFab();

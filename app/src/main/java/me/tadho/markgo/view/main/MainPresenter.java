@@ -45,7 +45,7 @@ public class MainPresenter implements MainContract.Presenter {
         Timber.d("Main Presenter started");
         if(mView.checkFirstStart()){
             mView.runIntro();
-        }else mView.buildView();
+        }else mView.setupView();
     }
 
 }
