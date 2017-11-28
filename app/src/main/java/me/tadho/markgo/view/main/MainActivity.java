@@ -60,19 +60,15 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        Timber.d("MainActt onCreate");
         // Set View-Presenter Bind
         mPresenter = new MainPresenter(this);
-        // Check firstRun
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean firstRun = mSharedPreferences.getBoolean(Preferences.PREF_KEY_FIRST_RUN, true);
-        Timber.d("firstRun -> "+((firstRun)?"true":"false"));
-        // Call Presenter runFirstStart
-        mPresenter.runFirstStart(firstRun);
+    }
 
-        setContentView(R.layout.activity_main);
-        setSupportActionBar(findViewById(R.id.toolbar));
-        setupFab();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPresenter.start();
     }
 
     @Override
@@ -82,8 +78,21 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public boolean checkFirstStart() {
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean firstRun = mSharedPreferences.getBoolean(Preferences.PREF_KEY_FIRST_RUN, true);
+        return firstRun;
+    }
+
+    @Override
+    public void buildView(){
+        setContentView(R.layout.activity_main);
+        setSupportActionBar(findViewById(R.id.toolbar));
+        setupFab();
+    }
+
+    @Override
     public void runIntro() {
-        Timber.d("should run intro");
         startActivity(new Intent(this, IntroActivity.class));
     }
 
@@ -101,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     statusBarColor = getWindow().getStatusBarColor();
                     getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
-                }else statusBarColor = 0;
+                } else statusBarColor = 0;
             }
 
             @Override
@@ -118,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.fab_sheet_item_camera :
+            case R.id.fab_sheet_item_camera:
                 Timber.d("Camera FABSheet pressed");
                 msFab.hideSheet();
                 startActivity(
@@ -126,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements
                                 .putExtra(Constants.TAKE_MODE, v.getId())
                 );
                 break;
-            case R.id.fab_sheet_item_gallery :
+            case R.id.fab_sheet_item_gallery:
                 Timber.d("Gallery FABSheet pressed");
                 msFab.hideSheet();
                 startActivity(
@@ -160,39 +169,25 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        if(msFab.isSheetVisible()){
+        if (msFab.isSheetVisible()) {
             msFab.hideSheet();
-        }else {
+        } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(R.string.dialog_exit)
-            .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
-                this.finishAffinity();
-            }).setNegativeButton(R.string.dialog_cancel, null).show();
+                    .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
+                        this.finishAffinity();
+                    }).setNegativeButton(R.string.dialog_cancel, null).show();
         }
     }
 
-    private void clearPreferences(){
+    private void clearPreferences() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
         alert.setTitle("Clear Preferences and exit app?")
-        .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
-            SharedPreferences.Editor editor = mSharedPreferences.edit();
-            editor.clear();
-            editor.apply();
-            this.finishAffinity();
-        }).setNegativeButton(R.string.dialog_cancel, null).show();
-//
-//        Snackbar.make(mFab, "Preferences Cleared", Snackbar.LENGTH_SHORT)
-//                .addCallback(new Snackbar.Callback(){
-//                    @Override
-//                    public void onDismissed(Snackbar transientBottomBar, int event) {
-//                        super.onDismissed(transientBottomBar, event);
-//                        mFab.setEnabled(true);
-//                    }
-//                    @Override
-//                    public void onShown(Snackbar sb) {
-//                        super.onShown(sb);
-//                        mFab.setEnabled(false);
-//                    }
-//                }).show();
+                .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.clear();
+                    editor.apply();
+                    this.finishAffinity();
+                }).setNegativeButton(R.string.dialog_cancel, null).show();
     }
 }

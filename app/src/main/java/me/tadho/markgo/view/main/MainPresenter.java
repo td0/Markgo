@@ -43,13 +43,9 @@ public class MainPresenter implements MainContract.Presenter {
     @Override
     public void start() {
         Timber.d("Main Presenter started");
-    }
-
-    @Override
-    public void runFirstStart(boolean firstStart) {
-        if (firstStart) {
+        if(mView.checkFirstStart()){
             mView.runIntro();
-        }
+        }else mView.buildView();
     }
 
 }

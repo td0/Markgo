@@ -28,12 +28,13 @@ import me.tadho.markgo.view.BaseView;
 
 interface MainContract {
     interface Presenter extends BasePresenter {
-        void runFirstStart(boolean firstStart);
     }
 
     @SuppressWarnings("SameParameterValue")
     interface View extends BaseView<Presenter> {
 //        void changePreferences(String key, boolean value);
+        boolean checkFirstStart();
         void runIntro();
+        void buildView();
     }
 }
