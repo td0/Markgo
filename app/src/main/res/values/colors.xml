@@ -8,6 +8,7 @@
     <color name="colorSecondaryDark">#c56200</color>
     <color name="textColorPrimary">#ffffff</color>
     <color name="textColorSecondary">#000000</color>
+    <color name="highlight">#4fff</color>
 
     <color name="background_card">#fff</color>
     <color name="text_black_87">#de000000</color>

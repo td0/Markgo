@@ -11,7 +11,7 @@
     <!--No Action Bar-->
     <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar" >
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorSecondary</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
@@ -19,8 +19,8 @@
     <!--Theme Overlay Dark-->
     <style name="AppTheme.NoActionBar.Overlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
-        <item name="colorControlNormal">@android:color/white</item>
-        <item name="colorControlHighlight">#8fff</item>
+        <item name="colorControlNormal">@color/textColorPrimary</item>
+        <item name="colorControlHighlight">@color/highlight</item>
         <item name="colorControlActivated">@color/colorSecondary</item>
     </style>
     <!--Theme Overlay Light-->
