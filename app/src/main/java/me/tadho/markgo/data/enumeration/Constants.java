@@ -22,7 +22,7 @@
 
 package me.tadho.markgo.data.enumeration;
 
-public class Constants {
+public final class Constants {
     public static final String APP_TAG = "Markgo";
     public static final String TAKE_MODE = "takeOn";
     //    Permission Request
