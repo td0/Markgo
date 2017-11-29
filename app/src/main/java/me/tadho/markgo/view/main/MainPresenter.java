@@ -22,6 +22,7 @@
 
 package me.tadho.markgo.view.main;
 
+import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.data.enumeration.Preferences;
 import timber.log.Timber;
 
@@ -29,23 +30,41 @@ import timber.log.Timber;
 public class MainPresenter implements MainContract.Presenter {
 
     private final MainContract.View mView;
+    private boolean firstRun, isViewSet;
 
     MainPresenter(MainContract.View mView) {
         // Set View-Presenter Bind
         if (mView != null) {
             this.mView = mView;
             this.mView.setPresenter(this);
-        } else {
-            throw new RuntimeException("Cant bind view");
-        }
+            isViewSet = false;
+        } else throw new RuntimeException("Cant bind view");
     }
 
     @Override
     public void start() {
-        Timber.d("Main Presenter started");
-        if(mView.checkFirstStart()){
-            mView.runIntro();
-        }else mView.setupView();
+        Timber.d("start() called");
     }
 
+    @Override
+    public void setFirstRun(boolean firstRun) {
+        this.firstRun = firstRun;
+        if (firstRun) {
+            mView.runIntro();
+        }
+    }
+
+    @Override
+    public void introDone() {
+        firstRun = false;
+    }
+
+    @Override
+    public void setResume() {
+        if(!isViewSet && !firstRun){
+            Timber.d("tdh: building MainAct views");
+            mView.setupViews();
+            isViewSet=true;
+        }
+    }
 }

@@ -39,7 +39,6 @@ public class IntroActivity extends MaterialIntroActivity implements IntroContrac
 
     private IntroContract.Presenter mPresenter;
     private SharedPreferences mSharedPreferences;
-    private SlideFragment formSlide;
     private String userName;
 
     @Override
@@ -58,7 +57,7 @@ public class IntroActivity extends MaterialIntroActivity implements IntroContrac
 
     @Override
     public void setupIntroSlides() {
-        formSlide = new FormIntroSlide();
+        SlideFragment formSlide = new FormIntroSlide();
         addSlide(new SlideFragmentBuilder()
                 .backgroundColor(R.color.colorMainIntro)
                 .buttonsColor(R.color.colorMainIntroAccent)
@@ -95,6 +94,7 @@ public class IntroActivity extends MaterialIntroActivity implements IntroContrac
     @Override
     public void onFinish() {
         mPresenter.introFinish();
+        setResult(RESULT_OK);
     }
 
     @Override

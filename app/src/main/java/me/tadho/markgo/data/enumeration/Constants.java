@@ -26,6 +26,7 @@ public final class Constants {
     public static final String APP_TAG = "Markgo";
     public static final String TAKE_MODE = "takeOn";
     //    Permission Request
+    public static final int REQUEST_INTRO_CODE = 1;
     public static final int REQUEST_CAMERA_CODE = 11;
     public static final int REQUEST_LOCATION_CODE = 22;
 }

@@ -60,40 +60,43 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Timber.d("MainActt onCreate");
-        // Set View-Presenter Bind
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean firstRun = mSharedPreferences.getBoolean(Preferences.PREF_KEY_FIRST_RUN, true);
+
         mPresenter = new MainPresenter(this);
+        mPresenter.setFirstRun(firstRun);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mPresenter.start();
+        mPresenter.setResume();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == Constants.REQUEST_INTRO_CODE && resultCode == RESULT_OK){
+            Timber.d("tdh: Intro Done");
+            mPresenter.introDone();
+        }
     }
 
     @Override
     public void setPresenter(@NonNull MainContract.Presenter presenter) {
-        Timber.d("setPresenter() called on: presenter = [" + presenter + "]");
         mPresenter = presenter;
     }
 
     @Override
-    public boolean checkFirstStart() {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean firstRun = mSharedPreferences.getBoolean(Preferences.PREF_KEY_FIRST_RUN, true);
-        return firstRun;
+    public void runIntro() {
+        startActivityForResult(new Intent(this, IntroActivity.class),Constants.REQUEST_INTRO_CODE);
     }
 
     @Override
-    public void setupView(){
+    public void setupViews(){
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
         setupFab();
-    }
-
-    @Override
-    public void runIntro() {
-        startActivity(new Intent(this, IntroActivity.class));
     }
 
     private void setupFab() {
