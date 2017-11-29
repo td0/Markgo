@@ -25,6 +25,6 @@
     <string name="intro_form_error">Please fill the name!</string>
     <string name="intro_form_name">Name</string>
     <string name="intro_form_title">Please enter your name</string>
-    <string name="intro_form_description">It\'s not a unique username. You can change it later, but you really need to fill it now..</string>
+    <string name="intro_form_description">It\'s not a unique username. You can change it later, but you really need to fill it for \'registration\' purpose..</string>
 
 </resources>
