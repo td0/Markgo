@@ -2,6 +2,7 @@ package me.tadho.markgo;
 
 import android.support.multidex.MultiDexApplication;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.squareup.leakcanary.LeakCanary;
 
 import timber.log.Timber;
@@ -25,6 +26,9 @@ public class App extends MultiDexApplication {
         // Timber init
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
+        } else {
+            FirebaseAnalytics.getInstance(this)
+                    .setAnalyticsCollectionEnabled(true);
         }
     }
 }
