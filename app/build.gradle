@@ -62,11 +62,18 @@ dependencies {
     implementation "com.android.support:recyclerview-v7:$supportLibraryVersion"
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:support-v4:$supportLibraryVersion"
+    implementation "com.android.support:animated-vector-drawable:$supportLibraryVersion"
+    implementation "com.android.support:customtabs:$supportLibraryVersion"
 
     implementation "com.google.android.gms:play-services-maps:$gmsVersion"
     implementation "com.google.android.gms:play-services-location:$gmsVersion"
     implementation "com.google.firebase:firebase-core:$gmsVersion"
     implementation "com.google.firebase:firebase-auth:$gmsVersion"
+    implementation "com.google.firebase:firebase-database:$gmsVersion"
+    implementation "com.google.firebase:firebase-storage:$gmsVersion"
+    implementation "com.firebaseui:firebase-ui-auth:$firebaseUIVersion"
+    implementation "com.firebaseui:firebase-ui-database:$firebaseUIVersion"
+    implementation "com.firebaseui:firebase-ui-storage:$firebaseUIVersion"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.1', {
