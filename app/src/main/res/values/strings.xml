@@ -1,0 +1,30 @@
+<resources>
+    <!--Activities Title-->
+    <string name="app_name">Markgo</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="test_activity">Test Activity</string>
+    <string name="reports_on_map">Reports Maps</string>
+
+    <!--Activity title-->
+    <string name="title_maps">Maps</string>
+    <string name="title_post">Post Review</string>
+    <!--FAB-->
+    <string name="fab_gallery">Gallery</string>
+    <string name="fab_camera">Camera</string>
+    <!--Dialog-->
+    <string name="dialog_exit">Do you want to quit the app?</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="about_submenu">About</string>
+    <string name="edit_name_submenu">Edit Name</string>
+
+    <!--intro-->
+    <string name="intro_welcome_title">Markgo</string>
+    <string name="intro_welcome_description">Report broken/damaged road.</string>
+    <string name="intro_permission_description">This apps requires GPS permission to tag your report with geo-location data.</string>
+    <string name="intro_form_error">Please fill the name!</string>
+    <string name="intro_form_name">Name</string>
+    <string name="intro_form_title">Please enter your name</string>
+    <string name="intro_form_description">It\'s not a unique username. You can change it later, but you really need to fill it for \'registration\' purpose..</string>
+
+</resources>
