@@ -35,24 +35,23 @@
         tools:replace="android:supportsRtl, android:allowBackup" >
 
         <!-- Activity -->
-        <activity
-            android:name=".view.MainActivity"
+        <activity android:name=".view.IntroActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/Theme.Intro">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".view.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".view.MapsActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".view.PostActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".view.IntroActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Intro"/>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

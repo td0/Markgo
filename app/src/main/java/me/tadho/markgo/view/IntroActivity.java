@@ -22,10 +22,14 @@
 
 package me.tadho.markgo.view;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
 
+
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.FirebaseDatabase;
 
 import agency.tango.materialintroscreen.MaterialIntroActivity;
 import agency.tango.materialintroscreen.SlideFragment;
@@ -34,6 +38,7 @@ import agency.tango.materialintroscreen.SlideFragmentBuilder;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Preferences;
 import me.tadho.markgo.view.customIntroSlide.FormIntroSlide;
+import timber.log.Timber;
 
 public class IntroActivity extends MaterialIntroActivity {
 
@@ -43,8 +48,20 @@ public class IntroActivity extends MaterialIntroActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (isFirstRun()) {
+            if (!FirebaseApp.getApps(this).isEmpty()) {
+                Timber.d("Firebase Instance NOT available, creating one...");
+                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+            } else {
+                Timber.d("Firebase Instance available");
+            }
+            setupIntroSlides();
+        } else startMainActivity();
+    }
 
-        setupIntroSlides();
+    private boolean isFirstRun(){
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        return mSharedPreferences.getBoolean(Preferences.PREF_KEY_FIRST_RUN, true);
     }
 
     public void setupIntroSlides() {
@@ -80,11 +97,16 @@ public class IntroActivity extends MaterialIntroActivity {
         editor.apply();
     }
 
+    private void startMainActivity(){
+        startActivity(new Intent(IntroActivity.this, MainActivity.class));
+        finish();
+    }
+
     @Override
     public void onFinish() {
         changePreferences(Preferences.PREF_KEY_FIRST_RUN);
         changePreferences(Preferences.PREF_KEY_USER_NAME, userName);
-        setResult(RESULT_OK);
+        startMainActivity();
     }
 
     public void setUserName(String userName){
