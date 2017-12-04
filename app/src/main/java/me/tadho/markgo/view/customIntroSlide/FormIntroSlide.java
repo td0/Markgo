@@ -41,23 +41,12 @@ import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 
-import com.google.firebase.FirebaseApiNotAvailableException;
-import com.google.firebase.FirebaseTooManyRequestsException;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseUser;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import agency.tango.materialintroscreen.SlideFragment;
 
-import com.google.firebase.FirebaseException;
-import com.google.firebase.auth.PhoneAuthCredential;
-import com.google.firebase.auth.PhoneAuthProvider;
-
-import io.reactivex.schedulers.Schedulers;
-import io.reactivex.subjects.PublishSubject;
-import io.reactivex.subjects.Subject;
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.R;
@@ -80,13 +69,9 @@ public class FormIntroSlide extends SlideFragment
     private Subject<Integer> verifyStateSubject = PublishSubject.create();
     private CompositeDisposable compositeDisposable;
     private String cantMoveFurtherMessage;
-    private boolean canMoveFurther;
     private boolean submitButtonError;
     private boolean signinButtonError;
     private int verifyState;
-
-    private FirebaseAuth mAuth;
-    private String verificationId;
 
     @Nullable
     @Override
@@ -114,15 +99,12 @@ public class FormIntroSlide extends SlideFragment
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mAuth = FirebaseAuth.getInstance();
-        verifyState = Constants.REG_STATE_GET_CODE;
+        initiation();
         Timber.d("onActivityCreated verifyState -> "+verifyState);
-        submitButtonError = true;
-        signinButtonError = true;
-        canMoveFurther = false;
-        cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
-        compositeDisposable = new CompositeDisposable();
-        setFormValidation();
+    }
+
+    public void setCantMoveFurtherMessage(String message){
+        cantMoveFurtherMessage = message;
     }
 
     @Override
@@ -137,7 +119,7 @@ public class FormIntroSlide extends SlideFragment
 
     @Override
     public boolean canMoveFurther() {
-        return canMoveFurther;
+        return false;
     }
 
     @Override
@@ -160,13 +142,8 @@ public class FormIntroSlide extends SlideFragment
                 cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error2);
                 setVerifyState(Constants.REG_STATE_GET_AUTH);
                 showMessage(getString(R.string.fbauth_enter_get_verification));
-                PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                    phoneEditText.getText().toString(),
-                    Constants.VERIFY_PHONE_TIMEOUT,
-                    TimeUnit.SECONDS,
-                    getActivity(),
-                    authCallback()
-                );
+                ((IntroActivity)getActivity())
+                        .getVerificationCode(phoneEditText.getText().toString());
             }
             else showMessage(cantMoveFurtherMessage);
         }
@@ -174,10 +151,8 @@ public class FormIntroSlide extends SlideFragment
             Timber.d("Sign In button pressed");
             if (!signinButtonError){
                 showMessage("Signing in...");
-                String code = codeEditText.getText().toString();
-                PhoneAuthCredential credential = PhoneAuthProvider
-                        .getCredential(verificationId, code);
-                signInWithPhoneCredential(credential);
+                ((IntroActivity)getActivity())
+                        .signInWithCode(codeEditText.getText().toString());
             }
             else showMessage(cantMoveFurtherMessage);
         }
@@ -187,76 +162,20 @@ public class FormIntroSlide extends SlideFragment
         }
     }
 
-    private PhoneAuthProvider.OnVerificationStateChangedCallbacks authCallback(){
-        return new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
-            @Override
-            public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-                Timber.d("Verification Complete");
-                signInWithPhoneCredential(phoneAuthCredential);
-            }
-            @Override
-            public void onVerificationFailed(FirebaseException e) {
-                Timber.e(e.getMessage());
-                setVerifyState(Constants.REG_STATE_GET_CODE);
-                if (e instanceof FirebaseAuthInvalidCredentialsException) {
-                    showMessage(e.getMessage());
-                } else if (e instanceof FirebaseAuthException ){
-                    showMessage(getString(R.string.fbauth_error_not_authorized));
-                } else if (e instanceof FirebaseTooManyRequestsException){
-                    showMessage(getString(R.string.fbauth_error_quota_reached));
-                } else if (e instanceof FirebaseApiNotAvailableException){
-                    showMessage(getString(R.string.fbauth_error_service_unavailable));
-                } else {
-                    showMessage(getString(R.string.fbauth_error_other));
-                }
-            }
-
-            @Override
-            public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
-                super.onCodeSent(s, forceResendingToken);
-                Timber.d("onCodeSent Running!");
-                cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error3);
-                showMessage(getString(R.string.fbauth_enter_verification_code));
-                verificationId = s;
-            }
-
-            @Override
-            public void onCodeAutoRetrievalTimeOut(String s) {
-                super.onCodeAutoRetrievalTimeOut(s);
-                //TODO: Do something with this method
-            }
-        };
-    }
-
-    private void signInWithPhoneCredential(PhoneAuthCredential credential){
-        mAuth.signInWithCredential(credential)
-                .addOnSuccessListener(getActivity(), authResult -> {
-                    Timber.d("Phone Sign In success");
-                    FirebaseUser user = authResult.getUser();
-                    String name = nameEditText.getText().toString();
-                    canMoveFurther();
-                    killCompositeDisposable();
-                    ((IntroActivity)getActivity()).onAuthSuccess(user, name);
-                })
-                .addOnFailureListener(getActivity(), e -> {
-                    Timber.e(e.getMessage());
-                    showMessage(e.getMessage());
-                });
+    public void initiation(){
+        killCompositeDisposable();
+        compositeDisposable = new CompositeDisposable();
+        submitButtonError = true;
+        signinButtonError = true;
+        cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
+        setFormValidation();
+        setVerifyState(Constants.REG_STATE_GET_CODE);
     }
 
     private void setFormValidation() {
         Observable<CharSequence> nameEditObservable = RxTextView.textChanges(nameEditText);
         Observable<CharSequence> phoneEditObservable = RxTextView.textChanges(phoneEditText);
         Observable<CharSequence> codeEditObservable = RxTextView.textChanges(codeEditText);
-        Observable<Long> resendTimerObservable = Observable
-                .intervalRange(0,31,0,1,
-                        TimeUnit.SECONDS, AndroidSchedulers.mainThread())
-                .map(interval -> {
-                    long reversed = 30-interval;
-                    String s = "Resend ("+reversed+")";
-                    resendButton.setText(s);
-                    return interval;
-                });
 
         Disposable nameDisposable = nameEditObservable
                 .doOnNext(charSequence -> hideNameError())
@@ -305,8 +224,20 @@ public class FormIntroSlide extends SlideFragment
                         submitButtonError = false;
                     } else submitButtonError = true;
                 });
+        Observable<Long> resendTimerObservable = Observable
+                .intervalRange(0,31,0,1, TimeUnit.SECONDS)
+                .map(interval -> 30-interval)
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(reversed -> {
+                    String s = "Resend ("+reversed+")";
+                    resendButton.setText(s);
+                })
+                .doOnComplete(()->{
+                    resendButton.setText(R.string.intro_button_Resend);
+                    resendButton.setEnabled(true);
+                });
         Disposable verifyStateDisposable = verifyStateSubject
-                .map(state -> {
+                .doOnNext(state -> {
                     if (state == Constants.REG_STATE_GET_CODE) {
                         Timber.d("Verify State 1 : getting verification code");
                         codeEditText.setText("");
@@ -326,20 +257,13 @@ public class FormIntroSlide extends SlideFragment
                         signinButton.setVisibility(View.VISIBLE);
                         resendButton.setVisibility(View.VISIBLE);
                     }
-                    return state;
                 })
                 .filter(state -> state==Constants.REG_STATE_GET_AUTH)
                 .map(state -> resendTimerObservable)
-                .subscribeOn(Schedulers.io())
-                .subscribe(resendObservable -> {
-                    resendObservable.subscribe(
-                            n->{},
-                            Throwable::getMessage,
-                            ()->{
-                                resendButton.setText(R.string.intro_button_Resend);
-                                resendButton.setEnabled(true);
-                            }
-                    );
+                .subscribe(resendObs -> {
+                    Disposable resendDisposable = resendObs
+                            .subscribe();
+                    compositeDisposable.add(resendDisposable);
                 });
         compositeDisposable.add(nameDisposable);
         compositeDisposable.add(phoneDisposable);
@@ -360,7 +284,7 @@ public class FormIntroSlide extends SlideFragment
     }
 
     private boolean validateName(String name) {
-        return name.matches("^\\p{L}+[\\p{L}\\p{Z}\\p{P}]{0,}");
+        return name.matches("^\\p{L}+[\\p{L}\\p{Z}\\p{P}]*");
     }
     private boolean validatePhone(String phoneNumber){
         if (TextUtils.isEmpty(phoneNumber)) return false;
@@ -393,7 +317,6 @@ public class FormIntroSlide extends SlideFragment
     }
     private void hideCodeError(){
         disableError(codeInputLayout);
-        // emailInputLayout.setErrorEnabled(false);
         codeInputLayout.setError(null);
     }
     private void setVerifyState(int state){
@@ -402,9 +325,7 @@ public class FormIntroSlide extends SlideFragment
     }
     private void killCompositeDisposable(){
         if (compositeDisposable!=null) {
-            if (!compositeDisposable.isDisposed()) {
-                compositeDisposable.dispose();
-            }
+            if (!compositeDisposable.isDisposed()) compositeDisposable.dispose();
             compositeDisposable = null;
         }
     }
@@ -412,4 +333,6 @@ public class FormIntroSlide extends SlideFragment
     private void showMessage(String s){
         ((IntroActivity)getActivity()).showMessage(s);
     }
+
+
 }
