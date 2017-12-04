@@ -19,53 +19,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+//mAuth.signOut();
+//        startActivity(new Intent(this, IntroActivity.class));
+//        finish();
+
 
 package me.tadho.markgo.view;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v7.preference.PreferenceManager;
+import android.view.View;
 
 
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import agency.tango.materialintroscreen.MaterialIntroActivity;
 import agency.tango.materialintroscreen.SlideFragment;
 import agency.tango.materialintroscreen.SlideFragmentBuilder;
 
 import me.tadho.markgo.R;
-import me.tadho.markgo.data.enumeration.Preferences;
+import me.tadho.markgo.data.FbPersistence;
+import me.tadho.markgo.data.model.User;
 import me.tadho.markgo.view.customIntroSlide.FormIntroSlide;
 import timber.log.Timber;
 
 public class IntroActivity extends MaterialIntroActivity {
 
-    private SharedPreferences mSharedPreferences;
-    private String userName;
+    SlideFragment formSlide;
+    FirebaseAuth mAuth;
+    DatabaseReference rootRef, usersRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (isFirstRun()) {
-            if (!FirebaseApp.getApps(this).isEmpty()) {
-                Timber.d("Firebase Instance NOT available, creating one...");
-                FirebaseDatabase.getInstance().setPersistenceEnabled(true);
-            } else {
-                Timber.d("Firebase Instance available");
-            }
+
+        mAuth = FirebaseAuth.getInstance();
+        rootRef = FbPersistence.getDatabase().getInstance().getReference();
+        usersRef = rootRef.child("Users");
+
+
+        if (mAuth.getCurrentUser() == null) {
+            hideNavButton();
             setupIntroSlides();
         } else startMainActivity();
     }
 
-    private boolean isFirstRun(){
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        return mSharedPreferences.getBoolean(Preferences.PREF_KEY_FIRST_RUN, true);
+    private void hideNavButton(){
+        hideBackButton();
+        findViewById(agency.tango.materialintroscreen.R.id.button_next)
+                .setVisibility(View.INVISIBLE);
     }
 
     public void setupIntroSlides() {
-        SlideFragment formSlide = new FormIntroSlide();
+        formSlide = new FormIntroSlide();
         addSlide(new SlideFragmentBuilder()
                 .backgroundColor(R.color.colorMainIntro)
                 .buttonsColor(R.color.colorMainIntroAccent)
@@ -74,27 +85,14 @@ public class IntroActivity extends MaterialIntroActivity {
                 .description(getString(R.string.intro_welcome_description))
                 .build());
         addSlide(new SlideFragmentBuilder()
-                .backgroundColor(R.color.indigo_700)
+                .backgroundColor(R.color.indigo_500)
                 .buttonsColor(R.color.indigo_300)
                 .image(R.drawable.ic_markgo_intro_gps)
-                .neededPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION})
+                .neededPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION
+                        , android.Manifest.permission.ACCESS_COARSE_LOCATION})
                 .description(getString(R.string.intro_permission_description))
                 .build());
-        addSlide(formSlide);
-    }
-
-    public void changePreferences(String key) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putBoolean(key, false);
-        editor.apply();
-    }
-
-    public void changePreferences(String key, String value) {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(key, value);
-        editor.apply();
+        addSlide( formSlide );
     }
 
     private void startMainActivity(){
@@ -102,17 +100,32 @@ public class IntroActivity extends MaterialIntroActivity {
         finish();
     }
 
-    @Override
-    public void onFinish() {
-        changePreferences(Preferences.PREF_KEY_FIRST_RUN);
-        changePreferences(Preferences.PREF_KEY_USER_NAME, userName);
+    public void onAuthSuccess(FirebaseUser user, String name){
+        String uid = user.getUid();
+        writeNewUser(uid, name);
         startMainActivity();
+        rootRef.child("UsersList").child(uid)
+            .addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    Timber.d("Create new user");
+                    writeNewUser(uid, name);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
     }
 
-    public void setUserName(String userName){
-        this.userName=userName;
+    private void writeNewUser(String uid, String name){
+        User user = new User(name);
+        usersRef.child(uid).setValue(user);
+        rootRef.child("UsersList").child(uid).setValue(true);
     }
 
     @Override
     public void onBackPressed() {}
+
 }

@@ -35,6 +35,7 @@ import android.view.View;
 
 import timber.log.Timber;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
@@ -50,11 +51,14 @@ public class MainActivity extends AppCompatActivity implements
     private MaterialSheetFab<Fab> msFab;
     private int statusBarColor;
 
+    private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
+        mAuth = FirebaseAuth.getInstance();
         setupFab();
     }
 
@@ -124,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             case R.id.reset_submenu:
                 Timber.d("Reset Preferences submenu pressed");
-                clearPreferences();
+                signOut();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -142,15 +146,13 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void clearPreferences() {
-        SharedPreferences mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    private void signOut() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Clear Preferences and exit app?")
-                .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
-                    SharedPreferences.Editor editor = mSharedPreferences.edit();
-                    editor.clear();
-                    editor.apply();
-                    this.finishAffinity();
-                }).setNegativeButton(R.string.dialog_cancel, null).show();
+        alert.setTitle("Confirm sign out?")
+            .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
+                mAuth.signOut();
+                startActivity(new Intent(this, IntroActivity.class));
+                finish();
+            }).setNegativeButton(R.string.dialog_cancel, null).show();
     }
 }

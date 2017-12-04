@@ -36,6 +36,16 @@
         <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
         <item name="layout_scrollFlags">scroll|enterAlways</item>
     </style>
+    
+    <!--Button Themes-->
+    <style name="RegisterSubmitButton" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorButtonNormal">@color/teal_500dark</item>
+        <item name="colorControlHighlight">@color/teal_500</item>
+    </style>
+    <style name="RegisterResendButton" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorButtonNormal">@color/grey_500</item>
+        <item name="colorControlHighlight">@color/grey_500dark</item>
+    </style>
 
     <!--FabSheet-->
     <style name="Widget.AppTheme.Sheet" parent="">

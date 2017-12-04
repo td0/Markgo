@@ -17,14 +17,35 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="about_submenu">About</string>
     <string name="edit_name_submenu">Edit Name</string>
+    <string name="logout_submenu">Logout</string>
 
     <!--intro-->
     <string name="intro_welcome_title">Markgo</string>
-    <string name="intro_welcome_description">Report broken/damaged road.</string>
+    <string name="intro_welcome_description">Report broken/damaged road</string>
     <string name="intro_permission_description">This apps requires GPS permission to tag your report with geo-location data.</string>
-    <string name="intro_form_error">Please fill the name!</string>
+    <string name="intro_form_title">Registration</string>
+    <string name="intro_form_description">Name form is not a unique username, you can change it later</string>
     <string name="intro_form_name">Name</string>
-    <string name="intro_form_title">Please enter your name</string>
-    <string name="intro_form_description">It\'s not a unique username. You can change it later, but you really need to fill it for \'registration\' purpose..</string>
+    <string name="intro_form_phone">Phone Number</string>
+    <string name="intro_form_code">Code</string>
+    <string name="intro_invalid_name">name invalid</string>
+    <string name="intro_invalid_phone">phone number invalid</string>
+    <string name="intro_invalid_code">code invalid</string>
+    <string name="intro_form_error">Please fill the name!</string>
+    <string name="intro_button_verification1">Get Verification Code</string>
+    <string name="intro_button_verification2">Sign In</string>
+    <string name="intro_button_Resend">Resend</string>
+    <string name="intro_form_snackbar_error1">Please fill all the form accordingly</string>
+    <string name="intro_form_snackbar_error2">Waiting for verification code SMS…</string>
+    <string name="intro_form_snackbar_error3">Verification code invalid</string>
+
+    <!--Firebase Auth-->
+    <string name="fbauth_enter_get_verification">Please wait, getting SMS verification code</string>
+    <string name="fbauth_enter_verification_code">Enter verification code from SMS</string>
+    <string name="fbauth_error_not_authorized">Error : The App is not authorized</string>
+    <string name="fbauth_error_quota_reached">Error : Request Quota Reached</string>
+    <string name="fbauth_error_service_unavailable">Error : Google Play Service unavailable</string>
+    <string name="fbauth_error_request_timeout">Error : Request time out, try again…</string>
+    <string name="fbauth_error_other">Error : Something terrible happens!</string>
 
 </resources>

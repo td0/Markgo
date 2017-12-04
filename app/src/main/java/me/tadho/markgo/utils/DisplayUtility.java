@@ -20,21 +20,26 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.data.enumeration;
+package me.tadho.markgo.utils;
 
-public final class Constants {
-    public static final String APP_TAG = "Markgo";
-    public static final String TAKE_MODE = "takeOn";
-    //    Permission Request
-    public static final int REQUEST_INTRO_CODE = 1;
-    public static final int REQUEST_CAMERA_CODE = 11;
-    public static final int REQUEST_LOCATION_CODE = 22;
+import android.content.Context;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
-    //    Intro Constants
-    public static final int REG_STATE_GET_CODE = 1;
-    public static final int REG_STATE_GET_AUTH = 2;
-    public static final long DEBOUNCE_TIMEOUT = 500;
-    public static final long VERIFY_PHONE_TIMEOUT = 60;
+public class DisplayUtility {
 
-
+    public static void hideKeyboard(Context context, View view) {
+        if (context != null) {
+            InputMethodManager inputMethodManager =
+                    (InputMethodManager) context
+                            .getApplicationContext()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputMethodManager != null) {
+                if (view != null) {
+                    inputMethodManager
+                            .hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+            }
+        }
+    }
 }

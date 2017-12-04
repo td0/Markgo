@@ -24,30 +24,110 @@ package me.tadho.markgo.view.customIntroSlide;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TextInputLayout;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+
+import com.google.firebase.FirebaseApiNotAvailableException;
+import com.google.firebase.FirebaseTooManyRequestsException;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseUser;
+import com.jakewharton.rxbinding2.widget.RxTextView;
 import agency.tango.materialintroscreen.SlideFragment;
+
+import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
+
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
+import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.R;
 import me.tadho.markgo.view.IntroActivity;
+import timber.log.Timber;
 
-public class FormIntroSlide extends SlideFragment{
+public class FormIntroSlide extends SlideFragment
+        implements View.OnClickListener {
 
-    public EditText editText;
+    private TextInputLayout nameInputLayout;
+    private TextInputLayout phoneInputLayout;
+    private TextInputLayout codeInputLayout;
+    private EditText nameEditText;
+    private EditText phoneEditText;
+    private EditText codeEditText;
+    private Button submitButton;
+    private Button signinButton;
+    private Button resendButton;
+
+    private Subject<Integer> verifyStateSubject = PublishSubject.create();
+    private CompositeDisposable compositeDisposable;
+    private String cantMoveFurtherMessage;
+    private boolean canMoveFurther;
+    private boolean submitButtonError;
+    private boolean signinButtonError;
+    private int verifyState;
+
+    private FirebaseAuth mAuth;
+    private String verificationId;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.layout_introslide_form, container, false);
-        editText = view.findViewById(R.id.intro_name_input);
+        nameInputLayout = view.findViewById(R.id.intro_input_name_layout);
+        phoneInputLayout = view.findViewById(R.id.intro_input_phone_layout);
+        codeInputLayout = view.findViewById(R.id.intro_input_code_layout);
+        nameEditText = view.findViewById(R.id.intro_name_input);
+        phoneEditText = view.findViewById(R.id.intro_phone_input);
+        codeEditText = view.findViewById(R.id.intro_code_input);
+        submitButton = view.findViewById(R.id.intro_submit_button);
+        signinButton = view.findViewById(R.id.intro_signin_button);
+        resendButton = view.findViewById(R.id.intro_resend_button);
+        submitButton.setOnClickListener(this);
+        signinButton.setOnClickListener(this);
+        resendButton.setOnClickListener(this);
+        view.findViewById(R.id.intro_form_layout)
+                .setOnFocusChangeListener((v,hasFocus) -> {
+                    if (hasFocus) DisplayUtility.hideKeyboard(getContext(),v);
+                });
         return view;
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mAuth = FirebaseAuth.getInstance();
+        verifyState = Constants.REG_STATE_GET_CODE;
+        Timber.d("onActivityCreated verifyState -> "+verifyState);
+        submitButtonError = true;
+        signinButtonError = true;
+        canMoveFurther = false;
+        cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
+        compositeDisposable = new CompositeDisposable();
+        setFormValidation();
+    }
+
+    @Override
     public int backgroundColor() {
-        return R.color.teal_700;
+        return R.color.teal_500;
     }
 
     @Override
@@ -57,17 +137,279 @@ public class FormIntroSlide extends SlideFragment{
 
     @Override
     public boolean canMoveFurther() {
-        String userName = editText.getText().toString();
-        if((userName.trim().length() > 0)) {
-            ((IntroActivity) getActivity()).setUserName(userName);
-            return true;
-        }
-        return false;
+        return canMoveFurther;
     }
 
     @Override
     public String cantMoveFurtherErrorMessage() {
-        return getString(R.string.intro_form_error);
+        return cantMoveFurtherMessage;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        killCompositeDisposable();
+    }
+
+    @Override
+    public void onClick(View v) {
+        DisplayUtility.hideKeyboard(getContext(), v);
+        if (v.getId() == R.id.intro_submit_button){
+            Timber.d("Get Verification button pressed");
+            if (!submitButtonError){
+                cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error2);
+                setVerifyState(Constants.REG_STATE_GET_AUTH);
+                showMessage(getString(R.string.fbauth_enter_get_verification));
+                PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                    phoneEditText.getText().toString(),
+                    Constants.VERIFY_PHONE_TIMEOUT,
+                    TimeUnit.SECONDS,
+                    getActivity(),
+                    authCallback()
+                );
+            }
+            else showMessage(cantMoveFurtherMessage);
+        }
+        else if (v.getId() == R.id.intro_signin_button) {
+            Timber.d("Sign In button pressed");
+            if (!signinButtonError){
+                showMessage("Signing in...");
+                String code = codeEditText.getText().toString();
+                PhoneAuthCredential credential = PhoneAuthProvider
+                        .getCredential(verificationId, code);
+                signInWithPhoneCredential(credential);
+            }
+            else showMessage(cantMoveFurtherMessage);
+        }
+        else if (v.getId() == R.id.intro_resend_button){
+            Timber.d("Resend button pressed");
+            setVerifyState(Constants.REG_STATE_GET_CODE);
+        }
+    }
+
+    private PhoneAuthProvider.OnVerificationStateChangedCallbacks authCallback(){
+        return new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            @Override
+            public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+                Timber.d("Verification Complete");
+                signInWithPhoneCredential(phoneAuthCredential);
+            }
+            @Override
+            public void onVerificationFailed(FirebaseException e) {
+                Timber.e(e.getMessage());
+                setVerifyState(Constants.REG_STATE_GET_CODE);
+                if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                    showMessage(e.getMessage());
+                } else if (e instanceof FirebaseAuthException ){
+                    showMessage(getString(R.string.fbauth_error_not_authorized));
+                } else if (e instanceof FirebaseTooManyRequestsException){
+                    showMessage(getString(R.string.fbauth_error_quota_reached));
+                } else if (e instanceof FirebaseApiNotAvailableException){
+                    showMessage(getString(R.string.fbauth_error_service_unavailable));
+                } else {
+                    showMessage(getString(R.string.fbauth_error_other));
+                }
+            }
+
+            @Override
+            public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+                super.onCodeSent(s, forceResendingToken);
+                Timber.d("onCodeSent Running!");
+                cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error3);
+                showMessage(getString(R.string.fbauth_enter_verification_code));
+                verificationId = s;
+            }
+
+            @Override
+            public void onCodeAutoRetrievalTimeOut(String s) {
+                super.onCodeAutoRetrievalTimeOut(s);
+                //TODO: Do something with this method
+            }
+        };
+    }
+
+    private void signInWithPhoneCredential(PhoneAuthCredential credential){
+        mAuth.signInWithCredential(credential)
+                .addOnSuccessListener(getActivity(), authResult -> {
+                    Timber.d("Phone Sign In success");
+                    FirebaseUser user = authResult.getUser();
+                    String name = nameEditText.getText().toString();
+                    canMoveFurther();
+                    killCompositeDisposable();
+                    ((IntroActivity)getActivity()).onAuthSuccess(user, name);
+                })
+                .addOnFailureListener(getActivity(), e -> {
+                    Timber.e(e.getMessage());
+                    showMessage(e.getMessage());
+                });
+    }
+
+    private void setFormValidation() {
+        Observable<CharSequence> nameEditObservable = RxTextView.textChanges(nameEditText);
+        Observable<CharSequence> phoneEditObservable = RxTextView.textChanges(phoneEditText);
+        Observable<CharSequence> codeEditObservable = RxTextView.textChanges(codeEditText);
+        Observable<Long> resendTimerObservable = Observable
+                .intervalRange(0,31,0,1,
+                        TimeUnit.SECONDS, AndroidSchedulers.mainThread())
+                .map(interval -> {
+                    long reversed = 30-interval;
+                    String s = "Resend ("+reversed+")";
+                    resendButton.setText(s);
+                    return interval;
+                });
+
+        Disposable nameDisposable = nameEditObservable
+                .doOnNext(charSequence -> hideNameError())
+                .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(charSequence -> {
+                    if (!validateName(charSequence.toString())) {
+                        cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
+                        showNameError();
+                    } else hideNameError();
+                });
+        Disposable phoneDisposable = phoneEditObservable
+                .doOnNext(charSequence -> hidePhoneError())
+                .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(charSequence -> {
+                    if (!validatePhone(charSequence.toString())) {
+                        cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
+                        showPhoneError();
+                    } else hidePhoneError();
+                });
+        Disposable codeDisposable = codeEditObservable
+                .doOnNext(charSequence -> hideCodeError())
+                .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(charSequence -> {
+                    if (!validateCode(charSequence.toString())) {
+                        showCodeError();
+                        signinButtonError = true;
+                    } else {
+                        hideCodeError();
+                        signinButtonError = false;
+                    }
+                });
+        Disposable buttonDisposable = Observable.combineLatest(nameEditObservable, phoneEditObservable,
+                (nameObs, phoneObs) -> validateName(nameObs.toString())
+                        && validatePhone(phoneObs.toString())
+                        && verifyState == Constants.REG_STATE_GET_CODE)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(valid -> {
+                    if (valid && verifyState == Constants.REG_STATE_GET_CODE) {
+                        Timber.d("buttonDisposable Verify State : 1");
+                        submitButtonError = false;
+                    } else submitButtonError = true;
+                });
+        Disposable verifyStateDisposable = verifyStateSubject
+                .map(state -> {
+                    if (state == Constants.REG_STATE_GET_CODE) {
+                        Timber.d("Verify State 1 : getting verification code");
+                        codeEditText.setText("");
+                        nameEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+                        phoneEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+                        codeInputLayout.setVisibility(View.INVISIBLE);
+                        submitButton.setVisibility(View.VISIBLE);
+                        signinButton.setVisibility(View.INVISIBLE);
+                        resendButton.setVisibility(View.INVISIBLE);
+                        resendButton.setEnabled(false);
+                    } else if (state == Constants.REG_STATE_GET_AUTH) {
+                        Timber.d("Verify State 2 : authenticating");
+                        nameEditText.setInputType(InputType.TYPE_NULL);
+                        phoneEditText.setInputType(InputType.TYPE_NULL);
+                        codeInputLayout.setVisibility(View.VISIBLE);
+                        submitButton.setVisibility(View.INVISIBLE);
+                        signinButton.setVisibility(View.VISIBLE);
+                        resendButton.setVisibility(View.VISIBLE);
+                    }
+                    return state;
+                })
+                .filter(state -> state==Constants.REG_STATE_GET_AUTH)
+                .map(state -> resendTimerObservable)
+                .subscribeOn(Schedulers.io())
+                .subscribe(resendObservable -> {
+                    resendObservable.subscribe(
+                            n->{},
+                            Throwable::getMessage,
+                            ()->{
+                                resendButton.setText(R.string.intro_button_Resend);
+                                resendButton.setEnabled(true);
+                            }
+                    );
+                });
+        compositeDisposable.add(nameDisposable);
+        compositeDisposable.add(phoneDisposable);
+        compositeDisposable.add(codeDisposable);
+        compositeDisposable.add(buttonDisposable);
+        compositeDisposable.add(verifyStateDisposable);
+    }
+
+    //////////
+
+    private void enableError(TextInputLayout textInputLayout) {
+        if (textInputLayout.getChildCount() == 2)
+            textInputLayout.getChildAt(1).setVisibility(View.VISIBLE);
+    }
+    private void disableError(TextInputLayout textInputLayout) {
+        if (textInputLayout.getChildCount() == 2)
+            textInputLayout.getChildAt(1).setVisibility(View.GONE);
+    }
+
+    private boolean validateName(String name) {
+        return name.matches("^\\p{L}+[\\p{L}\\p{Z}\\p{P}]{0,}");
+    }
+    private boolean validatePhone(String phoneNumber){
+        if (TextUtils.isEmpty(phoneNumber)) return false;
+        Matcher matcher = Patterns.PHONE.matcher(phoneNumber);
+        return matcher.matches() && phoneNumber.length()>=9;
+    }
+    private boolean validateCode(String code){
+        return code.matches("^[0-9]{5,7}$");
+    }
+
+    private void showNameError(){
+        enableError(nameInputLayout);
+        nameInputLayout.setError(getString(R.string.intro_invalid_name));
+    }
+    private void hideNameError(){
+        disableError(nameInputLayout);
+        nameInputLayout.setError(null);
+    }
+    private void showPhoneError(){
+        enableError(phoneInputLayout);
+        phoneInputLayout.setError(getString(R.string.intro_invalid_phone));
+    }
+    private void hidePhoneError(){
+        disableError(phoneInputLayout);
+        phoneInputLayout.setError(null);
+    }
+    private void showCodeError(){
+        enableError(codeInputLayout);
+        codeInputLayout.setError(getString(R.string.intro_invalid_code));
+    }
+    private void hideCodeError(){
+        disableError(codeInputLayout);
+        // emailInputLayout.setErrorEnabled(false);
+        codeInputLayout.setError(null);
+    }
+    private void setVerifyState(int state){
+        verifyState = state;
+        verifyStateSubject.onNext(state);
+    }
+    private void killCompositeDisposable(){
+        if (compositeDisposable!=null) {
+            if (!compositeDisposable.isDisposed()) {
+                compositeDisposable.dispose();
+            }
+            compositeDisposable = null;
+        }
+    }
+
+    private void showMessage(String s){
+        ((IntroActivity)getActivity()).showMessage(s);
+    }
 }
