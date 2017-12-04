@@ -20,19 +20,16 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.intro;
+project.ext {
+    compileSdk = 26
+    targetSdk = 26
+    minSdk = 19
 
-import me.tadho.markgo.view.BasePresenter;
-import me.tadho.markgo.view.BaseView;
+    buildTools = '26.0.2' // Remember to also update in .travis.yml
 
-public interface IntroContract {
-    interface Presenter extends BasePresenter {
-        void introFinish();
-    }
-    interface  View extends BaseView<Presenter>{
-        void setupIntroSlides();
-        void changePreferences(String key, boolean value);
-        void changePreferences(String key, String value);
-        String getUserName();
-    }
+    gmsVersion = '11.6.2'
+    firebaseUIVersion = '3.1.0'
+    supportLibraryVersion = '27.0.2'
+    leakCanaryVersion = '1.5.4'
+    architectureVersion = '1.0.0-beta1'
 }

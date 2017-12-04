@@ -20,33 +20,18 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.intro;
+package me.tadho.markgo.data;
 
-import me.tadho.markgo.data.enumeration.Preferences;
-import timber.log.Timber;
+import com.google.firebase.database.FirebaseDatabase;
 
-public class IntroPresenter implements IntroContract.Presenter {
+public class FbPersistence {
+    private static FirebaseDatabase mDatabase;
 
-    private final IntroContract.View mView;
-
-    IntroPresenter(IntroContract.View mView){
-        if (mView != null) {
-            this.mView = mView;
-            mView.setPresenter(this);
-        } else {
-            throw new RuntimeException("Cant bind view");
+    public static FirebaseDatabase getDatabase() {
+        if (mDatabase == null) {
+            mDatabase = FirebaseDatabase.getInstance();
+            mDatabase.setPersistenceEnabled(true);
         }
-    }
-
-    @Override
-    public void start() {
-        mView.setupIntroSlides();
-    }
-
-    @Override
-    public void introFinish() {
-        Timber.d("intro Finished, setting up data");
-        mView.changePreferences(Preferences.PREF_KEY_FIRST_RUN, false);
-        mView.changePreferences(Preferences.PREF_KEY_USER_NAME, mView.getUserName());
+        return mDatabase;
     }
 }

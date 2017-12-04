@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.post;
+package me.tadho.markgo.view;
 
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -31,41 +31,37 @@ import timber.log.Timber;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Constants;
 
-public class PostActivity extends AppCompatActivity implements PostContract.View {
+public class PostActivity extends AppCompatActivity {
 
-    private PostContract.Presenter mPresenter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
         setTitle(getString(R.string.title_post));
 
-        mPresenter = new PostPresenter(this);
-        mPresenter.start();
+        getTakeMode();
     }
 
-    @Override
-    public void setPresenter(@NonNull PostContract.Presenter presenter) {
-        mPresenter = presenter;
-    }
-
-    @Override
-    public int getTakeMode() {
+    public void getTakeMode() {
         Bundle bundle = getIntent().getExtras();
         if (bundle!=null){
-            return (int) bundle.get(Constants.TAKE_MODE);
+            switch ((int) bundle.get(Constants.TAKE_MODE)){
+                case R.id.fab_sheet_item_camera:
+                    Timber.d("Call Camera here");
+                    launchCamera();
+                    break;
+                case R.id.fab_sheet_item_gallery:
+                    Timber.d("Call Gallery here");
+                    launchGallery();
+                    break;
+                default:
+                    throw new RuntimeException("Can't get intent extras");
+            }
         }
-        return 0;
     }
 
-    @Override
-    public void launchCamera() {
-        Timber.d("Launch Camera here");
-//        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    public void launchCamera() { Timber.d("Launch Camera here"); }
 
-    }
-
-    @Override
     public void launchGallery() {
         Timber.d("Launch Gallery here");
     }

@@ -20,13 +20,12 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.main;
+package me.tadho.markgo.view;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -34,68 +33,32 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import me.tadho.markgo.view.intro.IntroActivity;
 import timber.log.Timber;
+
+import com.google.firebase.auth.FirebaseAuth;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Constants;
-import me.tadho.markgo.data.enumeration.Preferences;
-import me.tadho.markgo.utils.customModules.Fab;
-import me.tadho.markgo.view.maps.MapsActivity;
-import me.tadho.markgo.view.post.PostActivity;
+import me.tadho.markgo.utils.Fab;
 
 
 public class MainActivity extends AppCompatActivity implements
-        MainContract.View,
         View.OnClickListener {
 
-    private MainContract.Presenter mPresenter;
-    private SharedPreferences mSharedPreferences;
     private Fab mFab;
     private MaterialSheetFab<Fab> msFab;
     private int statusBarColor;
 
+    private FirebaseAuth mAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean firstRun = mSharedPreferences.getBoolean(Preferences.PREF_KEY_FIRST_RUN, true);
-
-        mPresenter = new MainPresenter(this);
-        mPresenter.setFirstRun(firstRun);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mPresenter.setResume();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == Constants.REQUEST_INTRO_CODE && resultCode == RESULT_OK){
-            Timber.d("tdh: Intro Done");
-            mPresenter.introDone();
-        }
-    }
-
-    @Override
-    public void setPresenter(@NonNull MainContract.Presenter presenter) {
-        mPresenter = presenter;
-    }
-
-    @Override
-    public void runIntro() {
-        startActivityForResult(new Intent(this, IntroActivity.class),Constants.REQUEST_INTRO_CODE);
-    }
-
-    @Override
-    public void setupViews(){
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
+        mAuth = FirebaseAuth.getInstance();
         setupFab();
     }
 
@@ -103,6 +66,8 @@ public class MainActivity extends AppCompatActivity implements
         mFab = findViewById(R.id.mFab);
         View sheetView = findViewById(R.id.fab_sheet);
         View overlay = findViewById(R.id.overlay);
+        View cameraSheetButton = findViewById(R.id.fab_sheet_item_camera);
+        View gallerySheetButton = findViewById(R.id.fab_sheet_item_gallery);
         int sheetColor = getResources().getColor(R.color.background_card);
         int fabColor = getResources().getColor(R.color.colorSecondary);
 
@@ -115,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements
                     getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
                 } else statusBarColor = 0;
             }
-
             @Override
             public void onHideSheet() {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -123,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         });
-        findViewById(R.id.fab_sheet_item_camera).setOnClickListener(this);
-        findViewById(R.id.fab_sheet_item_gallery).setOnClickListener(this);
+        cameraSheetButton.setOnClickListener(this);
+        gallerySheetButton.setOnClickListener(this);
     }
 
     @Override
@@ -164,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             case R.id.reset_submenu:
                 Timber.d("Reset Preferences submenu pressed");
-                clearPreferences();
+                signOut();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -177,20 +141,18 @@ public class MainActivity extends AppCompatActivity implements
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle(R.string.dialog_exit)
-                    .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
-                        this.finishAffinity();
-                    }).setNegativeButton(R.string.dialog_cancel, null).show();
+                    .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> this.finishAffinity())
+                    .setNegativeButton(R.string.dialog_cancel, null).show();
         }
     }
 
-    private void clearPreferences() {
+    private void signOut() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Clear Preferences and exit app?")
-                .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
-                    SharedPreferences.Editor editor = mSharedPreferences.edit();
-                    editor.clear();
-                    editor.apply();
-                    this.finishAffinity();
-                }).setNegativeButton(R.string.dialog_cancel, null).show();
+        alert.setTitle("Confirm sign out?")
+            .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
+                mAuth.signOut();
+                startActivity(new Intent(this, IntroActivity.class));
+                finish();
+            }).setNegativeButton(R.string.dialog_cancel, null).show();
     }
 }

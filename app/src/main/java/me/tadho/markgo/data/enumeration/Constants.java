@@ -29,4 +29,12 @@ public final class Constants {
     public static final int REQUEST_INTRO_CODE = 1;
     public static final int REQUEST_CAMERA_CODE = 11;
     public static final int REQUEST_LOCATION_CODE = 22;
+
+    //    Intro Constants
+    public static final int REG_STATE_GET_CODE = 1;
+    public static final int REG_STATE_GET_AUTH = 2;
+    public static final long DEBOUNCE_TIMEOUT = 500;
+    public static final long VERIFY_PHONE_TIMEOUT = 60;
+
+
 }

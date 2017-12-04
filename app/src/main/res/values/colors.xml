@@ -35,10 +35,16 @@
     <color name="brown_500">#795548</color>
     <color name="brown_700">#5d4037</color>
     <!--teal-->
+    <color name="teal_100">#b2dfdb</color>
     <color name="teal_300">#4db6ac</color>
+    <color name="teal_500light">#52c7b8</color>
     <color name="teal_500">#009688</color>
+    <color name="teal_500dark">#00675b</color>
     <color name="teal_700">#00796b</color>
+    <color name="teal_a400">#1de9b6</color>
 
     <color name="colorMainIntro">#5b5f76</color>
     <color name="colorMainIntroAccent">#6b6f86</color>
+    <color name="grey_500">#9e9e9e</color>
+    <color name="grey_500dark">#707070</color>
 </resources>

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="me.tadho.markgo.view.main.MainActivity">
+    tools:context="me.tadho.markgo.view.MainActivity">
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
         </android.support.design.widget.AppBarLayout>
     </android.support.design.widget.CoordinatorLayout>
 
-    <me.tadho.markgo.utils.customModules.Fab
+    <me.tadho.markgo.utils.Fab
         android:id="@+id/mFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

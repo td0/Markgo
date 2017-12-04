@@ -20,51 +20,63 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.main;
+package me.tadho.markgo.data.model;
 
-import me.tadho.markgo.data.enumeration.Constants;
-import me.tadho.markgo.data.enumeration.Preferences;
-import timber.log.Timber;
+import com.google.firebase.database.IgnoreExtraProperties;
+import com.google.firebase.database.ServerValue;
 
+import java.io.Serializable;
 
-public class MainPresenter implements MainContract.Presenter {
+import static com.google.firebase.database.ServerValue.TIMESTAMP;
 
-    private final MainContract.View mView;
-    private boolean firstRun, isViewSet;
+// [START blog_user_class]
+@IgnoreExtraProperties
+public class User implements Serializable {
+    private String name;
+    private int reportCount;
+    private int status;
+    private Object joinDate;
 
-    MainPresenter(MainContract.View mView) {
-        // Set View-Presenter Bind
-        if (mView != null) {
-            this.mView = mView;
-            this.mView.setPresenter(this);
-            isViewSet = false;
-        } else throw new RuntimeException("Cant bind view");
+    public User(){
+
     }
 
-    @Override
-    public void start() {
-        Timber.d("start() called");
+    public User(String name){
+        this.name = name;
+        reportCount = 0;
+        status = 1;
+        joinDate = TIMESTAMP;
     }
 
-    @Override
-    public void setFirstRun(boolean firstRun) {
-        this.firstRun = firstRun;
-        if (firstRun) {
-            mView.runIntro();
-        }
+    public void setName(String name) {
+        this.name = name;
     }
 
-    @Override
-    public void introDone() {
-        firstRun = false;
+    public String getName() {
+        return name;
     }
 
-    @Override
-    public void setResume() {
-        if(!isViewSet && !firstRun){
-            Timber.d("tdh: building MainAct views");
-            mView.setupViews();
-            isViewSet=true;
-        }
+    public int getReportCount() {
+        return reportCount;
+    }
+
+    public void setReportCount(int reportCount) {
+        this.reportCount = reportCount;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Object getJoinDate() {
+        return joinDate;
+    }
+
+    public void setJoinDate(Object joinDate) {
+        this.joinDate = joinDate;
     }
 }

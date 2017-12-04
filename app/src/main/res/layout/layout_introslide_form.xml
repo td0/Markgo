@@ -25,45 +25,50 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/intro_form_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginTop="16dp"
     android:baselineAligned="false"
     android:clipToPadding="false"
-    android:fitsSystemWindows="false" >
+    android:fitsSystemWindows="false"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true" >
 
     <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/intro_title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/intro_input_description"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="32dp"
-        android:textSize="22sp"
         android:gravity="center"
         android:text="@string/intro_form_title"
+        android:textSize="22sp"
+        android:layout_marginTop="50dp"
         app:layout_parallaxFactor="0.8" />
 
     <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/intro_input_description"
+        android:id="@+id/intro_description_text"
+        android:layout_below="@id/intro_title_text"
         android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_above="@id/intro_input_layout"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="47dp"
-        android:textSize="16sp"
+        android:layout_marginTop="22dp"
         android:gravity="center"
         android:text="@string/intro_form_description"
-        app:layout_parallaxFactor="0.5"/>
+        android:textSize="16sp"
+        app:layout_parallaxFactor="0.5" />
 
     <android.support.design.widget.TextInputLayout
-        android:id="@+id/intro_input_layout"
+        android:id="@+id/intro_input_name_layout"
+        android:layout_below="@id/intro_description_text"
         android:layout_width="270dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_marginTop="22dp"
         app:layout_parallaxFactor="0.2">
+
         <android.support.v7.widget.AppCompatEditText
             android:id="@+id/intro_name_input"
             android:layout_width="match_parent"
@@ -73,6 +78,96 @@
             android:maxLines="1" />
 
     </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/intro_input_phone_layout"
+        android:layout_below="@id/intro_input_name_layout"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        app:layout_parallaxFactor="0.3">
+        <EditText
+            android:id="@+id/intro_phone_input"
+            android:hint="@string/intro_form_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="14"
+            android:inputType="phone" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/intro_input_code_layout"
+        android:layout_below="@id/intro_input_phone_layout"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:visibility="invisible"
+        app:layout_parallaxFactor="0.4" >
+        <EditText
+            android:id="@+id/intro_code_input"
+            android:hint="@string/intro_form_code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="8"
+            android:inputType="number" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/intro_submit_button"
+        android:layout_below="@id/intro_input_code_layout"
+        android:text="@string/intro_button_verification1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textColor="@color/text_white_87"
+        android:visibility="visible"
+        android:theme="@style/RegisterSubmitButton"
+        app:layout_parallaxFactor="0.5" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:foregroundGravity="right"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/intro_input_code_layout"
+        android:layout_marginTop="32dp" >
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/intro_resend_button"
+            android:text="@string/intro_button_Resend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColor="@color/text_black_87"
+            android:visibility="invisible"
+            android:enabled="false"
+            android:theme="@style/RegisterResendButton"
+            app:layout_parallaxFactor="0.3" />
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/intro_signin_button"
+            android:text="@string/intro_button_verification2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:textColor="@color/text_white_87"
+            android:visibility="invisible"
+            android:theme="@style/RegisterSubmitButton"
+            app:layout_parallaxFactor="0.7" />
+
+    </LinearLayout>
 
 
 </agency.tango.materialintroscreen.parallax.ParallaxRelativeLayout>

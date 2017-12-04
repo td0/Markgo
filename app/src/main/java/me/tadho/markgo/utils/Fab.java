@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.utils.customModules;
+package me.tadho.markgo.utils;
 
 import android.content.Context;
 import android.support.design.widget.FloatingActionButton;

@@ -20,29 +20,37 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.maps;
+package me.tadho.markgo.view;
 
-public class MapsPresenter implements MapsContract.Presenter{
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.MenuItem;
 
-    private final MapsContract.View mView;
+import me.tadho.markgo.R;
+import timber.log.Timber;
 
-    MapsPresenter(MapsContract.View mView){
-        // Set View-Presenter Bind
-        if (mView != null) {
-            this.mView = mView;
-            this.mView.setPresenter(this);
-        } else {
-            throw new RuntimeException("Cant bind view");
+public class MapsActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Timber.d("MapsActivity onCreate()");
+        setContentView(R.layout.activity_maps);
+        setTitle(getString(R.string.title_maps));
+
+        if(getSupportActionBar() != null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
     }
 
     @Override
-    public void start() {
-
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            super.onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void placeholder() {
-
-    }
 }
