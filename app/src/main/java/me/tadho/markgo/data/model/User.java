@@ -22,12 +22,12 @@
 
 package me.tadho.markgo.data.model;
 
+import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 import com.google.firebase.database.ServerValue;
 
 import java.io.Serializable;
-
-import static com.google.firebase.database.ServerValue.TIMESTAMP;
+import java.util.HashMap;
 
 // [START blog_user_class]
 @IgnoreExtraProperties
@@ -35,7 +35,7 @@ public class User implements Serializable {
     private String name;
     private int reportCount;
     private int status;
-    private Object joinDate;
+    private HashMap<String, Object> joinDate;
 
     public User(){
 
@@ -45,11 +45,6 @@ public class User implements Serializable {
         this.name = name;
         reportCount = 0;
         status = 1;
-        joinDate = TIMESTAMP;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getName() {
@@ -60,23 +55,20 @@ public class User implements Serializable {
         return reportCount;
     }
 
-    public void setReportCount(int reportCount) {
-        this.reportCount = reportCount;
-    }
-
     public int getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public HashMap<String, Object> getJoinDate(){
+        if (joinDate != null) return joinDate;
+
+        HashMap<String, Object> timeStampNow = new HashMap<>();
+        timeStampNow.put("timestamp", ServerValue.TIMESTAMP);
+        return timeStampNow;
     }
 
-    public Object getJoinDate() {
-        return joinDate;
-    }
-
-    public void setJoinDate(Object joinDate) {
-        this.joinDate = joinDate;
+    @Exclude
+    public long getJoinDateLong() {
+        return (long)joinDate.get("timestamp");
     }
 }
