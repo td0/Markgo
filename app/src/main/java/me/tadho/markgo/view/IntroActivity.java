@@ -211,6 +211,7 @@ public class IntroActivity extends MaterialIntroActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        userListRef.removeEventListener(userListListener);
+        if (userListRef != null)
+            userListRef.removeEventListener(userListListener);
     }
 }
