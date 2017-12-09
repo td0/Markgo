@@ -40,7 +40,10 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
 
@@ -59,12 +62,13 @@ public class IntroActivity extends MaterialIntroActivity {
     private FirebaseAuth mAuth;
     private String verificationId;
     private DatabaseReference rootRef;
+    private DatabaseReference userListRef;
+    private ValueEventListener userListListener;
     private FormIntroSlide formSlide;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mAuth = FirebaseAuth.getInstance();
         rootRef = FbPersistence.getDatabase().getInstance().getReference();
 
@@ -187,23 +191,26 @@ public class IntroActivity extends MaterialIntroActivity {
     public void onAuthSuccess(FirebaseUser userAuth, String name){
         String uid = userAuth.getUid();
         User user = new User(name);
-        rootRef.child("Users").child(uid).setValue(user);
-        rootRef.child("UsersList").child(uid).setValue(true);
-//        DatabaseReference userListRef = rootRef.child("UsersList").child(uid);
-//        userListRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                if (!dataSnapshot.exists()) {
-//                    Timber.d("Create new user");
-//                    writeNewUser(uid, name);
-//                    userListRef.removeEventListener(this);
-//                }
-//            }
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                userListRef.removeEventListener(this);
-//            }
-//        });
+        userListRef = rootRef.child("UsersList").child(uid);
+        userListListener = userListRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    Timber.d("Create new user");
+                    rootRef.child("Users").child(uid).setValue(user);
+                    rootRef.child("UsersList").child(uid).setValue(true);
+                } else {
+                    rootRef.child("Users").child(uid).child("name").setValue(name);
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        userListRef.removeEventListener(userListListener);
+    }
 }
