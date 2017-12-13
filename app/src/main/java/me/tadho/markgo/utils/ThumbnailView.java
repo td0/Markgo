@@ -20,28 +20,29 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.data.enumeration;
+package me.tadho.markgo.utils;
 
-public final class Constants {
-    public static final String APP_TAG = "Markgo";
-    public static final String TAKE_MODE_EXTRA = "takeOn";
-    public static final String IMAGE_PATH_EXTRA = "imagePath";
-    public static final String LOCAL_FILE_EXTRA = "localFile";
+import android.content.Context;
+import android.util.AttributeSet;
 
-    //    Request Code
-    public static final int REQUEST_CAMERA_CODE = 11;
-    public static final int REQUEST_GALLERY_CODE = 22;
-    public static final int REQUEST_LOCATION_CODE = 33;
+public class ThumbnailView extends android.support.v7.widget.AppCompatImageView {
 
-    //    File name
-    public static final String fileName = "post";
+    public ThumbnailView(Context context) {
+        super(context);
+    }
 
+    public ThumbnailView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
 
-    //    Intro Constants
-    public static final int REG_STATE_GET_CODE = 1;
-    public static final int REG_STATE_GET_AUTH = 2;
-    public static final long DEBOUNCE_TIMEOUT = 500;
-    public static final long VERIFY_PHONE_TIMEOUT = 60;
+    public ThumbnailView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
 
-
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = getMeasuredWidth();
+        setMeasuredDimension(width,width*10/16);
+    }
 }

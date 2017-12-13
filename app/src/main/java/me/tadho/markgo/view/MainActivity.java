@@ -23,12 +23,10 @@
 package me.tadho.markgo.view;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements
                 msFab.hideSheet();
                 startActivity(
                         new Intent(this, PostActivity.class)
-                                .putExtra(Constants.TAKE_MODE, v.getId())
+                                .putExtra(Constants.TAKE_MODE_EXTRA, v.getId())
                 );
                 break;
             case R.id.fab_sheet_item_gallery:
@@ -107,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements
                 msFab.hideSheet();
                 startActivity(
                         new Intent(this, PostActivity.class)
-                                .putExtra(Constants.TAKE_MODE, v.getId())
+                                .putExtra(Constants.TAKE_MODE_EXTRA, v.getId())
                 );
                 break;
         }

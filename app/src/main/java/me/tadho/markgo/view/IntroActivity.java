@@ -31,9 +31,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApiNotAvailableException;
 import com.google.firebase.FirebaseException;
 import com.google.firebase.FirebaseTooManyRequestsException;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -43,6 +45,7 @@ import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
@@ -51,7 +54,6 @@ import agency.tango.materialintroscreen.MaterialIntroActivity;
 import agency.tango.materialintroscreen.SlideFragmentBuilder;
 
 import me.tadho.markgo.R;
-import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.data.model.User;
 import me.tadho.markgo.view.customIntroSlide.FormIntroSlide;
@@ -70,7 +72,7 @@ public class IntroActivity extends MaterialIntroActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
-        rootRef = FbPersistence.getDatabase().getInstance().getReference();
+        rootRef = FirebaseDatabase.getInstance().getReference();
 
         if (mAuth.getCurrentUser() == null) {
             hideNavButton();
@@ -97,9 +99,7 @@ public class IntroActivity extends MaterialIntroActivity {
                 .buttonsColor(R.color.indigo_300)
                 .image(R.drawable.ic_markgo_intro_gps)
                 .neededPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION
-                        , android.Manifest.permission.ACCESS_COARSE_LOCATION
-                        , android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        , android.Manifest.permission.READ_EXTERNAL_STORAGE})
+                        , android.Manifest.permission.ACCESS_COARSE_LOCATION})
                 .description(getString(R.string.intro_permission_description))
                 .build());
         formSlide = new FormIntroSlide();
@@ -136,6 +136,8 @@ public class IntroActivity extends MaterialIntroActivity {
             @Override
             public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
                 Timber.d("Verification Complete");
+                EditText codeEdit = findViewById(R.id.intro_code_input);
+                codeEdit.setText(phoneAuthCredential.getSmsCode());
                 signInWithPhoneCredential(phoneAuthCredential);
             }
             @Override
@@ -173,22 +175,23 @@ public class IntroActivity extends MaterialIntroActivity {
     }
 
     private void signInWithPhoneCredential(PhoneAuthCredential credential){
-        mAuth.signInWithCredential(credential)
-                .addOnSuccessListener(this, authResult -> {
+        Task<AuthResult> mAuthResult = mAuth.signInWithCredential(credential)
+                .addOnSuccessListener(authResult -> {
                     Timber.d("Phone Sign In success");
                     FirebaseUser user = authResult.getUser();
                     String name = ((EditText)findViewById(R.id.intro_name_input))
                             .getText().toString();
                     onAuthSuccess(user, name);
-                    onFinish();
                 })
-                .addOnFailureListener(this, e -> {
+                .addOnFailureListener(e -> {
                     Timber.e(e.getMessage());
                     showMessage(e.getMessage());
                 });
+
     }
 
     public void onAuthSuccess(FirebaseUser userAuth, String name){
+        Timber.d("Running onAuthSuccess");
         String uid = userAuth.getUid();
         User user = new User(name);
         userListRef = rootRef.child("UsersList").child(uid);
@@ -196,22 +199,40 @@ public class IntroActivity extends MaterialIntroActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
-                    Timber.d("Create new user");
-                    rootRef.child("Users").child(uid).setValue(user);
-                    rootRef.child("UsersList").child(uid).setValue(true);
+                    Timber.d("Create new user..");
+                    rootRef.child("Users").child(uid).setValue(user,
+                        (err1, ref1)->{
+                            rootRef.child("UsersList").child(uid)
+                                .setValue(true, (err2,ref2)->{
+                                    onFinish();
+                                });
+                        });
+
                 } else {
-                    rootRef.child("Users").child(uid).child("name").setValue(name);
+                    Timber.d("User already registered, updating name..");
+                    rootRef.child("Users").child(uid).child("name")
+                        .setValue(name, (err, ref)->{
+                            onFinish();
+                        });
                 }
             }
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+                Timber.d("userListRef onCancelled");
+                onFinish();
+            }
         });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (userListRef != null)
+        Timber.d("onDestroy Called");
+        if (userListRef != null) {
+            Timber.d("Destroying userListRef");
             userListRef.removeEventListener(userListListener);
+            userListRef = null;
+
+        }
     }
 }

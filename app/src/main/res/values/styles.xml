@@ -9,7 +9,7 @@
     </style>
 
     <!--No Action Bar-->
-    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar" >
+    <style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorSecondary</item>
@@ -36,7 +36,7 @@
         <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
         <item name="layout_scrollFlags">scroll|enterAlways</item>
     </style>
-    
+
     <!--Button Themes-->
     <style name="RegisterSubmitButton" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorButtonNormal">@color/teal_500dark</item>
@@ -60,6 +60,7 @@
         <item name="cardMaxElevation">@dimen/fab_sheet_elevation</item>
         <item name="contentPadding">-3dp</item>
     </style>
+
     <style name="TextAppearance.FabSheet.Item" parent="">
         <item name="android:layout_width">@dimen/sheet_width</item>
         <item name="android:layout_height">wrap_content</item>
@@ -69,6 +70,18 @@
         <item name="android:textSize">@dimen/sheet_item_text_size</item>
         <item name="android:textColor">@color/colorPrimaryDark</item>
         <item name="android:drawablePadding">@dimen/sheet_item_image_spacing</item>
+    </style>
+
+    <style name="FullscreenTheme" parent="AppTheme">
+        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
+        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
+    </style>
+
+    <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
     </style>
 
 </resources>

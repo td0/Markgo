@@ -20,28 +20,11 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.data.enumeration;
+package me.tadho.markgo.utils;
+import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 
-public final class Constants {
-    public static final String APP_TAG = "Markgo";
-    public static final String TAKE_MODE_EXTRA = "takeOn";
-    public static final String IMAGE_PATH_EXTRA = "imagePath";
-    public static final String LOCAL_FILE_EXTRA = "localFile";
-
-    //    Request Code
-    public static final int REQUEST_CAMERA_CODE = 11;
-    public static final int REQUEST_GALLERY_CODE = 22;
-    public static final int REQUEST_LOCATION_CODE = 33;
-
-    //    File name
-    public static final String fileName = "post";
-
-
-    //    Intro Constants
-    public static final int REG_STATE_GET_CODE = 1;
-    public static final int REG_STATE_GET_AUTH = 2;
-    public static final long DEBOUNCE_TIMEOUT = 500;
-    public static final long VERIFY_PHONE_TIMEOUT = 60;
-
+@GlideModule
+public final class MarkgoGlideModule extends AppGlideModule {
 
 }

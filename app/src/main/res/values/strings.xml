@@ -48,4 +48,8 @@
     <string name="fbauth_error_request_timeout">Error : Request time out, try again…</string>
     <string name="fbauth_error_other">Error : Something terrible happens!</string>
 
+    <string name="title_activity_camera">CameraActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
 </resources>

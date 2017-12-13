@@ -7,6 +7,7 @@
     <color name="colorSecondaryLight">#ffc246</color>
     <color name="colorSecondaryDark">#c56200</color>
     <color name="textColorPrimary">#ffffff</color>
+    <color name="background_light">#FFFAFAFA</color>
     <color name="textColorSecondary">#000000</color>
     <color name="highlight">#4fff</color>
 
@@ -47,4 +48,6 @@
     <color name="colorMainIntroAccent">#6b6f86</color>
     <color name="grey_500">#9e9e9e</color>
     <color name="grey_500dark">#707070</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>
