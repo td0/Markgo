@@ -13,6 +13,8 @@
     <string name="fab_camera">Camera</string>
     <!--Dialog-->
     <string name="dialog_exit">Do you want to quit the app?</string>
+    <string name="dialog_permission_denied">Permission is not granted</string>
+    <string name="dialog_storage_permission_reasoning">You have to grant Read External Storage permission to pick a picture from Gallery</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="about_submenu">About</string>
@@ -41,15 +43,14 @@
 
     <!--Firebase Auth-->
     <string name="fbauth_enter_get_verification">Please wait, getting SMS verification code</string>
-    <string name="fbauth_enter_verification_code">Enter verification code from SMS</string>
     <string name="fbauth_error_not_authorized">Error : The App is not authorized</string>
     <string name="fbauth_error_quota_reached">Error : Request Quota Reached</string>
     <string name="fbauth_error_service_unavailable">Error : Google Play Service unavailable</string>
     <string name="fbauth_error_request_timeout">Error : Request time out, try again…</string>
     <string name="fbauth_error_other">Error : Something terrible happens!</string>
 
-    <string name="title_activity_camera">CameraActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <!--Animation-->
+    <string name="animation_photo_view">photoViewAnimation</string>
+    <string name="image_description_thumbnail">image preview</string>
 
 </resources>

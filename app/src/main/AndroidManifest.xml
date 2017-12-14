@@ -53,9 +53,10 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".view.PostActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".view.ImageViewerActivity"
+            android:name=".view.PhotoViewerActivity"
             android:theme="@style/ImageViewerTheme"/>
 
         <!--

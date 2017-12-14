@@ -29,49 +29,57 @@
     android:layout_height="match_parent"
     tools:context="me.tadho.markgo.view.PostActivity">
 
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/appbar_layout"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <me.tadho.markgo.utils.ThumbnailView
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <!-- Toolbar -->
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                style="@style/Widget.AppTheme.ToolBar"
+                app:layout_scrollFlags="enterAlways"/>
+
+        </android.support.design.widget.AppBarLayout>
+    </android.support.design.widget.CoordinatorLayout>
+
+    <me.tadho.markgo.view.customView.ThumbnailView
         android:id="@+id/iv_preview"
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:scaleType="centerCrop"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/appbar_layout"
         android:background="@color/grey_500"
-        android:contentDescription="image preview" />
+        android:contentDescription="@string/image_description_thumbnail" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/iv_preview" >
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/text_layout_street_name"
+
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/post_textv_streetname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="19" >
-                <EditText
-                    android:id="@+id/text_input_street_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:focusable="false"
-                    android:textIsSelectable="false"
-                    android:textEditNoPasteWindowLayout="@color/colorSecondary"
-                    android:inputType="none"
-                    android:longClickable="false"
-                    android:enabled="false"
-                    android:focusableInTouchMode="false"
-                    android:clickable="false"
-                    android:hint="Street Name"
-                    android:textColorHint="@color/colorSecondary"
-                    android:text="Jalan Letjend S.Parman" />
-            </android.support.design.widget.TextInputLayout>
+                android:layout_gravity="center_vertical"
+                android:layout_weight="19"
+                android:textSize="17sp"
+                android:textColor="@color/text_black_87"
+                android:text="Jalan Letjend S Parman"/>
 
             <android.support.v7.widget.AppCompatImageButton
                 android:id="@+id/button_get_location"
@@ -89,13 +97,12 @@
             android:paddingTop="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <EditText
+            <android.support.v7.widget.AppCompatEditText
                 android:id="@+id/intro_code_input"
-                android:lines="2"
+                android:lines="4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textNoSuggestions"
+                android:inputType="textMultiLine"
                 android:hint="Description" />
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>

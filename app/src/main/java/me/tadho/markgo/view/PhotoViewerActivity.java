@@ -23,53 +23,44 @@
 package me.tadho.markgo.view;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.ImageView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.github.chrisbanes.photoview.OnOutsidePhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.github.chuross.flinglayout.FlingLayout;
 
 import java.io.File;
 
-import kotlin.Unit;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.utils.GlideApp;
-import timber.log.Timber;
 
-public class ImageViewerActivity extends AppCompatActivity {
-
-    private PhotoView photoView;
-
+public class PhotoViewerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_image_viewer);
+        setContentView(R.layout.activity_photo_viewer);
         Intent intent = getIntent();
-        String imagePath = intent.getStringExtra(Constants.IMAGE_PATH_EXTRA);
+        String imagePath = intent.getStringExtra(Constants.PHOTO_PATH_EXTRA);
         boolean isLocalFile = intent.getBooleanExtra(Constants.LOCAL_FILE_EXTRA, false);
-        photoView = findViewById(R.id.iv_preview);
+        PhotoView photoView = findViewById(R.id.iv_preview);
 
         if (isLocalFile){
             File file = new File(imagePath);
             Uri fileUri = Uri.fromFile(file);
 
-            RequestOptions requestOptions = new RequestOptions();
-            requestOptions.diskCacheStrategy(DiskCacheStrategy.NONE);
-            GlideApp.with(ImageViewerActivity.this)
+            RequestOptions requestOptions = new RequestOptions()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE);
+            GlideApp.with(PhotoViewerActivity.this)
                     .load(fileUri)
                     .apply(requestOptions)
                     .into(photoView);
         } else {
-            GlideApp.with(ImageViewerActivity.this)
+            GlideApp.with(PhotoViewerActivity.this)
                     .load(imagePath)
                     .into(photoView);
         }
@@ -77,5 +68,4 @@ public class ImageViewerActivity extends AppCompatActivity {
         photoView.setOnPhotoTapListener((view, x, y) -> supportFinishAfterTransition());
         photoView.setOnOutsidePhotoTapListener(imageView -> supportFinishAfterTransition());
     }
-
 }

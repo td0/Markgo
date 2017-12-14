@@ -22,6 +22,8 @@
         <item name="colorControlNormal">@color/textColorPrimary</item>
         <item name="colorControlHighlight">@color/highlight</item>
         <item name="colorControlActivated">@color/colorSecondary</item>
+        <item name="android:itemBackground">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/text_white_87</item>
     </style>
     <!--Theme Overlay Light-->
     <style name="AppTheme.NoActionBar.Overlay.Popup" parent="ThemeOverlay.AppCompat.Light" />
@@ -55,12 +57,12 @@
         <item name="android:layout_marginBottom">@dimen/sheet_spacing</item>
         <item name="android:layout_marginLeft">@dimen/sheet_spacing</item>
         <item name="android:layout_marginRight">@dimen/sheet_spacing</item>
-        <item name="cardBackgroundColor">@color/colorSecondary</item>
         <item name="cardElevation">@dimen/fab_sheet_elevation</item>
         <item name="cardMaxElevation">@dimen/fab_sheet_elevation</item>
         <item name="contentPadding">-3dp</item>
     </style>
 
+    <!--fabsheet items style-->
     <style name="TextAppearance.FabSheet.Item" parent="">
         <item name="android:layout_width">@dimen/sheet_width</item>
         <item name="android:layout_height">wrap_content</item>
@@ -68,10 +70,11 @@
         <item name="android:background">?attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
         <item name="android:textSize">@dimen/sheet_item_text_size</item>
-        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/text_white_87</item>
         <item name="android:drawablePadding">@dimen/sheet_item_image_spacing</item>
     </style>
 
+    <!--Fullscreen app style-->
     <style name="FullscreenTheme" parent="AppTheme">
         <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
         <item name="android:windowActionBarOverlay">true</item>
@@ -80,6 +83,7 @@
         <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
     </style>
 
+    <!--Actionbar style-->
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>

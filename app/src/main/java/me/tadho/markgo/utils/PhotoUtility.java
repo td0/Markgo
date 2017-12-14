@@ -22,9 +22,13 @@
 
 package me.tadho.markgo.utils;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 
-public class BitmapScaler
+public class PhotoUtility
 {
     // scale and keep aspect ratio
     public static Bitmap scaleToFitWidth(Bitmap b, int width)
@@ -60,5 +64,20 @@ public class BitmapScaler
         float factorW = width / (float) b.getWidth();
         return Bitmap.createScaledBitmap(b, (int) (b.getWidth() * factorW),
                 (int) (b.getHeight() * factorH), true);
+    }
+
+    public static String getFullPathFromUri(Context context, Uri uri){
+        String result;
+        Cursor cursor = context.getContentResolver()
+                .query(uri, null, null, null, null);
+        if (cursor == null) { // Source is Dropbox or other similar local file path
+            result = uri.getPath();
+        } else {
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            result = cursor.getString(idx);
+            cursor.close();
+        }
+        return result;
     }
 }

@@ -41,12 +41,12 @@
             <TextView
                 android:id="@+id/fab_sheet_item_gallery"
                 style="@style/TextAppearance.FabSheet.Item"
-                android:drawableStart="@drawable/ic_photo_library_black_24dp"
+                android:drawableStart="@drawable/ic_photo_library_white_24dp"
                 android:text="@string/fab_gallery" />
             <TextView
                 android:id="@+id/fab_sheet_item_camera"
                 style="@style/TextAppearance.FabSheet.Item"
-                android:drawableStart="@drawable/ic_photo_camera_black_24dp"
+                android:drawableStart="@drawable/ic_photo_camera_white_24dp"
                 android:text="@string/fab_camera" />
         </LinearLayout>
 

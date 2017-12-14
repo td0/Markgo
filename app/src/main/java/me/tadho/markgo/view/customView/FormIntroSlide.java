@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.customIntroSlide;
+package me.tadho.markgo.view.customView;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;

@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.utils;
+package me.tadho.markgo.view.customView;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -43,6 +43,6 @@ public class ThumbnailView extends android.support.v7.widget.AppCompatImageView 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int width = getMeasuredWidth();
-        setMeasuredDimension(width,width*10/16);
+        setMeasuredDimension(width,width*9/16);
     }
 }

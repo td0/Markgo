@@ -30,5 +30,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:transitionName="image" />
+        android:transitionName="@string/animation_photo_view" />
 </RelativeLayout>

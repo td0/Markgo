@@ -25,7 +25,7 @@ package me.tadho.markgo.data.enumeration;
 public final class Constants {
     public static final String APP_TAG = "Markgo";
     public static final String TAKE_MODE_EXTRA = "takeOn";
-    public static final String IMAGE_PATH_EXTRA = "imagePath";
+    public static final String PHOTO_PATH_EXTRA = "imagePath";
     public static final String LOCAL_FILE_EXTRA = "localFile";
 
     //    Request Code
@@ -34,8 +34,7 @@ public final class Constants {
     public static final int REQUEST_LOCATION_CODE = 33;
 
     //    File name
-    public static final String fileName = "post";
-
+    public static final String postFileName = "post.jpg";
 
     //    Intro Constants
     public static final int REG_STATE_GET_CODE = 1;

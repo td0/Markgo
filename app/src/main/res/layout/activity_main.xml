@@ -25,7 +25,7 @@
         </android.support.design.widget.AppBarLayout>
     </android.support.design.widget.CoordinatorLayout>
 
-    <me.tadho.markgo.utils.Fab
+    <me.tadho.markgo.view.customView.Fab
         android:id="@+id/mFab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

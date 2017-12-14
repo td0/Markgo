@@ -56,7 +56,7 @@ import agency.tango.materialintroscreen.SlideFragmentBuilder;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.data.model.User;
-import me.tadho.markgo.view.customIntroSlide.FormIntroSlide;
+import me.tadho.markgo.view.customView.FormIntroSlide;
 import timber.log.Timber;
 
 public class IntroActivity extends MaterialIntroActivity {
