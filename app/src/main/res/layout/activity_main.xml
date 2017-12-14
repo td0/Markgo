@@ -25,21 +25,36 @@
         </android.support.design.widget.AppBarLayout>
     </android.support.design.widget.CoordinatorLayout>
 
-    <me.tadho.markgo.view.customView.Fab
-        android:id="@+id/mFab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:fabSize="normal"
-        app:srcCompat="@drawable/ic_add_black_24dp" />
-
-
-    <com.gordonwong.materialsheetfab.DimOverlayFrameLayout
-        android:id="@+id/overlay"
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/mFam"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <include layout="@layout/layout_fab_sheet" />
-
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom|end"
+        android:padding="@dimen/fab_margin"
+        app:menu_icon="@drawable/ic_add_black_24dp"
+        app:menu_backgroundColor="@color/transparentOverlay"
+        app:menu_colorNormal="@color/colorSecondary"
+        app:menu_colorPressed="@color/colorSecondaryDark"
+        app:menu_colorRipple="@color/colorSecondaryLight" >
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fabGallery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_photo_library_white_fab"
+            app:fab_colorNormal="@color/colorPrimary"
+            app:fab_colorPressed="@color/colorPrimaryDark"
+            app:fab_colorRipple="@color/colorPrimaryLight"
+            app:fab_size="mini"
+            app:fab_label="@string/fab_gallery" />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fabCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_photo_camera_white_fab"
+            app:fab_colorNormal="@color/colorPrimary"
+            app:fab_colorPressed="@color/colorPrimaryDark"
+            app:fab_colorRipple="@color/colorPrimaryLight"
+            app:fab_size="mini"
+            app:fab_label="@string/fab_camera" />
+    </com.github.clans.fab.FloatingActionMenu>
 </android.support.design.widget.CoordinatorLayout>

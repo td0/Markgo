@@ -23,36 +23,37 @@
 package me.tadho.markgo.view;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import timber.log.Timber;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.gordonwong.materialsheetfab.MaterialSheetFab;
-import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
+import io.reactivex.disposables.CompositeDisposable;
 import com.jakewharton.rxbinding2.view.RxView;
+import com.jakewharton.rxbinding2.widget.RxCompoundButton;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
-import me.tadho.markgo.R;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
+import com.google.firebase.auth.FirebaseAuth;
+
 import me.tadho.markgo.data.enumeration.Constants;
-import me.tadho.markgo.view.customView.Fab;
+import me.tadho.markgo.R;
+import timber.log.Timber;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private Fab mFab;
-    private MaterialSheetFab<Fab> msFab;
-    private int statusBarColor;
-
+    private FloatingActionMenu mFam;
     private FirebaseAuth mAuth;
     private CompositeDisposable compositeDisposable;
 
@@ -61,62 +62,52 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
-        mAuth = FirebaseAuth.getInstance();
         compositeDisposable = new CompositeDisposable();
         setupFab();
+        mAuth = FirebaseAuth.getInstance();
     }
 
+
+    @SuppressLint("ClickableViewAccessibility")
     private void setupFab() {
-        mFab = findViewById(R.id.mFab);
-        View sheetView = findViewById(R.id.fab_sheet);
-        View overlay = findViewById(R.id.overlay);
-        View cameraSheetButton = findViewById(R.id.fab_sheet_item_camera);
-        View gallerySheetButton = findViewById(R.id.fab_sheet_item_gallery);
-        int sheetColor = getResources().getColor(R.color.colorPrimaryDark);
-        int fabColor = getResources().getColor(R.color.colorSecondary);
+        Timber.d("Setting up Floating Action Menu");
+        mFam = findViewById(R.id.mFam);
+        FloatingActionButton fabGallery = findViewById(R.id.fabGallery);
+        FloatingActionButton fabCamera = findViewById(R.id.fabCamera);
+        mFam.setClosedOnTouchOutside(true);
 
-        msFab = new MaterialSheetFab<>(mFab, sheetView, overlay, sheetColor, fabColor);
-        msFab.setEventListener(new MaterialSheetFabEventListener() {
-            @Override
-            public void onShowSheet() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    statusBarColor = getWindow().getStatusBarColor();
-                    getWindow().setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
-                } else statusBarColor = 0;
-            }
-            @Override
-            public void onHideSheet() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    getWindow().setStatusBarColor(statusBarColor);
-                }
-            }
-        });
+        // TODO : might need to hide this FAB later
+        // mFam.hideMenuButton(true);
 
-        Disposable cameraClickDisposable = RxView.clicks(cameraSheetButton)
-            .subscribe(v->{
-                msFab.hideSheet();
-                Intent intent = new Intent(MainActivity.this, PostActivity.class)
-                    .putExtra(Constants.TAKE_MODE_EXTRA, cameraSheetButton.getId());
-                startActivity(intent);
-            });
-        Disposable galleryClickDisposable = RxView.clicks(gallerySheetButton)
-            .compose(new RxPermissions(MainActivity.this)
-            .ensure(Manifest.permission.READ_EXTERNAL_STORAGE))
-            .subscribe(granted->{
-                msFab.hideSheet();
-                if (granted){
-                    Timber.d("Read external permission granted");
-                    Intent intent = new Intent(this, PostActivity.class)
-                        .putExtra(Constants.TAKE_MODE_EXTRA, gallerySheetButton.getId());
+
+        Disposable fabGalleryDisposable = RxView.clicks(fabGallery)
+                .compose(new RxPermissions(MainActivity.this)
+                        .ensure(Manifest.permission.READ_EXTERNAL_STORAGE))
+                .subscribe(granted->{
+                    Timber.d("Floating Action Button Gallery clicked");
+                    mFam.toggle(true);
+                    if (granted){
+                        Timber.d("Read external permission granted");
+                        Intent intent = new Intent(this, PostActivity.class)
+                                .putExtra(Constants.TAKE_MODE_EXTRA, Constants.TAKE_MODE_EXTRA_GALLERY);
+                        startActivity(intent);
+                    } else {
+                        Timber.d("Permission rejected");
+                        showPermissionReasoning();
+                    }
+                });
+        Disposable fabCameraDisposable = RxView.clicks(fabCamera)
+                .subscribe(v->{
+                    Timber.d("Floating Action Button Camera clicked");
+                    mFam.toggle(true);
+                    Intent intent = new Intent(MainActivity.this, PostActivity.class)
+                            .putExtra(Constants.TAKE_MODE_EXTRA, Constants.TAKE_MODE_EXTRA_CAMERA);
                     startActivity(intent);
-                } else {
-                    Timber.d("Permission rejected");
-                    showPermissionReasoning();
-                }
-            });
-        compositeDisposable.add(cameraClickDisposable);
-        compositeDisposable.add(galleryClickDisposable);
+                });
+        compositeDisposable.addAll(fabGalleryDisposable,fabCameraDisposable);
     }
+
+
 
 
     @Override
@@ -142,10 +133,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (msFab.isSheetVisible()) {
-            msFab.hideSheet();
+        if (mFam.isOpened()) {
+            mFam.close(true);
         } else {
-            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+            AlertDialog.Builder alert = customAlertDialog();
             alert.setTitle(R.string.dialog_exit)
                     .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> this.finishAffinity())
                     .setNegativeButton(R.string.dialog_cancel, null).show();
@@ -153,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPermissionReasoning(){
-        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder alert = customAlertDialog();
         alert.setTitle(R.string.dialog_permission_denied)
                 .setMessage(R.string.dialog_storage_permission_reasoning)
                 .setPositiveButton(R.string.dialog_ok,null)
@@ -161,13 +152,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signOut() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder alert = customAlertDialog();
         alert.setTitle("Confirm sign out?")
             .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
                 mAuth.signOut();
                 startActivity(new Intent(this, IntroActivity.class));
                 finish();
             }).setNegativeButton(R.string.dialog_cancel, null).show();
+    }
+
+    private AlertDialog.Builder customAlertDialog(){
+        return new AlertDialog
+                .Builder(MainActivity.this,R.style.AlertDialogCustom);
     }
 
     @Override

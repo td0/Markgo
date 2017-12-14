@@ -62,6 +62,19 @@
         <item name="contentPadding">-3dp</item>
     </style>
 
+    <!--Custom Dialog Theme-->
+    <style name="AlertDialogCustom" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:textColor">@color/colorSecondary</item>
+        <item name="android:textColorPrimary">@color/text_white_87</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
+    </style>
+    <!--Dialog title style-->
+    <style name="MyTitleTextStyle">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
+        <item name="android:textColor">@color/text_white_87</item>
+    </style>
+
     <!--fabsheet items style-->
     <style name="TextAppearance.FabSheet.Item" parent="">
         <item name="android:layout_width">@dimen/sheet_width</item>

@@ -116,11 +116,11 @@ public class PostActivity extends AppCompatActivity
             photoPath = photoFile.getPath();
             Timber.d("photoPath -> "+ photoPath);
             switch ((int) bundle.get(Constants.TAKE_MODE_EXTRA)){
-                case R.id.fab_sheet_item_camera:
+                case Constants.TAKE_MODE_EXTRA_CAMERA:
                     Timber.d("Call Camera here");
                     launchCamera();
                     break;
-                case R.id.fab_sheet_item_gallery:
+                case Constants.TAKE_MODE_EXTRA_GALLERY:
                     Timber.d("Call Gallery here");
                     launchGallery();
                     break;

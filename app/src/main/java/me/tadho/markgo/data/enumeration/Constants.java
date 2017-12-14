@@ -24,7 +24,9 @@ package me.tadho.markgo.data.enumeration;
 
 public final class Constants {
     public static final String APP_TAG = "Markgo";
-    public static final String TAKE_MODE_EXTRA = "takeOn";
+    public static final String TAKE_MODE_EXTRA = "takeFrom";
+    public static final int TAKE_MODE_EXTRA_GALLERY = 3;
+    public static final int TAKE_MODE_EXTRA_CAMERA = 29;
     public static final String PHOTO_PATH_EXTRA = "imagePath";
     public static final String LOCAL_FILE_EXTRA = "localFile";
 
