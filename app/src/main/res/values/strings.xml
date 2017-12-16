@@ -46,7 +46,7 @@
     <string name="fbauth_error_not_authorized">Error : The App is not authorized</string>
     <string name="fbauth_error_quota_reached">Error : Request Quota Reached</string>
     <string name="fbauth_error_service_unavailable">Error : Google Play Service unavailable</string>
-    <string name="fbauth_error_request_timeout">Error : Request time out, try again…</string>
+    <string name="fbauth_error_request_timeout">Error : Request time out, please try again…</string>
     <string name="fbauth_error_other">Error : Something terrible happens!</string>
 
     <!--Animation-->
