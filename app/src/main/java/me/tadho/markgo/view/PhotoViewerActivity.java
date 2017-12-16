@@ -68,4 +68,10 @@ public class PhotoViewerActivity extends AppCompatActivity {
         photoView.setOnPhotoTapListener((view, x, y) -> supportFinishAfterTransition());
         photoView.setOnOutsidePhotoTapListener(imageView -> supportFinishAfterTransition());
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        GlideApp.get(this).clearMemory();
+    }
 }
