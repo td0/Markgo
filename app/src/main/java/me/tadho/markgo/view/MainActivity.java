@@ -24,22 +24,16 @@ package me.tadho.markgo.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.FrameLayout;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.CompositeDisposable;
 import com.jakewharton.rxbinding2.view.RxView;
-import com.jakewharton.rxbinding2.widget.RxCompoundButton;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -48,6 +42,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.R;
+import me.tadho.markgo.utils.DisplayUtility;
 import timber.log.Timber;
 
 
@@ -78,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
 
         // TODO : might need to hide this FAB later
         // mFam.hideMenuButton(true);
-
 
         Disposable fabGalleryDisposable = RxView.clicks(fabGallery)
                 .compose(new RxPermissions(MainActivity.this)
@@ -136,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         if (mFam.isOpened()) {
             mFam.close(true);
         } else {
-            AlertDialog.Builder alert = customAlertDialog();
+            AlertDialog.Builder alert = DisplayUtility.customAlertDialog(this);
             alert.setTitle(R.string.dialog_exit)
                     .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> this.finishAffinity())
                     .setNegativeButton(R.string.dialog_cancel, null).show();
@@ -144,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showPermissionReasoning(){
-        AlertDialog.Builder alert = customAlertDialog();
+        AlertDialog.Builder alert = DisplayUtility.customAlertDialog(this);
         alert.setTitle(R.string.dialog_permission_denied)
                 .setMessage(R.string.dialog_storage_permission_reasoning)
                 .setPositiveButton(R.string.dialog_ok,null)
@@ -152,18 +146,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void signOut() {
-        AlertDialog.Builder alert = customAlertDialog();
+        AlertDialog.Builder alert = DisplayUtility.customAlertDialog(this);
         alert.setTitle("Confirm sign out?")
             .setPositiveButton(R.string.dialog_ok, (dialog, whichButton) -> {
                 mAuth.signOut();
                 startActivity(new Intent(this, IntroActivity.class));
                 finish();
             }).setNegativeButton(R.string.dialog_cancel, null).show();
-    }
-
-    private AlertDialog.Builder customAlertDialog(){
-        return new AlertDialog
-                .Builder(MainActivity.this,R.style.AlertDialogCustom);
     }
 
     @Override

@@ -23,8 +23,11 @@
 package me.tadho.markgo.utils;
 
 import android.content.Context;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+
+import me.tadho.markgo.R;
 
 public class DisplayUtility {
 
@@ -41,5 +44,10 @@ public class DisplayUtility {
                 }
             }
         }
+    }
+
+    public static AlertDialog.Builder customAlertDialog(Context context){
+        return new AlertDialog
+                .Builder(context, R.style.AlertDialogCustom);
     }
 }
