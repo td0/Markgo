@@ -114,6 +114,7 @@ public class PostActivity extends AppCompatActivity
         if (bundle!=null){
             photoFile = getPhotoFile();
             photoPath = photoFile.getPath();
+            photoTaken = null;
             Timber.d("photoPath -> "+ photoPath);
             switch ((int) bundle.get(Constants.TAKE_MODE_EXTRA)){
                 case Constants.TAKE_MODE_EXTRA_CAMERA:
@@ -208,23 +209,21 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void galleryAction(Uri photoUri){
-        photoTaken = null;
-        Timber.d("Gallery : Getting photo bitmap");
-        try {
-            photoTaken = MediaStore.Images.Media
-                .getBitmap(PostActivity.this.getContentResolver(), photoUri);
-        } catch (IOException e) {
-            Timber.e(e.getMessage());
-            e.printStackTrace();
-        }
-        Timber.d("Gallery : get full path from Uri");
-        String photoFullPath = PhotoUtility
-                .getFullPathFromUri(PostActivity.this, photoUri);
-        rotationDegree = getExifOrientation(photoFullPath);
-
         Disposable galDisposable = Observable.just(2)
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext(x->{
+                Timber.d("Gallery : Getting photo bitmap");
+                try {
+                    photoTaken = MediaStore.Images.Media
+                            .getBitmap(PostActivity.this.getContentResolver(), photoUri);
+                } catch (IOException e) {
+                    Timber.e(e.getMessage());
+                    e.printStackTrace();
+                }
+                Timber.d("Gallery : get full path from Uri");
+                String photoFullPath = PhotoUtility
+                        .getFullPathFromUri(PostActivity.this, photoUri);
+                rotationDegree = getExifOrientation(photoFullPath);
                 Timber.d("(onNext)->RXGallery "+Thread.currentThread().getName());
                 Timber.d("Gallery : scaling picture");
                 Bitmap previewBitmap = PhotoUtility.scaleToFitHeight(photoTaken, 800);
@@ -269,7 +268,7 @@ public class PostActivity extends AppCompatActivity
             Timber.e(e.getMessage());
             e.printStackTrace();
         }
-        String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+        String orientString = exif != null ? exif.getAttribute(ExifInterface.TAG_ORIENTATION) : null;
         int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
         int rotationAngle = 0;
         if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
