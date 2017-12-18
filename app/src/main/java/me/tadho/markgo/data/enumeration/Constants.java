@@ -25,10 +25,14 @@ package me.tadho.markgo.data.enumeration;
 public final class Constants {
     public static final String APP_TAG = "Markgo";
     public static final String TAKE_MODE_EXTRA = "takeFrom";
+    public static final String STRING_NULL = "N/A";
+
+    // POST
     public static final int TAKE_MODE_EXTRA_GALLERY = 3;
     public static final int TAKE_MODE_EXTRA_CAMERA = 29;
     public static final String PHOTO_PATH_EXTRA = "imagePath";
     public static final String LOCAL_FILE_EXTRA = "localFile";
+
 
     //    Request Code
     public static final int REQUEST_CAMERA_CODE = 11;
@@ -43,6 +47,7 @@ public final class Constants {
     public static final int REG_STATE_GET_AUTH = 2;
     public static final long DEBOUNCE_TIMEOUT = 500;
     public static final long VERIFY_PHONE_TIMEOUT = 60;
+
 
 
 }

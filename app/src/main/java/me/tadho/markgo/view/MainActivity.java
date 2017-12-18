@@ -128,10 +128,14 @@ public class MainActivity extends AppCompatActivity {
                 Timber.d("Map action button pressed");
                 startActivity(new Intent(this, MapsActivity.class));
                 return true;
-            case R.id.reset_submenu:
-                Timber.d("Reset Preferences submenu pressed");
+            case R.id.logout_submenu:
+                Timber.d("Logout Preferences submenu pressed");
                 signOut();
                 return true;
+            //TODO: Temporary helper
+            case R.id.changename_submenu:
+                Timber.d("Change name submenu pressed");
+                startActivity(new Intent(this, PostActivity.class));
         }
         return super.onOptionsItemSelected(item);
     }

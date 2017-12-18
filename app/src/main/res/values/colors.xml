@@ -13,8 +13,8 @@
     <color name="transparentOverlay">#77000000</color>
 
     <color name="background_card">#fff</color>
-    <color name="text_black_87">#de000000</color>
-    <color name="text_white_87">#deffffff</color>
+    <color name="text_black">#de000000</color>
+    <color name="text_white">#deffffff</color>
 
     <!--blue-->
     <color name="blue_300">#64b5f6</color>

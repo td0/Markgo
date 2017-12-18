@@ -25,8 +25,12 @@ package me.tadho.markgo.utils;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.WindowManager;
 
 public class PhotoUtility
 {
@@ -66,6 +70,12 @@ public class PhotoUtility
                 (int) (b.getHeight() * factorH), true);
     }
 
+    public static Bitmap rotateBitmap(Bitmap bm, int rotationAngle){
+        Matrix matrix = new Matrix();
+        matrix.postRotate(rotationAngle);
+        return Bitmap.createBitmap(bm, 0, 0, bm.getWidth(), bm.getHeight(), matrix, true);
+    }
+
     public static String getFullPathFromUri(Context context, Uri uri){
         String result;
         Cursor cursor = context.getContentResolver()
@@ -79,5 +89,13 @@ public class PhotoUtility
             cursor.close();
         }
         return result;
+    }
+
+    public static int dp2px(final Context context, int dp) {
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        DisplayMetrics displaymetrics = new DisplayMetrics();
+        display.getMetrics(displaymetrics);
+        return (int) (dp * displaymetrics.density + 0.5f);
     }
 }

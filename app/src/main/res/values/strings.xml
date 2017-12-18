@@ -53,4 +53,9 @@
     <string name="animation_photo_view">photoViewAnimation</string>
     <string name="image_description_thumbnail">image preview</string>
 
+    <!--Post report-->
+    <string name="form_description_hint">Description</string>
+    <string name="get_exif_location">Getting location from photo…</string>
+    <string name="get_gps_location">Getting location from GPS…</string>
+
 </resources>

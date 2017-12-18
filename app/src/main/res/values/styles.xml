@@ -23,7 +23,7 @@
         <item name="colorControlHighlight">@color/highlight</item>
         <item name="colorControlActivated">@color/colorSecondary</item>
         <item name="android:itemBackground">@color/colorPrimaryDark</item>
-        <item name="android:textColor">@color/text_white_87</item>
+        <item name="android:textColor">@color/text_white</item>
     </style>
     <!--Theme Overlay Light-->
     <style name="AppTheme.NoActionBar.Overlay.Popup" parent="ThemeOverlay.AppCompat.Light" />
@@ -65,14 +65,14 @@
     <!--Custom Dialog Theme-->
     <style name="AlertDialogCustom" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:textColor">@color/colorSecondary</item>
-        <item name="android:textColorPrimary">@color/text_white_87</item>
+        <item name="android:textColorPrimary">@color/text_white</item>
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:windowTitleStyle">@style/MyTitleTextStyle</item>
     </style>
     <!--Dialog title style-->
     <style name="MyTitleTextStyle">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
-        <item name="android:textColor">@color/text_white_87</item>
+        <item name="android:textColor">@color/text_white</item>
     </style>
 
     <!--fabsheet items style-->
@@ -83,7 +83,7 @@
         <item name="android:background">?attr/selectableItemBackground</item>
         <item name="android:clickable">true</item>
         <item name="android:textSize">@dimen/sheet_item_text_size</item>
-        <item name="android:textColor">@color/text_white_87</item>
+        <item name="android:textColor">@color/text_white</item>
         <item name="android:drawablePadding">@dimen/sheet_item_image_spacing</item>
     </style>
 
