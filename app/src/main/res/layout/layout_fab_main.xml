@@ -33,7 +33,8 @@
     app:menu_backgroundColor="@color/transparentOverlay"
     app:menu_colorNormal="@color/colorSecondary"
     app:menu_colorPressed="@color/colorSecondaryDark"
-    app:menu_colorRipple="@color/colorSecondaryLight" >
+    app:menu_colorRipple="@color/colorSecondaryLight"
+    app:layout_behavior="me.tadho.markgo.utils.FloatingActionMenuBehavior">
 
     <com.github.clans.fab.FloatingActionButton
         android:id="@+id/fabCamera"
