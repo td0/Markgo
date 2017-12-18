@@ -29,6 +29,7 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.design.widget.FloatingActionButton;
 import android.support.media.ExifInterface;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.FileProvider;
@@ -50,6 +51,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import me.tadho.markgo.BuildConfig;
+import me.tadho.markgo.utils.GlideApp;
 import me.tadho.markgo.utils.PhotoUtility;
 import me.tadho.markgo.view.customView.ThumbnailView;
 import me.tadho.markgo.R;
@@ -64,6 +66,7 @@ public class PostActivity extends AppCompatActivity
     private String photoPath;
     private Bitmap photoTaken;
     private int rotationDegree;
+    private FloatingActionButton mFab;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -87,6 +90,7 @@ public class PostActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        GlideApp.get(PostActivity.this).clearMemory();
         if (compositeDisposable!=null){
             if(!compositeDisposable.isDisposed()){
                 Timber.d("RxTest onDestroy, disposing");
@@ -175,7 +179,8 @@ public class PostActivity extends AppCompatActivity
             if (resultCode == RESULT_OK) {
                 Timber.d("Camera onActivityResult");
                 cameraAction();
-            } else { // Result was a failure
+            } else {
+                // Result was a failure
                 Timber.d("Picture was not taken!");
                 finish();
             }
@@ -259,6 +264,17 @@ public class PostActivity extends AppCompatActivity
                 });
     }
 
+//    private void setThumbnailView(Uri uri){
+//        RequestOptions requestOptions = new RequestOptions()
+//            .diskCacheStrategy(DiskCacheStrategy.NONE)
+//            .skipMemoryCache(true);
+//        GlideApp.with(PostActivity.this)
+//            .load(uri)
+//            .placeholder(R.drawable.placeholder)
+//            .apply(requestOptions)
+//            .into(thumbnailView);
+//    }
+
     private int getExifOrientation(String photoFilePath) {
         Timber.d("Camera/Gallery : reading exif data");
         ExifInterface exif = null;
@@ -294,6 +310,8 @@ public class PostActivity extends AppCompatActivity
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 getSupportActionBar().setDisplayShowHomeEnabled(true);
             }
+            mFab = findViewById(R.id.fab_submit_post);
+            mFab.hide();
         }
     }
 }

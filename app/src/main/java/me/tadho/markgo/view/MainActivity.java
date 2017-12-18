@@ -33,6 +33,7 @@ import android.view.MenuItem;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.CompositeDisposable;
+
 import com.jakewharton.rxbinding2.view.RxView;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
@@ -57,14 +58,24 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
-        compositeDisposable = new CompositeDisposable();
         setupFab();
         mAuth = FirebaseAuth.getInstance();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (compositeDisposable!=null){
+            if(!compositeDisposable.isDisposed()){
+                Timber.d("RxTest onDestroy, disposing");
+                compositeDisposable.dispose();
+            }
+        }
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupFab() {
+        compositeDisposable = new CompositeDisposable();
         Timber.d("Setting up Floating Action Menu");
         mFam = findViewById(R.id.mFam);
         FloatingActionButton fabGallery = findViewById(R.id.fabGallery);
@@ -153,16 +164,5 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, IntroActivity.class));
                 finish();
             }).setNegativeButton(R.string.dialog_cancel, null).show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (compositeDisposable!=null){
-            if(!compositeDisposable.isDisposed()){
-                Timber.d("RxTest onDestroy, disposing");
-                compositeDisposable.dispose();
-            }
-        }
     }
 }

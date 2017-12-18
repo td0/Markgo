@@ -72,6 +72,5 @@ public class PhotoViewerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        GlideApp.get(this).clearMemory();
     }
 }

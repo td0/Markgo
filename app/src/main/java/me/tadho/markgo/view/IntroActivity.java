@@ -72,12 +72,13 @@ public class IntroActivity extends MaterialIntroActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
-        rootRef = FirebaseDatabase.getInstance().getReference();
-
-        if (mAuth.getCurrentUser() == null) {
+        if (mAuth.getCurrentUser() != null) {
+            onFinish();
+        } else {
+            rootRef = FirebaseDatabase.getInstance().getReference();
             hideNavButton();
             setupIntroSlides();
-        } else onFinish();
+        }
     }
 
     private void hideNavButton(){
@@ -169,25 +170,23 @@ public class IntroActivity extends MaterialIntroActivity {
             public void onCodeAutoRetrievalTimeOut(String s) {
                 super.onCodeAutoRetrievalTimeOut(s);
                 Timber.e(getString(R.string.fbauth_error_request_timeout));
-                showMessage(getString(R.string.fbauth_error_request_timeout));
             }
         };
     }
 
     private void signInWithPhoneCredential(PhoneAuthCredential credential){
-        Task<AuthResult> mAuthResult = mAuth.signInWithCredential(credential)
-                .addOnSuccessListener(authResult -> {
-                    Timber.d("Phone Sign In success");
-                    FirebaseUser user = authResult.getUser();
-                    String name = ((EditText)findViewById(R.id.intro_name_input))
-                            .getText().toString();
-                    onAuthSuccess(user, name);
-                })
-                .addOnFailureListener(e -> {
-                    Timber.e(e.getMessage());
-                    showMessage(e.getMessage());
-                });
-
+        mAuth.signInWithCredential(credential)
+            .addOnSuccessListener(authResult -> {
+                Timber.d("Phone Sign In success");
+                FirebaseUser user = authResult.getUser();
+                String name = ((EditText)findViewById(R.id.intro_name_input))
+                        .getText().toString().trim();
+                onAuthSuccess(user, name);
+            })
+            .addOnFailureListener(e -> {
+                Timber.e(e.getMessage());
+                showMessage(e.getMessage());
+            });
     }
 
     public void onAuthSuccess(FirebaseUser userAuth, String name){

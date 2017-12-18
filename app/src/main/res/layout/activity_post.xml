@@ -55,45 +55,61 @@
         android:layout_marginTop="16dp"
         android:orientation="vertical"
         app:layout_constraintTop_toBottomOf="@id/iv_preview" >
-        <LinearLayout
+
+        <!--Location-->
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <android.support.v7.widget.AppCompatTextView
-                android:id="@+id/post_textv_streetname"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="19"
-                android:textSize="17sp"
-                android:textColor="@color/text_black_87"
-                android:text="Jalan Letjend S Parman"/>
-
-            <android.support.v7.widget.AppCompatImageButton
-                android:id="@+id/button_get_location"
-                android:layout_width="0dp"
-                android:padding="13dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="3"
-                android:background="@color/background_light"
-                app:srcCompat="@drawable/ic_my_location_black_24dp"/>
-        </LinearLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/text_input_description"
-            android:paddingTop="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <android.support.v7.widget.AppCompatEditText
-                android:id="@+id/intro_code_input"
-                android:lines="4"
+            app:cardElevation="2dp">
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:hint="Description" />
-        </android.support.design.widget.TextInputLayout>
+                android:orientation="horizontal" >
+                <android.support.v7.widget.AppCompatTextView
+                    android:id="@+id/post_textv_streetname"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="19"
+                    android:textSize="17sp"
+                    android:textColor="@color/text_black_87"
+                    android:text="Jalan Letjend S Parman"/>
+
+                <android.support.v7.widget.AppCompatImageButton
+                    android:id="@+id/button_get_location"
+                    android:layout_width="0dp"
+                    android:padding="13dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="3"
+                    android:background="@color/background_light"
+                    app:srcCompat="@drawable/ic_my_location_black_24dp"/>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <!--Description-->
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardElevation="2dp" >
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/text_input_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp">
+                <android.support.v7.widget.AppCompatEditText
+                    android:id="@+id/intro_code_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="1"
+                    android:maxLines="4"
+                    android:scrollbars="vertical"
+                    android:inputType="textMultiLine"
+                    android:hint="Description" />
+            </android.support.design.widget.TextInputLayout>
+        </android.support.v7.widget.CardView>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
