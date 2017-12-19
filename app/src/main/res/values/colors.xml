@@ -1,5 +1,6 @@
 <!--?xml version="1.0" encoding="UTF-8"?-->
 <resources>
+
     <color name="colorPrimary">#212121</color>
     <color name="colorPrimaryLight">#484848</color>
     <color name="colorPrimaryDark">#000000</color>
@@ -7,7 +8,7 @@
     <color name="colorSecondaryLight">#ffc246</color>
     <color name="colorSecondaryDark">#c56200</color>
     <color name="textColorPrimary">#ffffff</color>
-    <color name="background_light">#FFFAFAFA</color>
+    <color name="background_light">#FAFAFA</color>
     <color name="textColorSecondary">#000000</color>
     <color name="highlight">#4fff</color>
     <color name="transparentOverlay">#77000000</color>
@@ -15,6 +16,7 @@
     <color name="background_card">#fff</color>
     <color name="text_black">#de000000</color>
     <color name="text_white">#deffffff</color>
+    <color name="about_libraries_title_description">@color/text_white</color>
 
     <!--blue-->
     <color name="blue_300">#64b5f6</color>

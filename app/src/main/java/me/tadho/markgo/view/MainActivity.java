@@ -35,6 +35,8 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.CompositeDisposable;
 
 import com.jakewharton.rxbinding2.view.RxView;
+import com.mikepenz.aboutlibraries.Libs;
+import com.mikepenz.aboutlibraries.LibsBuilder;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import com.github.clans.fab.FloatingActionButton;
@@ -132,10 +134,23 @@ public class MainActivity extends AppCompatActivity {
                 Timber.d("Logout Preferences submenu pressed");
                 signOut();
                 return true;
-            //TODO: Temporary helper
+            // TODO: Temporary helper
             case R.id.changename_submenu:
                 Timber.d("Change name submenu pressed");
                 startActivity(new Intent(this, PostActivity.class));
+                return true;
+            case R.id.about_submenu:
+                Timber.d("About submenu pressed");
+                new LibsBuilder()
+                    .withFields(Libs.toStringArray(R.string.class.getFields()))
+                    .withAboutIconShown(true)
+                    .withActivityStyle(Libs.ActivityStyle.DARK)
+                    .withAboutAppName(getString(R.string.app_name))
+                    .withActivityTitle(getString(R.string.activity_about_title))
+                    .withAboutDescription(getString(R.string.activity_about_description))
+                    .withLicenseShown(true)
+                    .start(MainActivity.this);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
