@@ -40,6 +40,9 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.ByteArrayOutputStream;
@@ -70,10 +73,10 @@ public class PostActivity extends AppCompatActivity
     implements View.OnClickListener{
 
     private File photoFile;
+    private Uri photoUri;
     private String photoPath;
     private Bitmap photoTaken;
-    private ExifInterface exifInterface;
-    private int rotationDegree;
+    private LatLng latLng;
 
     private String streetName;
     private TextView tvStreetName;
@@ -97,24 +100,21 @@ public class PostActivity extends AppCompatActivity
             setContentView(R.layout.activity_post);
             setSupportActionBar(findViewById(R.id.toolbar));
             setTitle(getString(R.string.title_post));
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowHomeEnabled(true);
+            }
 
             thumbnailView = findViewById(R.id.iv_preview);
-
             spinner = new DoubleBounce();
             spinner.setBounds(0,0,46,46);
             spinner.setColor(getResources().getColor(R.color.text_white));
             tvStreetName = findViewById(R.id.post_text_street);
             tvStreetName.setCompoundDrawables(spinner,null,null,null);
             spinner.start();
-
-            streetName = Constants.STRING_NULL;
-
-            if (getSupportActionBar() != null) {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setDisplayShowHomeEnabled(true);
-            }
             mFab = findViewById(R.id.fab_submit_post);
             mFab.hide();
+            streetName = Constants.STRING_NULL;
         }
     }
 
@@ -143,9 +143,9 @@ public class PostActivity extends AppCompatActivity
     public void onClick(View v) {
         if (v.getId() == thumbnailView.getId()){
             Intent intent = new Intent(PostActivity.this,
-                    PhotoViewerActivity.class);
-            intent.putExtra(Constants.PHOTO_PATH_EXTRA, photoPath);
-            intent.putExtra(Constants.LOCAL_FILE_EXTRA, true);
+                    PhotoViewerActivity.class)
+                .putExtra(Constants.PHOTO_PATH_EXTRA, photoPath)
+                .putExtra(Constants.LOCAL_FILE_EXTRA, true);
             ActivityOptionsCompat options = ActivityOptionsCompat
                     .makeSceneTransitionAnimation(PostActivity.this, v,
                             getString(R.string.animation_photo_view));
@@ -236,58 +236,53 @@ public class PostActivity extends AppCompatActivity
     }
 
     private void cameraAction(){
-        rotationDegree = getExifOrientation(photoPath);
-        photoTaken = BitmapFactory.decodeFile(photoPath);
-
-        Disposable camDisposable = Observable.just(3)
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe(x->{
+        Timber.d("Camera : Loading photo with glide");
+        setThumbnailView(Uri.fromFile(photoFile));
+        Disposable camDisposable = Observable.just(Constants.REQUEST_CAMERA_CODE)
+            .observeOn(Schedulers.io())
+            .doOnNext(x->{
                 Timber.d("(onNext)->RXCamera "+Thread.currentThread().getName());
-                Timber.d("Camera : scaling picture");
-                Bitmap previewBitmap = PhotoUtility.scaleToFitHeight(photoTaken, 800);
-                previewBitmap = PhotoUtility.rotateBitmap(previewBitmap,rotationDegree);
-                Timber.d("Camera : Setting up photo thumbnail into view");
-                thumbnailView.setImageBitmap(previewBitmap);
+                Timber.d("Gallery : Getting photo bitmap");
+                photoUri = Uri.fromFile(photoFile);
+                photoTaken = BitmapFactory.decodeFile(photoPath);
             })
             .compose(writePhotoFileObservable())
+            .compose(exifObservableTransformer())
             .subscribe();
         compositeDisposable.add(camDisposable);
     }
 
-    private void galleryAction(Uri photoUri){
-        Timber.d("Gallery : Getting photo bitmap");
-        String photoFullPath = PhotoUtility.getFullPathFromUri(PostActivity.this, photoUri);
-        rotationDegree = getExifOrientation(photoFullPath);
-        try {
-            photoTaken = MediaStore.Images.Media
-                .getBitmap(PostActivity.this.getContentResolver(), photoUri);
-        } catch (IOException e) {
-            Timber.e(e.getMessage());
-            e.printStackTrace();
-        }
-
-        Disposable galDisposable = Observable.just(29)
-            .subscribeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe(x->{
-                Timber.d("Gallery : get full path from Uri");
+    private void galleryAction(Uri uri){
+        Timber.d("Gallery : Loading photo with glide");
+        setThumbnailView(uri);
+        Disposable galDisposable = Observable.just(Constants.REQUEST_GALLERY_CODE)
+            .observeOn(Schedulers.io())
+            .doOnNext(x->{
                 Timber.d("(onNext)->RXGallery "+Thread.currentThread().getName());
-                Timber.d("Gallery : scaling picture");
-                Bitmap previewBitmap = PhotoUtility.scaleToFitHeight(photoTaken, 800);
-                previewBitmap = PhotoUtility.rotateBitmap(previewBitmap,rotationDegree);
-                Timber.d("Gallery : Setting up photo thumbnail into view");
-                thumbnailView.setImageBitmap(previewBitmap);
+                Timber.d("Gallery : Getting photo bitmap");
+                photoUri = uri;
+                try {
+                    photoTaken = MediaStore.Images.Media
+                        .getBitmap(PostActivity.this.getContentResolver(), photoUri);
+                } catch (IOException e) {
+                    Timber.e(e.getMessage());
+                    e.printStackTrace();
+                }
             })
             .compose(writePhotoFileObservable())
+            .compose(exifObservableTransformer())
             .subscribe();
         compositeDisposable.add(galDisposable);
     }
 
-    private ObservableTransformer<Integer,String> writePhotoFileObservable(){
+    private ObservableTransformer<Integer,Integer> writePhotoFileObservable(){
         return observable -> observable
-            .observeOn(Schedulers.io())
-            .map(x -> {
+            .doOnNext(x -> {
                 Timber.d("(onNext)->WriteFile|Camera/Gallery "+Thread.currentThread().getName());
-                Bitmap compressedBitmap = PhotoUtility.rotateBitmap(photoTaken, rotationDegree);
+
+                Bitmap compressedBitmap = PhotoUtility
+                    .rotateBitmap(PostActivity.this, photoUri, photoTaken);
+
                 Timber.d("WriteFile|Camera/Gallery : init compress stream");
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                 compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 45, bytes);
@@ -303,12 +298,19 @@ public class PostActivity extends AppCompatActivity
                     Timber.e(e.getMessage());
                 }
                 thumbnailView.setOnClickListener(this);
-                LatLng latLng = getExifLocation();
+            });
+    }
+
+    private ObservableTransformer<Integer,String> exifObservableTransformer(){
+        return observable -> observable
+            .map(x->{
+                latLng = PhotoUtility.getExifLocation(photoPath);
                 if (latLng != null) streetName = getStreetName(latLng);
+                if (streetName == null) streetName = Constants.STRING_NULL;
                 return streetName;
             })
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext(street -> {
+            .doOnNext(street->{
                 if (!street.equals(Constants.STRING_NULL)) {
                     spinner.stop();
                     Drawable drw = getResources()
@@ -327,56 +329,14 @@ public class PostActivity extends AppCompatActivity
             });
     }
 
-    private int getExifOrientation(String photoFilePath) {
-        Timber.d("Camera/Gallery : reading exif orientation");
-        exifInterface = null;
-        try {
-            exifInterface = new ExifInterface(photoFilePath);
-        } catch (IOException e) {
-            Timber.e(e.getMessage());
-            e.printStackTrace();
-        }
-        String orientString = exifInterface != null ?
-            exifInterface.getAttribute(ExifInterface.TAG_ORIENTATION) : null;
-        int orientation = orientString != null ?
-            Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
-        int rotationAngle = 0;
-        if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
-        if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
-        if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
-        return rotationAngle;
-    }
-
-    private LatLng getExifLocation()  {
-        Timber.d("Camera/Gallery : reading exif location");
-        if (exifInterface==null) return null;
-        String latDms = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE);
-        String latRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF);
-        String lngDms = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE);
-        String lngRef = exifInterface.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF);
-        Timber.d("(exif) Latitude  DMS : "+latDms+" ("+latRef+")");
-        Timber.d("(exif) Longitude DMS : "+lngDms+" ("+lngRef+")");
-        if(latDms==null||lngDms==null||latRef==null||lngRef==null) {
-            Timber.d("(exif) gps data not found");
-            return null;
-        }
-        Double lat = convertToDegree(latDms,latRef);
-        Double lng = convertToDegree(lngDms,lngRef);
-        Timber.d("(exif) Latitude  : "+lat);
-        Timber.d("(exif) Longitude : "+lng);
-        return new LatLng(lat,lng);
-    }
-
-    private Double convertToDegree(String dmsString, String dmsRef){
-        Double result = 0d;
-        String[] DMS = dmsString.split(",", 3);
-        for (int i = 0; i < DMS.length; i++) {
-            String[] dms = DMS[i].split("/", 2);
-            Double dms1 = Double.valueOf(dms[0]);
-            Double dms2 = Double.valueOf(dms[1]);
-            result += (dms1 / dms2) / Math.pow(60, i);
-        }
-        return (dmsRef.equals("N")||dmsRef.equals("E"))? result : result*(-1);
+    private void setThumbnailView(Uri uri){
+        RequestOptions requestOptions = new RequestOptions()
+            .diskCacheStrategy(DiskCacheStrategy.NONE);
+        GlideApp.with(PostActivity.this)
+            .load(uri)
+            .apply(requestOptions)
+            .placeholder(R.drawable.placeholder)
+            .into(thumbnailView).onStop();
     }
 
     private String getStreetName(LatLng latLng){
