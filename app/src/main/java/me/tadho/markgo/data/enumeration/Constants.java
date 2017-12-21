@@ -48,6 +48,11 @@ public final class Constants {
     public static final long DEBOUNCE_TIMEOUT = 500;
     public static final long VERIFY_PHONE_TIMEOUT = 60;
 
+    public static final String MAPS_MODE = "mapsMode";
+    public static final char MAPS_PICKER = 'p';
+    public static final char MAPS_VIEWER = 'v';
+    public static final char MAPS_LIST = 'n';
+
 
 
 }

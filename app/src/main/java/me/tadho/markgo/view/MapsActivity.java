@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import me.tadho.markgo.R;
+import me.tadho.markgo.data.enumeration.Constants;
 import timber.log.Timber;
 
 public class MapsActivity extends AppCompatActivity {
@@ -37,10 +38,19 @@ public class MapsActivity extends AppCompatActivity {
         Timber.d("MapsActivity onCreate()");
         setContentView(R.layout.activity_maps);
         setTitle(getString(R.string.title_maps));
-
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
+        Bundle bundle = getIntent().getExtras();
+        char mapsMode = bundle != null ? bundle.getChar(Constants.MAPS_MODE) : Constants.MAPS_LIST;
+
+        if (mapsMode == Constants.MAPS_PICKER) {
+            Timber.d("Maps location picker mode");
+        } else if (mapsMode == Constants.MAPS_VIEWER) {
+            Timber.d("Maps location viewer mode");
+        } else if (mapsMode == Constants.MAPS_LIST) {
+            Timber.d("Maps location list mode");
         }
     }
 

@@ -89,7 +89,7 @@ public class PhotoUtility {
         Timber.d("(exif) Latitude  DMS : "+latDms+" ("+latRef+")");
         Timber.d("(exif) Longitude DMS : "+lngDms+" ("+lngRef+")");
         if(latDms==null||lngDms==null||latRef==null||lngRef==null) {
-            Timber.d("(exif) gps data not found");
+            Timber.d("(exif) location data not found");
             return null;
         }
         Double lat = convertToDegree(latDms,latRef);

@@ -22,6 +22,7 @@
 
 package me.tadho.markgo.view;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,17 +33,19 @@ import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.media.ExifInterface;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.ByteArrayOutputStream;
@@ -50,6 +53,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
@@ -59,6 +63,7 @@ import io.reactivex.schedulers.Schedulers;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 import com.github.ybq.android.spinkit.style.DoubleBounce;
+import com.patloew.rxlocation.RxLocation;
 
 import me.tadho.markgo.BuildConfig;
 import me.tadho.markgo.utils.GlideApp;
@@ -72,25 +77,32 @@ import timber.log.Timber;
 public class PostActivity extends AppCompatActivity
     implements View.OnClickListener{
 
-    private File photoFile;
     private Uri photoUri;
+    private File photoFile;
     private String photoPath;
     private Bitmap photoTaken;
-    private LatLng latLng;
 
+    private LatLng mLatLng;
     private String streetName;
+    private String description;
+    private String photoUploadedPath;
+
     private TextView tvStreetName;
     private ThumbnailView thumbnailView;
     private FloatingActionButton mFab;
+    private ImageButton customLocationButton;
     private DoubleBounce spinner;
 
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private RxLocation rxLocation;
+    private LocationRequest locationRequest;
+    private CompositeDisposable compositeDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getIntent().getExtras();
         int mode = (int) (bundle != null ? bundle.get(Constants.TAKE_MODE_EXTRA) : 0);
+
         initiation();
         if (mode != 0) launchTakeMode(mode);
     }
@@ -104,7 +116,7 @@ public class PostActivity extends AppCompatActivity
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                 getSupportActionBar().setDisplayShowHomeEnabled(true);
             }
-
+            compositeDisposable = new CompositeDisposable();
             thumbnailView = findViewById(R.id.iv_preview);
             spinner = new DoubleBounce();
             spinner.setBounds(0,0,46,46);
@@ -112,6 +124,8 @@ public class PostActivity extends AppCompatActivity
             tvStreetName = findViewById(R.id.post_text_street);
             tvStreetName.setCompoundDrawables(spinner,null,null,null);
             spinner.start();
+            customLocationButton = findViewById(R.id.button_set_custom_location);
+            customLocationButton.setOnClickListener(this);
             mFab = findViewById(R.id.fab_submit_post);
             mFab.hide();
             streetName = Constants.STRING_NULL;
@@ -150,7 +164,25 @@ public class PostActivity extends AppCompatActivity
                     .makeSceneTransitionAnimation(PostActivity.this, v,
                             getString(R.string.animation_photo_view));
             startActivity(intent, options.toBundle());
+        } else if (v.getId() == customLocationButton.getId()) {
+            Timber.d("Custom location button pressed");
+            Intent mapPickerIntent = new Intent(PostActivity.this, MapsActivity.class)
+                .putExtra(Constants.MAPS_MODE,Constants.MAPS_PICKER);
+            ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(PostActivity.this, v,
+                    getString(R.string.animation_maps_picker));
+            startActivityForResult(mapPickerIntent, Constants.REQUEST_LOCATION_CODE);
         }
+    }
+
+    private void setThumbnailView(Uri uri){
+        RequestOptions requestOptions = new RequestOptions()
+            .diskCacheStrategy(DiskCacheStrategy.NONE);
+        GlideApp.with(PostActivity.this)
+            .load(uri)
+            .apply(requestOptions)
+            .placeholder(R.drawable.placeholder)
+            .into(thumbnailView).onStop();
     }
 
     private File getPhotoFile() {
@@ -232,9 +264,18 @@ public class PostActivity extends AppCompatActivity
                 Timber.d("Picture was not chosen!");
                 finish();
             }
+        } else if (requestCode == Constants.REQUEST_LOCATION_CODE) {
+            Timber.d("Set the street name based on custom location");
+        } else {
+            Timber.d("Something fishy giving back onActivityResult");
+            Timber.d("Request Code = "+requestCode);
+            Timber.d("Result Code = "+resultCode);
         }
     }
 
+    /*
+    * CAMERA ACTION
+    */
     private void cameraAction(){
         Timber.d("Camera : Loading photo with glide");
         setThumbnailView(Uri.fromFile(photoFile));
@@ -246,12 +287,14 @@ public class PostActivity extends AppCompatActivity
                 photoUri = Uri.fromFile(photoFile);
                 photoTaken = BitmapFactory.decodeFile(photoPath);
             })
-            .compose(writePhotoFileObservable())
-            .compose(exifObservableTransformer())
+            .compose(aggregatorObservableTransformer())
             .subscribe();
         compositeDisposable.add(camDisposable);
     }
 
+    /*
+    * GALLERY ACTION
+    */
     private void galleryAction(Uri uri){
         Timber.d("Gallery : Loading photo with glide");
         setThumbnailView(uri);
@@ -269,20 +312,31 @@ public class PostActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
             })
-            .compose(writePhotoFileObservable())
-            .compose(exifObservableTransformer())
+            .compose(aggregatorObservableTransformer())
             .subscribe();
         compositeDisposable.add(galDisposable);
     }
 
-    private ObservableTransformer<Integer,Integer> writePhotoFileObservable(){
-        return observable -> observable
+    /*
+    * -> AGGREGATOR OBSERVABLE TRANSFORMER <-|
+    */
+    private ObservableTransformer<Integer,String> aggregatorObservableTransformer(){
+        return obs -> obs
+            .compose(writePhotoObservableTransformer())
+            .compose(exifObservableTransformer())
+            .filter(x -> x.equals(Constants.STRING_NULL))
+            .flatMap(x -> getCurrentLocation());
+    }
+
+    /*
+    * WRITING PHOTO FILE TO BE UPLOADED
+    */
+    private ObservableTransformer<Integer,Integer> writePhotoObservableTransformer(){
+        return obs -> obs
             .doOnNext(x -> {
                 Timber.d("(onNext)->WriteFile|Camera/Gallery "+Thread.currentThread().getName());
-
                 Bitmap compressedBitmap = PhotoUtility
                     .rotateBitmap(PostActivity.this, photoUri, photoTaken);
-
                 Timber.d("WriteFile|Camera/Gallery : init compress stream");
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
                 compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 45, bytes);
@@ -301,12 +355,14 @@ public class PostActivity extends AppCompatActivity
             });
     }
 
+    /*
+    * READ EXIF LOCATION
+    */
     private ObservableTransformer<Integer,String> exifObservableTransformer(){
-        return observable -> observable
+        return obs -> obs
             .map(x->{
-                latLng = PhotoUtility.getExifLocation(photoPath);
-                if (latLng != null) streetName = getStreetName(latLng);
-                if (streetName == null) streetName = Constants.STRING_NULL;
+                mLatLng = PhotoUtility.getExifLocation(photoPath);
+                if (mLatLng != null) setStreetName(mLatLng);
                 return streetName;
             })
             .observeOn(AndroidSchedulers.mainThread())
@@ -316,42 +372,87 @@ public class PostActivity extends AppCompatActivity
                     Drawable drw = getResources()
                         .getDrawable(R.drawable.ic_location_on_red_400_24dp);
                     drw.setBounds(0,0,46,46);
-                    tvStreetName.setText(streetName);
+                    tvStreetName.setText(street);
                     tvStreetName.setCompoundDrawables(drw,null,null,null);
+                    customLocationButton.setVisibility(View.VISIBLE);
+                    mFab.show();
                 } else {
                     spinner.setColor(getResources().getColor(R.color.blue_300));
                     spinner.setBounds(0,0,46,46);
                     tvStreetName.setText(R.string.get_gps_location);
                     tvStreetName.setCompoundDrawables(spinner, null, null, null);
                 }
-                findViewById(R.id.button_set_custom_location)
-                    .setVisibility(View.VISIBLE);
             });
     }
 
-    private void setThumbnailView(Uri uri){
-        RequestOptions requestOptions = new RequestOptions()
-            .diskCacheStrategy(DiskCacheStrategy.NONE);
-        GlideApp.with(PostActivity.this)
-            .load(uri)
-            .apply(requestOptions)
-            .placeholder(R.drawable.placeholder)
-            .into(thumbnailView).onStop();
+    /*
+    * GET CURRENT GPS LOCATION
+    */
+    private Observable<String> getCurrentLocation(){
+        locationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setNumUpdates(1)
+            .setInterval(3000);
+        rxLocation = new RxLocation(PostActivity.this);
+        rxLocation.setDefaultTimeout(10, TimeUnit.SECONDS);
+        return rxLocation.settings().checkAndHandleResolution(locationRequest)
+            .flatMapObservable(isActivated->{
+                if (isActivated) {
+                    Timber.d("Location settings turned on");
+                    return onLocationSettingsActivatedObservable();
+                }
+                else return Observable.just(Constants.STRING_NULL)
+                    .doOnNext(s -> {
+                        Timber.d("Can't get the location, user refused to turn on location settings");
+                        spinner.stop();
+                        Drawable drw = getResources()
+                            .getDrawable(R.drawable.ic_location_off_red_400_24dp);
+                        drw.setBounds(0,0,46,46);
+                        tvStreetName.setText(R.string.cant_get_location);
+                        tvStreetName.setCompoundDrawables(drw,null,null,null);
+                        customLocationButton.setVisibility(View.VISIBLE);
+                    });
+            });
     }
 
-    private String getStreetName(LatLng latLng){
-        Timber.d("(exif/geocode) reading geocode from lat & long");
+    /*
+    * GOT LOCATION FROM GPS
+    */
+    @SuppressLint("MissingPermission")
+    private Observable<String> onLocationSettingsActivatedObservable(){
+        return rxLocation.location().updates(locationRequest)
+            .map(location -> {
+                mLatLng = new LatLng(location.getLatitude(),location.getLongitude());
+                setStreetName(mLatLng);
+                return streetName;
+            })
+            .doOnNext(street->{
+                Timber.d("Found location from GPS");
+                if (street.equals(Constants.STRING_NULL))
+                    street = getString(R.string.cant_get_street_name);
+                spinner.stop();
+                Drawable drw = getResources()
+                    .getDrawable(R.drawable.ic_location_on_red_400_24dp);
+                drw.setBounds(0,0,46,46);
+                tvStreetName.setText(street);
+                tvStreetName.setCompoundDrawables(drw,null,null,null);
+                customLocationButton.setVisibility(View.VISIBLE);
+                mFab.show();
+            });
+    }
+
+    private void setStreetName(LatLng latLng){
+        Timber.d("Geocode reading geocode from lat & long");
         List<Address> addresses = null;
         try {
             addresses = new Geocoder(PostActivity.this)
                 .getFromLocation(latLng.latitude, latLng.longitude,1);
         } catch (IOException e) { e.printStackTrace(); }
         if(addresses == null || addresses.size() == 0 ){
-            Timber.d("(exif/geocode) can't find any address");
-            return null;
+            Timber.d("Geocode can't find any address");
+            return;
         }
-        String street = addresses.get(0).getThoroughfare();
-        Timber.d("(exif/geocode) Street Name : "+street);
-        return street;
+        streetName = addresses.get(0).getThoroughfare();
+        Timber.d("Geocode Street Name : "+streetName);
     }
 }
