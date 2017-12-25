@@ -90,9 +90,9 @@ public class FormIntroSlide extends SlideFragment
         signinButton.setOnClickListener(this);
         resendButton.setOnClickListener(this);
         view.findViewById(R.id.intro_form_layout)
-                .setOnFocusChangeListener((v,hasFocus) -> {
-                    if (hasFocus) DisplayUtility.hideKeyboard(getContext(),v);
-                });
+            .setOnFocusChangeListener((v,hasFocus) -> {
+                if (hasFocus) DisplayUtility.hideKeyboard(getContext(),v);
+            });
         return view;
     }
 
@@ -143,7 +143,7 @@ public class FormIntroSlide extends SlideFragment
                 setVerifyState(Constants.REG_STATE_GET_AUTH);
                 showMessage(getString(R.string.fbauth_enter_get_verification));
                 ((IntroActivity)getActivity())
-                        .getVerificationCode(phoneEditText.getText().toString());
+                    .getVerificationCode(phoneEditText.getText().toString());
             }
             else showMessage(cantMoveFurtherMessage);
         }
@@ -152,7 +152,7 @@ public class FormIntroSlide extends SlideFragment
             if (!signinButtonError){
                 showMessage("Signing in...");
                 ((IntroActivity)getActivity())
-                        .signInWithCode(codeEditText.getText().toString());
+                    .signInWithCode(codeEditText.getText().toString());
             }
             else showMessage(cantMoveFurtherMessage);
         }
@@ -178,98 +178,103 @@ public class FormIntroSlide extends SlideFragment
         Observable<CharSequence> codeEditObservable = RxTextView.textChanges(codeEditText);
 
         Disposable nameDisposable = nameEditObservable
-                .doOnNext(charSequence -> hideNameError())
-                .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
-                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(charSequence -> {
-                    if (!validateName(charSequence.toString())) {
-                        cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
-                        showNameError();
-                    } else hideNameError();
-                });
+            .doOnNext(charSequence -> hideNameError())
+            .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .filter(charSequence -> !TextUtils.isEmpty(charSequence))
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(charSequence -> {
+                if (!validateName(charSequence.toString())) {
+                    cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
+                    showNameError();
+                } else hideNameError();
+            });
         Disposable phoneDisposable = phoneEditObservable
-                .doOnNext(charSequence -> hidePhoneError())
-                .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
-                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(charSequence -> {
-                    if (!validatePhone(charSequence.toString())) {
-                        cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
-                        showPhoneError();
-                    } else hidePhoneError();
-                });
+            .doOnNext(charSequence -> hidePhoneError())
+            .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .filter(charSequence -> !TextUtils.isEmpty(charSequence))
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(charSequence -> {
+                if (!validatePhone(charSequence.toString())) {
+                    cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
+                    showPhoneError();
+                } else hidePhoneError();
+            });
         Disposable codeDisposable = codeEditObservable
-                .doOnNext(charSequence -> hideCodeError())
-                .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
-                .filter(charSequence -> !TextUtils.isEmpty(charSequence))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(charSequence -> {
-                    if (!validateCode(charSequence.toString())) {
-                        showCodeError();
-                        signinButtonError = true;
-                    } else {
-                        hideCodeError();
-                        signinButtonError = false;
-                    }
-                });
-        Disposable buttonDisposable = Observable.combineLatest(nameEditObservable, phoneEditObservable,
-                (nameObs, phoneObs) -> validateName(nameObs.toString())
-                        && validatePhone(phoneObs.toString())
-                        && verifyState == Constants.REG_STATE_GET_CODE)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(valid -> {
-                    if (valid && verifyState == Constants.REG_STATE_GET_CODE) {
-                        Timber.d("buttonDisposable Verify State : 1");
-                        submitButtonError = false;
-                    } else submitButtonError = true;
-                });
+            .doOnNext(charSequence -> hideCodeError())
+            .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .filter(charSequence -> !TextUtils.isEmpty(charSequence))
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(charSequence -> {
+                if (!validateCode(charSequence.toString())) {
+                    showCodeError();
+                    signinButtonError = true;
+                } else {
+                    hideCodeError();
+                    signinButtonError = false;
+                }
+            });
+        Disposable buttonDisposable = Observable
+            .combineLatest(nameEditObservable, phoneEditObservable,
+            (nameObs, phoneObs) -> validateName(nameObs.toString())
+                    && validatePhone(phoneObs.toString())
+                    && verifyState == Constants.REG_STATE_GET_CODE)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(valid -> {
+                if (valid && verifyState == Constants.REG_STATE_GET_CODE) {
+                    Timber.d("buttonDisposable Verify State : 1");
+                    submitButtonError = false;
+                } else submitButtonError = true;
+            });
         Observable<Long> resendTimerObservable = Observable
-                .intervalRange(0,31,0,1, TimeUnit.SECONDS)
-                .map(interval -> 30-interval)
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnNext(reversed -> {
-                    String s = "Resend ("+reversed+")";
-                    resendButton.setText(s);
-                })
-                .doOnComplete(()->{
-                    resendButton.setText(R.string.intro_button_Resend);
-                    resendButton.setEnabled(true);
-                });
+            .intervalRange(0,31,0,1, TimeUnit.SECONDS)
+            .map(interval -> 30-interval)
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext(reversed -> {
+                String s = "Resend ("+reversed+")";
+                resendButton.setText(s);
+            })
+            .doOnComplete(()->{
+                resendButton.setText(R.string.intro_button_Resend);
+                resendButton.setEnabled(true);
+            });
         Disposable verifyStateDisposable = verifyStateSubject
-                .doOnNext(state -> {
-                    if (state == Constants.REG_STATE_GET_CODE) {
-                        Timber.d("Verify State 1 : getting verification code");
-                        codeEditText.setText("");
-                        nameEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
-                        phoneEditText.setInputType(InputType.TYPE_CLASS_PHONE);
-                        codeInputLayout.setVisibility(View.INVISIBLE);
-                        submitButton.setVisibility(View.VISIBLE);
-                        signinButton.setVisibility(View.INVISIBLE);
-                        resendButton.setVisibility(View.INVISIBLE);
-                        resendButton.setEnabled(false);
-                    } else if (state == Constants.REG_STATE_GET_AUTH) {
-                        Timber.d("Verify State 2 : authenticating");
-                        nameEditText.setInputType(InputType.TYPE_NULL);
-                        phoneEditText.setInputType(InputType.TYPE_NULL);
-                        codeInputLayout.setVisibility(View.VISIBLE);
-                        submitButton.setVisibility(View.INVISIBLE);
-                        signinButton.setVisibility(View.VISIBLE);
-                        resendButton.setVisibility(View.VISIBLE);
-                    }
-                })
-                .filter(state -> state==Constants.REG_STATE_GET_AUTH)
-                .map(state -> resendTimerObservable)
-                .subscribe(resendObs -> {
-                    Disposable resendDisposable = resendObs
-                            .subscribe();
-                    compositeDisposable.add(resendDisposable);
-                });
-        compositeDisposable.add(nameDisposable);
-        compositeDisposable.add(phoneDisposable);
-        compositeDisposable.add(codeDisposable);
-        compositeDisposable.add(buttonDisposable);
-        compositeDisposable.add(verifyStateDisposable);
+            .doOnNext(state -> {
+                if (state == Constants.REG_STATE_GET_CODE) {
+                    Timber.d("Verify State 1 : getting verification code");
+                    codeEditText.setText("");
+                    nameEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
+                    phoneEditText.setInputType(InputType.TYPE_CLASS_PHONE);
+                    codeInputLayout.setVisibility(View.INVISIBLE);
+                    submitButton.setVisibility(View.VISIBLE);
+                    signinButton.setVisibility(View.INVISIBLE);
+                    resendButton.setVisibility(View.INVISIBLE);
+                    resendButton.setEnabled(false);
+                } else if (state == Constants.REG_STATE_GET_AUTH) {
+                    Timber.d("Verify State 2 : authenticating");
+                    nameEditText.setInputType(InputType.TYPE_NULL);
+                    phoneEditText.setInputType(InputType.TYPE_NULL);
+                    codeInputLayout.setVisibility(View.VISIBLE);
+                    submitButton.setVisibility(View.INVISIBLE);
+                    signinButton.setVisibility(View.VISIBLE);
+                    resendButton.setVisibility(View.VISIBLE);
+                }
+            })
+            .filter(state -> state==Constants.REG_STATE_GET_AUTH)
+            .flatMap(state -> resendTimerObservable)
+            .subscribe();
+        compositeDisposable.addAll(nameDisposable, phoneDisposable, codeDisposable,
+            buttonDisposable, verifyStateDisposable);
+    }
+
+    private void killCompositeDisposable(){
+        if (compositeDisposable!=null) {
+            if (!compositeDisposable.isDisposed()) compositeDisposable.dispose();
+            compositeDisposable = null;
+        }
+    }
+
+    private void showMessage(String s){
+        ((IntroActivity)getActivity()).showMessage(s);
     }
 
     //////////
@@ -323,16 +328,4 @@ public class FormIntroSlide extends SlideFragment
         verifyState = state;
         verifyStateSubject.onNext(state);
     }
-    private void killCompositeDisposable(){
-        if (compositeDisposable!=null) {
-            if (!compositeDisposable.isDisposed()) compositeDisposable.dispose();
-            compositeDisposable = null;
-        }
-    }
-
-    private void showMessage(String s){
-        ((IntroActivity)getActivity()).showMessage(s);
-    }
-
-
 }
