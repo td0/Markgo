@@ -21,7 +21,7 @@
   ~ SOFTWARE.
   -->
 
-<android.support.constraint.ConstraintLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -29,32 +29,22 @@
     android:layout_height="match_parent"
     tools:context="me.tadho.markgo.view.PostActivity">
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar_layout"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:elevation="8dp" >
-            <!-- Toolbar -->
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                style="@style/Widget.AppTheme.ToolBar"
-                app:layout_scrollFlags="enterAlways"
-                app:elevation="8dp" />
-        </android.support.design.widget.AppBarLayout>
-    </android.support.design.widget.CoordinatorLayout>
+        android:layout_height="wrap_content" >
 
+        <include layout="@layout/layout_toolbar"/>
+    </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
+        app:layout_anchor="@id/appbar_layout"
+        app:layout_anchorGravity="bottom"
+        android:paddingTop="?attr/actionBarSize"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_margin="8dp"
-        android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/appbar_layout" >
+        android:orientation="vertical" >
 
         <!--Location-->
         <android.support.v7.widget.CardView
@@ -145,7 +135,6 @@
         app:fabSize="normal"
         app:backgroundTint="@color/colorSecondary"
         app:srcCompat="@drawable/ic_send_black_24dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        android:layout_gravity="bottom|end"/>
 
-</android.support.constraint.ConstraintLayout>
+</android.support.design.widget.CoordinatorLayout>

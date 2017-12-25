@@ -21,7 +21,7 @@
   ~ SOFTWARE.
   -->
 
-<RelativeLayout
+<android.support.design.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -29,13 +29,13 @@
     android:layout_height="match_parent"
     tools:context="me.tadho.markgo.view.MapsActivity">
 
-    <android.support.design.widget.CoordinatorLayout
+    <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <include layout="@layout/layout_toolbar"/>
-    </android.support.design.widget.CoordinatorLayout>
+    </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/frame_main"
@@ -43,4 +43,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-</RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>
