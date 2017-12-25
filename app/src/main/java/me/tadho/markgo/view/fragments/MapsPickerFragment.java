@@ -242,7 +242,10 @@ public class MapsPickerFragment extends Fragment implements
                 Timber.d("Animating camera on my location");
                 CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLng).zoom(17).build();
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),800,null);
+                googleMap.animateCamera(
+                    CameraUpdateFactory.newCameraPosition(cameraPosition),
+                    800,null);
+                mLatLng = latLng;
             })
             .doOnError(e -> {
                 Timber.e("Failed to get location updates");

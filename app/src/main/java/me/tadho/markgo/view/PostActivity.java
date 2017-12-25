@@ -131,7 +131,6 @@ public class PostActivity extends AppCompatActivity
             customLocationButton.setOnClickListener(this);
             mFab = findViewById(R.id.fab_submit_post);
             mFab.hide();
-//            mFab.hide();
             streetName = Constants.STRING_NOT_AVAILABLE;
         }
     }
