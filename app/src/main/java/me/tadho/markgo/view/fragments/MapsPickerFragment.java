@@ -22,16 +22,226 @@
 
 package me.tadho.markgo.view.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
-public class MapsPickerFragment extends Fragment {
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.patloew.rxlocation.RxLocation;
+
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Single;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.disposables.Disposable;
+import me.tadho.markgo.R;
+import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.view.MapsActivity;
+import timber.log.Timber;
+
+public class MapsPickerFragment extends Fragment implements
+    View.OnClickListener {
+
+    private Disposable pickLocationDisposable;
+    private MapView mMapView;
+    private GoogleMap googleMap;
+    private LatLng mLatLng;
+    private LatLng initialLatLng;
+    private Marker pickerMarker;
+    private RxLocation rxLocation;
+    private LocationRequest locationRequest;
+
+    private FloatingActionButton fabSubmit;
+    private FloatingActionButton fabMyLocation;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Timber.d("Getting fragment argument");
+
+        initialLatLng = new LatLng(0,0);
+        mLatLng = Constants.MALANG_LATLNG;
+        if (getArguments() != null) {
+            mLatLng = getArguments().getParcelable(Constants.LATLNG_EXTRA);
+            initialLatLng = mLatLng;
+            Timber.d("Argument found -> "+mLatLng);
+        }
+    }
+
+    @Nullable
+    @Override
+    @SuppressLint("MissingPermission")
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_maps_picker, container, false);
+        if (mMapView == null) mMapView = rootView.findViewById(R.id.maps_picker_view);
+        mMapView.onCreate(savedInstanceState);
+        mMapView.onResume();
+        try {
+            MapsInitializer.initialize(getActivity().getApplicationContext());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mMapView.getMapAsync((GoogleMap mMap) ->{
+            googleMap = mMap;
+            googleMap.getUiSettings().setMapToolbarEnabled(false);
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            googleMap.setMyLocationEnabled(true);
+
+            MarkerOptions markerOptions = new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_flag4_left_orange))
+                .position(mLatLng)
+                .draggable(true);
+            pickerMarker = googleMap.addMarker(markerOptions);
+            googleMap.setOnMarkerClickListener(marker -> {
+                Timber.d("Marker clicked, playing dead!");
+                return true;
+            });
+            googleMap.setOnMapClickListener(latLng -> {
+                pickerMarker.setPosition(latLng);
+                mLatLng = latLng;
+            });
+            googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                @Override
+                public void onMarkerDragStart(Marker marker) {}
+                @Override
+                public void onMarkerDrag(Marker marker) {}
+                @Override
+                public void onMarkerDragEnd(Marker marker) {
+                    mLatLng = marker.getPosition();
+                }
+            });
+
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(mLatLng).zoom(17).build();
+            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        });
+        return rootView;
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        fabSubmit = getView().findViewById(R.id.fab_submit_location);
+        fabMyLocation = getView().findViewById(R.id.fab_my_location);
+        fabSubmit.setOnClickListener(this);
+        fabMyLocation.setOnClickListener(this);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mMapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mMapView.onPause();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mMapView.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (pickLocationDisposable != null) {
+            pickLocationDisposable.dispose();
+            pickLocationDisposable = null;
+        }
+        pickerMarker.remove();
+        googleMap.setOnMarkerClickListener(null);
+        googleMap.setOnMarkerDragListener(null);
+        googleMap.setOnMapClickListener(null);
+        googleMap.clear();
+        fabSubmit.setOnClickListener(null);
+        fabMyLocation.setOnClickListener(null);
+        mMapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
+    }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.fab_submit_location :
+                Timber.d("Submit Location button clicked");
+                if (!initialLatLng.equals(mLatLng)) ((MapsActivity)getActivity()).sendActivityResult(mLatLng);
+                else getActivity().onBackPressed();
+                break;
+            case R.id.fab_my_location :
+                Timber.d("My Location button clicked");
+                pickLocationDisposable = myLocationSingle().subscribe();
+                break;
+        }
+    }
+
+    private Single myLocationSingle() {
+        locationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setNumUpdates(1)
+            .setInterval(3000);
+        rxLocation = new RxLocation(getActivity().getBaseContext());
+        rxLocation.setDefaultTimeout(10, TimeUnit.SECONDS);
+        return rxLocation.settings()
+            .checkAndHandleResolution(locationRequest)
+            .flatMap(isActivated -> {
+                Timber.d("Location settings turned on ->"+isActivated);
+                return getMyLocationSingle(isActivated);
+            });
+
+    }
+
+    @SuppressLint("MissingPermission")
+    private Single getMyLocationSingle(Boolean isActivated) {
+        if (isActivated) return rxLocation.location()
+            .updates(locationRequest)
+            .map(loc -> new LatLng(loc.getLatitude(),loc.getLongitude()))
+            .take(1)
+            .single(mLatLng)
+            .doOnSuccess(latLng -> {
+                Timber.d("Getting my location -> "+latLng);
+
+                Timber.d("Setting marker on my location");
+                pickerMarker.setPosition(latLng);
+
+                Timber.d("Animating camera on my location");
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(latLng).zoom(17).build();
+                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),800,null);
+            })
+            .doOnError(e -> {
+                Timber.e("Failed to get location updates");
+                Timber.e(e.getMessage());
+            });
+
+        Timber.d("location isn't activated, return dummy single");
+        return Single.just(mLatLng);
     }
 }

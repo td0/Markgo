@@ -54,6 +54,8 @@
     <string name="animation_maps_picker">mapsPickerAnimation</string>
 
     <!--Post report-->
+    <string name="location_tag_exif">(EXIF)</string>
+    <string name="location_tag_gps">(GPS)</string>
     <string name="image_description_thumbnail">image preview</string>
     <string name="form_description_hint">Description</string>
     <string name="get_exif_location">Getting location from photo…</string>

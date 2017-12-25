@@ -39,7 +39,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -55,6 +54,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableTransformer;
 import io.reactivex.disposables.CompositeDisposable;
@@ -65,6 +65,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.patloew.rxlocation.RxLocation;
 
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
 import me.tadho.markgo.BuildConfig;
 import me.tadho.markgo.utils.GlideApp;
 import me.tadho.markgo.utils.PhotoUtility;
@@ -96,6 +98,7 @@ public class PostActivity extends AppCompatActivity
     private RxLocation rxLocation;
     private LocationRequest locationRequest;
     private CompositeDisposable compositeDisposable;
+    private Subject<Boolean> customLocationButtonPressed = PublishSubject.create();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,8 +130,8 @@ public class PostActivity extends AppCompatActivity
             customLocationButton = findViewById(R.id.button_set_custom_location);
             customLocationButton.setOnClickListener(this);
             mFab = findViewById(R.id.fab_submit_post);
-            mFab.hide();
-            streetName = Constants.STRING_NULL;
+//            mFab.hide();
+            streetName = Constants.STRING_NOT_AVAILABLE;
         }
     }
 
@@ -154,6 +157,7 @@ public class PostActivity extends AppCompatActivity
     }
 
     @Override
+    @SuppressLint("RestrictedApi")
     public void onClick(View v) {
         if (v.getId() == thumbnailView.getId()){
             Intent intent = new Intent(PostActivity.this,
@@ -166,12 +170,18 @@ public class PostActivity extends AppCompatActivity
             startActivity(intent, options.toBundle());
         } else if (v.getId() == customLocationButton.getId()) {
             Timber.d("Custom location button pressed");
-            Intent mapPickerIntent = new Intent(PostActivity.this, MapsActivity.class)
-                .putExtra(Constants.MAPS_MODE,Constants.MAPS_PICKER);
+            customLocationButtonPressed.onNext(true);
+
+            Bundle extras = new Bundle();
+            Intent mapPickerIntent = new Intent(PostActivity.this, MapsActivity.class);
+            extras.putChar(Constants.MAPS_MODE,Constants.MAPS_PICKER);
+            if (mLatLng != null) extras.putParcelable(Constants.LATLNG_EXTRA, mLatLng);
+            mapPickerIntent.putExtras(extras);
+
             ActivityOptionsCompat options = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(PostActivity.this, v,
                     getString(R.string.animation_maps_picker));
-            startActivityForResult(mapPickerIntent, Constants.REQUEST_LOCATION_CODE);
+            startActivityForResult(mapPickerIntent,Constants.REQUEST_LOCATION_CODE,options.toBundle());
         }
     }
 
@@ -193,7 +203,7 @@ public class PostActivity extends AppCompatActivity
                 Timber.e("failed to create "+Environment.DIRECTORY_PICTURES+" directory");
                 return null;
             }
-            return new File(mediaStorageDir.getPath() + File.separator + Constants.postFileName);
+            return new File(mediaStorageDir.getPath() + File.separator + Constants.POST_FILE_NAME);
         }
         Timber.e("Can't find External Storage / is not mounted");
         return null;
@@ -216,39 +226,29 @@ public class PostActivity extends AppCompatActivity
         Timber.d("photoPath -> "+ photoPath);
         switch (mode){
             case Constants.TAKE_MODE_EXTRA_CAMERA:
-                Timber.d("Call Camera here");
-                launchCamera();
+                Timber.d("Launching Camera");
+                Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    .putExtra(MediaStore.EXTRA_OUTPUT, getFileProviderUri());
+                if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(cameraIntent, Constants.REQUEST_CODE_CAMERA);
+                }
                 break;
             case Constants.TAKE_MODE_EXTRA_GALLERY:
-                Timber.d("Call Gallery here");
-                launchGallery();
+                Timber.d("Launching Gallery");
+                Intent galleryIntent = new Intent(Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                if (galleryIntent.resolveActivity(getPackageManager())!=null){
+                    startActivityForResult(galleryIntent, Constants.REQUEST_CODE_GALLERY);
+                }
                 break;
             default:
                 throw new RuntimeException("Can't get intent extras");
         }
     }
 
-    private void launchCamera() {
-        Timber.d("Launch Camera here");
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                .putExtra(MediaStore.EXTRA_OUTPUT, getFileProviderUri());
-        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-             startActivityForResult(cameraIntent, Constants.REQUEST_CAMERA_CODE);
-        }
-    }
-
-    private void launchGallery() {
-        Timber.d("Launch Gallery here");
-        Intent galleryIntent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        if (galleryIntent.resolveActivity(getPackageManager())!=null){
-            startActivityForResult(galleryIntent, Constants.REQUEST_GALLERY_CODE);
-        }
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.REQUEST_CAMERA_CODE) {
+        if (requestCode == Constants.REQUEST_CODE_CAMERA) {
             if (resultCode == RESULT_OK) {
                 Timber.d("Camera onActivityResult");
                 cameraAction();
@@ -256,7 +256,7 @@ public class PostActivity extends AppCompatActivity
                 Timber.d("Picture was not taken!");
                 finish();
             }
-        } else if (requestCode == Constants.REQUEST_GALLERY_CODE){
+        } else if (requestCode == Constants.REQUEST_CODE_GALLERY){
             if (resultCode == RESULT_OK) {
                 Timber.d("Gallery onActivityResult");
                 if (data!=null) galleryAction(data.getData());
@@ -265,11 +265,25 @@ public class PostActivity extends AppCompatActivity
                 finish();
             }
         } else if (requestCode == Constants.REQUEST_LOCATION_CODE) {
-            Timber.d("Set the street name based on custom location");
+            if (resultCode==RESULT_OK) {
+                Timber.d("Set the street name based on custom location");
+                spinner.start();
+                tvStreetName.setCompoundDrawables(spinner, null, null, null);
+                tvStreetName.setText("Getting street name...");
+                Disposable customLocationDisposable = Completable.fromAction(() -> {
+                        mLatLng = data.getParcelableExtra(Constants.LATLNG_EXTRA);
+                        setStreetName(mLatLng);
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnComplete(() -> setLocationFound(streetName, false))
+                    .subscribe();
+                compositeDisposable.add(customLocationDisposable);
+            }
         } else {
-            Timber.d("Something fishy giving back onActivityResult");
-            Timber.d("Request Code = "+requestCode);
-            Timber.d("Result Code = "+resultCode);
+            Timber.w("Something fishy giving back onActivityResult");
+            Timber.w("Request Code = "+requestCode);
+            Timber.w("Result Code = "+resultCode);
         }
     }
 
@@ -279,7 +293,8 @@ public class PostActivity extends AppCompatActivity
     private void cameraAction(){
         Timber.d("Camera : Loading photo with glide");
         setThumbnailView(Uri.fromFile(photoFile));
-        Disposable camDisposable = Observable.just(Constants.REQUEST_CAMERA_CODE)
+        Disposable camDisposable = Observable.just(Constants.STRING_NOT_AVAILABLE)
+            .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .doOnNext(x->{
                 Timber.d("(onNext)->RXCamera "+Thread.currentThread().getName());
@@ -298,9 +313,10 @@ public class PostActivity extends AppCompatActivity
     private void galleryAction(Uri uri){
         Timber.d("Gallery : Loading photo with glide");
         setThumbnailView(uri);
-        Disposable galDisposable = Observable.just(Constants.REQUEST_GALLERY_CODE)
+        Disposable galDisposable = Observable.just(Constants.STRING_NOT_AVAILABLE)
+            .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
-            .doOnNext(x->{
+            .doOnNext(x -> {
                 Timber.d("(onNext)->RXGallery "+Thread.currentThread().getName());
                 Timber.d("Gallery : Getting photo bitmap");
                 photoUri = uri;
@@ -314,25 +330,26 @@ public class PostActivity extends AppCompatActivity
             })
             .compose(aggregatorObservableTransformer())
             .subscribe();
+
         compositeDisposable.add(galDisposable);
     }
 
     /*
     * -> AGGREGATOR OBSERVABLE TRANSFORMER <-|
     */
-    private ObservableTransformer<Integer,String> aggregatorObservableTransformer(){
-        return obs -> obs
+    private ObservableTransformer<String,String> aggregatorObservableTransformer(){
+        return observable -> observable
             .compose(writePhotoObservableTransformer())
             .compose(exifObservableTransformer())
-            .filter(x -> x.equals(Constants.STRING_NULL))
+            .filter(x -> x.equals(Constants.STRING_NOT_AVAILABLE))
             .flatMap(x -> getCurrentLocation());
     }
 
     /*
     * WRITING PHOTO FILE TO BE UPLOADED
     */
-    private ObservableTransformer<Integer,Integer> writePhotoObservableTransformer(){
-        return obs -> obs
+    private ObservableTransformer<String,String> writePhotoObservableTransformer(){
+        return observable -> observable
             .doOnNext(x -> {
                 Timber.d("(onNext)->WriteFile|Camera/Gallery "+Thread.currentThread().getName());
                 Bitmap compressedBitmap = PhotoUtility
@@ -358,22 +375,17 @@ public class PostActivity extends AppCompatActivity
     /*
     * READ EXIF LOCATION
     */
-    private ObservableTransformer<Integer,String> exifObservableTransformer(){
-        return obs -> obs
-            .map(x->{
+    private ObservableTransformer<String,String> exifObservableTransformer(){
+        return observable -> observable
+            .map(x -> {
                 mLatLng = PhotoUtility.getExifLocation(photoPath);
                 if (mLatLng != null) setStreetName(mLatLng);
                 return streetName;
             })
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext(street->{
-                if (!street.equals(Constants.STRING_NULL)) {
-                    spinner.stop();
-                    Drawable drw = getResources()
-                        .getDrawable(R.drawable.ic_location_on_red_400_24dp);
-                    drw.setBounds(0,0,46,46);
-                    tvStreetName.setText(street);
-                    tvStreetName.setCompoundDrawables(drw,null,null,null);
+            .doOnNext(street -> {
+                if (!street.equals(Constants.STRING_NOT_AVAILABLE)) {
+                    setLocationFound(street,true);
                     customLocationButton.setVisibility(View.VISIBLE);
                     mFab.show();
                 } else {
@@ -382,6 +394,7 @@ public class PostActivity extends AppCompatActivity
                     tvStreetName.setText(R.string.get_gps_location);
                     tvStreetName.setCompoundDrawables(spinner, null, null, null);
                 }
+                customLocationButton.setVisibility(View.VISIBLE);
             });
     }
 
@@ -395,23 +408,14 @@ public class PostActivity extends AppCompatActivity
             .setInterval(3000);
         rxLocation = new RxLocation(PostActivity.this);
         rxLocation.setDefaultTimeout(10, TimeUnit.SECONDS);
-        return rxLocation.settings().checkAndHandleResolution(locationRequest)
-            .flatMapObservable(isActivated->{
+        return rxLocation.settings()
+            .checkAndHandleResolution(locationRequest)
+            .flatMapObservable(isActivated -> {
                 if (isActivated) {
                     Timber.d("Location settings turned on");
                     return onLocationSettingsActivatedObservable();
                 }
-                else return Observable.just(Constants.STRING_NULL)
-                    .doOnNext(s -> {
-                        Timber.d("Can't get the location, user refused to turn on location settings");
-                        spinner.stop();
-                        Drawable drw = getResources()
-                            .getDrawable(R.drawable.ic_location_off_red_400_24dp);
-                        drw.setBounds(0,0,46,46);
-                        tvStreetName.setText(R.string.cant_get_location);
-                        tvStreetName.setCompoundDrawables(drw,null,null,null);
-                        customLocationButton.setVisibility(View.VISIBLE);
-                    });
+                return onLocationNotFoundObservable();
             });
     }
 
@@ -426,19 +430,47 @@ public class PostActivity extends AppCompatActivity
                 setStreetName(mLatLng);
                 return streetName;
             })
-            .doOnNext(street->{
+            .doOnNext(street -> {
                 Timber.d("Found location from GPS");
-                if (street.equals(Constants.STRING_NULL))
-                    street = getString(R.string.cant_get_street_name);
-                spinner.stop();
-                Drawable drw = getResources()
-                    .getDrawable(R.drawable.ic_location_on_red_400_24dp);
-                drw.setBounds(0,0,46,46);
-                tvStreetName.setText(street);
-                tvStreetName.setCompoundDrawables(drw,null,null,null);
+                setLocationFound(street, false);
                 customLocationButton.setVisibility(View.VISIBLE);
                 mFab.show();
+            })
+            .takeUntil(customLocationButtonPressed)
+            .doOnComplete(() -> {
+                if (streetName.equals(Constants.STRING_NOT_AVAILABLE)) {
+                    setLocationNotFound();
+                    Timber.d("Location fetching interupted");
+                }
             });
+    }
+
+    private Observable<String> onLocationNotFoundObservable(){
+        return Observable.just(Constants.STRING_NOT_AVAILABLE)
+            .doOnNext(s -> setLocationNotFound());
+    }
+
+
+    private void setLocationFound(String street, Boolean isExif){
+        if (street.equals(Constants.STRING_NOT_AVAILABLE))
+            street = getString(R.string.cant_get_street_name);
+        spinner.stop();
+        Drawable drw = getResources()
+            .getDrawable(R.drawable.ic_location_on_red_400_24dp);
+        drw.setBounds(0,0,46,46);
+        String streetText = isExif? getString(R.string.location_tag_exif):getString(R.string.location_tag_gps);
+        streetText = streetText+" "+street;
+        tvStreetName.setText(streetText);
+        tvStreetName.setCompoundDrawables(drw,null,null,null);
+    }
+
+    private void setLocationNotFound(){
+        spinner.stop();
+        Drawable drw = getResources()
+            .getDrawable(R.drawable.ic_location_off_red_400_24dp);
+        drw.setBounds(0,0,46,46);
+        tvStreetName.setText(R.string.cant_get_location);
+        tvStreetName.setCompoundDrawables(drw,null,null,null);
     }
 
     private void setStreetName(LatLng latLng){

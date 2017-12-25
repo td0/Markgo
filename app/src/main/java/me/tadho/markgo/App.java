@@ -1,3 +1,8 @@
+/**
+
+ * Created by tdh on 10/26/17.
+ */
+
 package me.tadho.markgo;
 
 import android.support.multidex.MultiDexApplication;
@@ -6,10 +11,6 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.squareup.leakcanary.LeakCanary;
 
 import timber.log.Timber;
-
-/**
- * Created by tdh on 10/26/17.
- */
 
 public class App extends MultiDexApplication {
     @Override

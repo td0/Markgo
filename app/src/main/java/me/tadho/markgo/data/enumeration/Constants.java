@@ -22,25 +22,31 @@
 
 package me.tadho.markgo.data.enumeration;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public final class Constants {
-    public static final String APP_TAG = "Markgo";
     public static final String TAKE_MODE_EXTRA = "takeFrom";
-    public static final String STRING_NULL = "N/A";
+    public static final String STRING_NOT_AVAILABLE = "404-N/A";
 
     // POST
     public static final int TAKE_MODE_EXTRA_GALLERY = 3;
     public static final int TAKE_MODE_EXTRA_CAMERA = 29;
     public static final String PHOTO_PATH_EXTRA = "imagePath";
     public static final String LOCAL_FILE_EXTRA = "localFile";
+    public static final String LATLNG_EXTRA = "currentLocation";
+    public static final String POST_MAPS_BUNDLE = "mapsBundle";
+
+    // MAPS
+    public static final LatLng MALANG_LATLNG = new LatLng(-7.9666204, 112.6326321);
 
 
     //    Request Code
-    public static final int REQUEST_CAMERA_CODE = 11;
-    public static final int REQUEST_GALLERY_CODE = 22;
+    public static final int REQUEST_CODE_CAMERA = 11;
+    public static final int REQUEST_CODE_GALLERY = 22;
     public static final int REQUEST_LOCATION_CODE = 33;
 
     //    File name
-    public static final String postFileName = "post.jpg";
+    public static final String POST_FILE_NAME = "post.jpg";
 
     //    Intro Constants
     public static final int REG_STATE_GET_CODE = 1;

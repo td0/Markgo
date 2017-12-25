@@ -18,6 +18,9 @@
     <color name="text_white">#deffffff</color>
     <color name="about_libraries_title_description">@color/text_white</color>
 
+    <!--white-->
+    <color name="background_white">#ffffff</color>
+    <color name="background_black">#000000</color>
     <!--blue-->
     <color name="blue_300">#64b5f6</color>
     <color name="blue_500">#2196f3</color>
