@@ -59,13 +59,9 @@
         app:fabSize="normal"
         />
 
-    <RelativeLayout
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/maps_picker_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <com.google.android.gms.maps.MapView
-            android:id="@+id/maps_picker_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </RelativeLayout>
+        android:layout_height="match_parent"/>
 
 </android.support.design.widget.CoordinatorLayout>

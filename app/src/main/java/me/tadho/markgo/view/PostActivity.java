@@ -130,6 +130,7 @@ public class PostActivity extends AppCompatActivity
             customLocationButton = findViewById(R.id.button_set_custom_location);
             customLocationButton.setOnClickListener(this);
             mFab = findViewById(R.id.fab_submit_post);
+            mFab.hide();
 //            mFab.hide();
             streetName = Constants.STRING_NOT_AVAILABLE;
         }
@@ -171,6 +172,7 @@ public class PostActivity extends AppCompatActivity
         } else if (v.getId() == customLocationButton.getId()) {
             Timber.d("Custom location button pressed");
             customLocationButtonPressed.onNext(true);
+            mFab.hide();
 
             Bundle extras = new Bundle();
             Intent mapPickerIntent = new Intent(PostActivity.this, MapsActivity.class);
@@ -269,7 +271,7 @@ public class PostActivity extends AppCompatActivity
                 Timber.d("Set the street name based on custom location");
                 spinner.start();
                 tvStreetName.setCompoundDrawables(spinner, null, null, null);
-                tvStreetName.setText("Getting street name...");
+                tvStreetName.setText(R.string.get_street_name);
                 Disposable customLocationDisposable = Completable.fromAction(() -> {
                         mLatLng = data.getParcelableExtra(Constants.LATLNG_EXTRA);
                         setStreetName(mLatLng);
@@ -280,6 +282,7 @@ public class PostActivity extends AppCompatActivity
                     .subscribe();
                 compositeDisposable.add(customLocationDisposable);
             }
+            if (!streetName.equals(Constants.STRING_NOT_AVAILABLE)) mFab.show();
         } else {
             Timber.w("Something fishy giving back onActivityResult");
             Timber.w("Request Code = "+requestCode);
@@ -335,7 +338,7 @@ public class PostActivity extends AppCompatActivity
     }
 
     /*
-    * -> AGGREGATOR OBSERVABLE TRANSFORMER <-|
+    * <-|-> AGGREGATOR OBSERVABLE TRANSFORMER <-|->
     */
     private ObservableTransformer<String,String> aggregatorObservableTransformer(){
         return observable -> observable
@@ -462,6 +465,7 @@ public class PostActivity extends AppCompatActivity
         streetText = streetText+" "+street;
         tvStreetName.setText(streetText);
         tvStreetName.setCompoundDrawables(drw,null,null,null);
+        mFab.show();
     }
 
     private void setLocationNotFound(){

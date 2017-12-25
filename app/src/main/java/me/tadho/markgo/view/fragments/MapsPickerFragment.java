@@ -37,6 +37,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -56,7 +57,7 @@ import me.tadho.markgo.view.MapsActivity;
 import timber.log.Timber;
 
 public class MapsPickerFragment extends Fragment implements
-    View.OnClickListener {
+    View.OnClickListener, OnMapReadyCallback{
 
     private Disposable pickLocationDisposable;
     private MapView mMapView;
@@ -89,50 +90,55 @@ public class MapsPickerFragment extends Fragment implements
     @SuppressLint("MissingPermission")
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_maps_picker, container, false);
+
         if (mMapView == null) mMapView = rootView.findViewById(R.id.maps_picker_view);
         mMapView.onCreate(savedInstanceState);
-        mMapView.onResume();
+
         try {
             MapsInitializer.initialize(getActivity().getApplicationContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        mMapView.getMapAsync((GoogleMap mMap) ->{
-            googleMap = mMap;
-            googleMap.getUiSettings().setMapToolbarEnabled(false);
-            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            googleMap.setMyLocationEnabled(true);
-
-            MarkerOptions markerOptions = new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.mapmarker_flag4_left_orange))
-                .position(mLatLng)
-                .draggable(true);
-            pickerMarker = googleMap.addMarker(markerOptions);
-            googleMap.setOnMarkerClickListener(marker -> {
-                Timber.d("Marker clicked, playing dead!");
-                return true;
-            });
-            googleMap.setOnMapClickListener(latLng -> {
-                pickerMarker.setPosition(latLng);
-                mLatLng = latLng;
-            });
-            googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-                @Override
-                public void onMarkerDragStart(Marker marker) {}
-                @Override
-                public void onMarkerDrag(Marker marker) {}
-                @Override
-                public void onMarkerDragEnd(Marker marker) {
-                    mLatLng = marker.getPosition();
-                }
-            });
-
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(mLatLng).zoom(17).build();
-            googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        });
+        mMapView.getMapAsync(this);
         return rootView;
+    }
+
+    @Override
+    @SuppressLint("MissingPermission")
+    public void onMapReady(GoogleMap mMap) {
+        googleMap = mMap;
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+        googleMap.setMyLocationEnabled(true);
+
+        MarkerOptions markerOptions = new MarkerOptions()
+            .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_custom_marker_orange_flag))
+            .position(mLatLng)
+            .draggable(true);
+        pickerMarker = googleMap.addMarker(markerOptions);
+        googleMap.setOnMarkerClickListener(marker -> {
+            Timber.d("Marker clicked, playing dead!");
+            return true;
+        });
+        googleMap.setOnMapClickListener(latLng -> {
+            pickerMarker.setPosition(latLng);
+            mLatLng = latLng;
+        });
+        googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+            @Override
+            public void onMarkerDragStart(Marker marker) {}
+            @Override
+            public void onMarkerDrag(Marker marker) {}
+            @Override
+            public void onMarkerDragEnd(Marker marker) {
+                mLatLng = marker.getPosition();
+            }
+        });
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+            .target(mLatLng).zoom(17).build();
+        googleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     @Override
@@ -142,7 +148,6 @@ public class MapsPickerFragment extends Fragment implements
         fabMyLocation = getView().findViewById(R.id.fab_my_location);
         fabSubmit.setOnClickListener(this);
         fabMyLocation.setOnClickListener(this);
-
     }
 
     @Override
@@ -171,12 +176,15 @@ public class MapsPickerFragment extends Fragment implements
             pickLocationDisposable = null;
         }
         pickerMarker.remove();
+        pickerMarker = null;
         googleMap.setOnMarkerClickListener(null);
         googleMap.setOnMarkerDragListener(null);
         googleMap.setOnMapClickListener(null);
         googleMap.clear();
+        googleMap = null;
         fabSubmit.setOnClickListener(null);
         fabMyLocation.setOnClickListener(null);
+        mMapView.getMapAsync(null);
         mMapView.onDestroy();
     }
 
