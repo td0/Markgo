@@ -534,7 +534,7 @@ public class PostActivity extends AppCompatActivity
         progress.show();
         mFab.hide();
 
-        HashMap<String, Object> coord = new HashMap<String, Object>();
+        HashMap<String, Object> coord = new HashMap<>();
         coord.put("latitude", mLatLng.latitude);
         coord.put("longitude", mLatLng.longitude);
         sp = PreferenceManager.getDefaultSharedPreferences(PostActivity.this);
