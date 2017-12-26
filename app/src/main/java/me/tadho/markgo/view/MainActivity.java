@@ -25,9 +25,11 @@ package me.tadho.markgo.view;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -45,6 +47,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.R;
+import me.tadho.markgo.data.enumeration.Preferences;
 import me.tadho.markgo.utils.DisplayUtility;
 import timber.log.Timber;
 
@@ -137,7 +140,11 @@ public class MainActivity extends AppCompatActivity {
             // TODO: Temporary helper
             case R.id.changename_submenu:
                 Timber.d("Change name submenu pressed");
-                startActivity(new Intent(this, PostActivity.class));
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                sp.edit().putInt(Preferences.PREF_KEY_REPORT_COUNT,0).apply();
+                DisplayUtility.customAlertDialog(MainActivity.this)
+                    .setMessage("report count has been reset to 0")
+                    .show();
                 return true;
             case R.id.about_submenu:
                 Timber.d("About submenu pressed");

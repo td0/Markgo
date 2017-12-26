@@ -9,11 +9,16 @@ public final class Preferences {
     public final static String PREF_KEY_USER_NAME = "user_name";
     public final static String PREF_KEY_REPORT_COUNT = "report_count";
 
-    public final static String FB_REF_USERS = "Users";
-    public final static String FB_REF_NAME = "name";
-    public final static String FB_REF_REPORTCOUNT = "reportCount";
-    public final static String FB_REF_USERSLIST = "UsersList";
-    public final static String FB_REF_REPORTS = "Reports";
+    // Firebase Database References
+    public final static String FD_REF_USERS = "Users";
+    public final static String FD_REF_NAME = "name";
+    public final static String FD_REF_REPORTCOUNT = "reportCount";
+    public final static String FD_REF_USERSLIST = "UsersList";
+    public final static String FD_REF_REPORTS = "Reports";
+    public final static String FD_REF_USERREPORTS = "UserReports";
+    public final static String FD_REF_GEOFIRENODE = "ReportCoordinate";
 
+    // Firebase Storage References
+    public final static String FS_REF_ROOT = "Roseway";
 
 }

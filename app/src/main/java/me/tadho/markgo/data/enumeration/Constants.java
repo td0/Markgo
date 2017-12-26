@@ -46,7 +46,8 @@ public final class Constants {
     public static final int REQUEST_LOCATION_CODE = 33;
 
     //    File name
-    public static final String POST_FILE_NAME = "post.jpg";
+    public static final String POST_FILE_NAME = "post";
+    public static final String POST_FILE_EXT = ".jpg";
 
     //    Intro Constants
     public static final int REG_STATE_GET_CODE = 1;

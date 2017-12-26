@@ -212,13 +212,13 @@ public class IntroActivity extends MaterialIntroActivity {
     }
 
     private Completable setFBUserCompletable(String uid, User user) {
-        DatabaseReference ref = rootRef.child(Preferences.FB_REF_USERS).child(uid);
+        DatabaseReference ref = rootRef.child(Preferences.FD_REF_USERS).child(uid);
         return RxFirebaseDatabase.setValue(ref, user)
             .andThen(setFBUserListCompletable(uid, user.getName()));
     }
 
     private Completable setFBUserListCompletable(String uid, String name){
-        DatabaseReference ref = rootRef.child(Preferences.FB_REF_USERSLIST).child(uid);
+        DatabaseReference ref = rootRef.child(Preferences.FD_REF_USERSLIST).child(uid);
         return RxFirebaseDatabase.setValue(ref, true)
             .doOnComplete(() -> {
                 savePreferences(name, 0);
@@ -227,9 +227,9 @@ public class IntroActivity extends MaterialIntroActivity {
     }
 
     private Completable setFBNameCompletable(String uid, String name){
-        DatabaseReference userRef = rootRef.child(Preferences.FB_REF_USERS).child(uid);
-        DatabaseReference nameRef = userRef.child(Preferences.FB_REF_NAME);
-        DatabaseReference countRef = userRef.child(Preferences.FB_REF_REPORTCOUNT);
+        DatabaseReference userRef = rootRef.child(Preferences.FD_REF_USERS).child(uid);
+        DatabaseReference nameRef = userRef.child(Preferences.FD_REF_NAME);
+        DatabaseReference countRef = userRef.child(Preferences.FD_REF_REPORTCOUNT);
         return  RxFirebaseDatabase.observeSingleValueEvent(countRef)
             .flatMapCompletable(snap ->
                 RxFirebaseDatabase.setValue(nameRef,name)
