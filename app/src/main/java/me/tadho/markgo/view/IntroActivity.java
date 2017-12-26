@@ -57,6 +57,7 @@ import io.reactivex.Completable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import me.tadho.markgo.R;
+import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Constants;
 import me.tadho.markgo.data.enumeration.Preferences;
 import me.tadho.markgo.data.model.User;
@@ -79,7 +80,7 @@ public class IntroActivity extends MaterialIntroActivity {
         if (mAuth.getCurrentUser() != null) {
             onFinish();
         } else {
-            rootRef = FirebaseDatabase.getInstance().getReference();
+            rootRef = FbPersistence.getDatabase().getReference();
             compositeDisposable = new CompositeDisposable();
             hideNavButton();
             setupIntroSlides();

@@ -87,6 +87,7 @@ import com.patloew.rxlocation.RxLocation;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import me.tadho.markgo.BuildConfig;
+import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Preferences;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.DisplayUtility;
@@ -574,7 +575,7 @@ public class PostActivity extends AppCompatActivity
     }
 
     private Completable saveReportDataCompletable(Report report){
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+        DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
         String key = dbRef.child("Reports").push().getKey();
         String uid = report.getReporterId();
         reportCount = sp.getInt(Preferences.PREF_KEY_REPORT_COUNT, 0);
