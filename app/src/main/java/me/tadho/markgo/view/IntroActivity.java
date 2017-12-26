@@ -27,7 +27,9 @@
 package me.tadho.markgo.view;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.preference.PreferenceManager;
 import android.view.View;
 import android.widget.EditText;
 
@@ -42,19 +44,21 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
 
 import agency.tango.materialintroscreen.MaterialIntroActivity;
 import agency.tango.materialintroscreen.SlideFragmentBuilder;
 
+import durdinapps.rxfirebase2.RxFirebaseDatabase;
+import io.reactivex.Completable;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.data.enumeration.Preferences;
 import me.tadho.markgo.data.model.User;
 import me.tadho.markgo.view.customView.FormIntroSlide;
 import timber.log.Timber;
@@ -64,9 +68,9 @@ public class IntroActivity extends MaterialIntroActivity {
     private FirebaseAuth mAuth;
     private String verificationId;
     private DatabaseReference rootRef;
-    private DatabaseReference userListRef;
-    private ValueEventListener userListListener;
     private FormIntroSlide formSlide;
+    private Task<AuthResult> signInTask;
+    private CompositeDisposable compositeDisposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +80,7 @@ public class IntroActivity extends MaterialIntroActivity {
             onFinish();
         } else {
             rootRef = FirebaseDatabase.getInstance().getReference();
+            compositeDisposable = new CompositeDisposable();
             hideNavButton();
             setupIntroSlides();
         }
@@ -84,25 +89,25 @@ public class IntroActivity extends MaterialIntroActivity {
     private void hideNavButton(){
         hideBackButton();
         findViewById(agency.tango.materialintroscreen.R.id.button_next)
-                .setVisibility(View.INVISIBLE);
+            .setVisibility(View.INVISIBLE);
     }
 
     public void setupIntroSlides() {
         addSlide(new SlideFragmentBuilder()
-                .backgroundColor(R.color.colorMainIntro)
-                .buttonsColor(R.color.colorMainIntroAccent)
-                .image(R.drawable.ic_markgo_logo)
-                .title(getString(R.string.intro_welcome_title))
-                .description(getString(R.string.intro_welcome_description))
-                .build());
+            .backgroundColor(R.color.colorMainIntro)
+            .buttonsColor(R.color.colorMainIntroAccent)
+            .image(R.drawable.ic_markgo_logo)
+            .title(getString(R.string.intro_welcome_title))
+            .description(getString(R.string.intro_welcome_description))
+            .build());
         addSlide(new SlideFragmentBuilder()
-                .backgroundColor(R.color.indigo_500)
-                .buttonsColor(R.color.indigo_300)
-                .image(R.drawable.ic_markgo_intro_gps)
-                .neededPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION
-                        , android.Manifest.permission.ACCESS_COARSE_LOCATION})
-                .description(getString(R.string.intro_permission_description))
-                .build());
+            .backgroundColor(R.color.indigo_500)
+            .buttonsColor(R.color.indigo_300)
+            .image(R.drawable.ic_markgo_intro_gps)
+            .neededPermissions(new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION})
+            .description(getString(R.string.intro_permission_description))
+            .build());
         formSlide = new FormIntroSlide();
         addSlide( formSlide );
     }
@@ -117,19 +122,12 @@ public class IntroActivity extends MaterialIntroActivity {
     public void onBackPressed() {}
 
     public void getVerificationCode(String phone){
-        PhoneAuthProvider.getInstance().verifyPhoneNumber(
-                phone,
-                Constants.VERIFY_PHONE_TIMEOUT,
+        PhoneAuthProvider
+            .getInstance()
+            .verifyPhoneNumber(phone, Constants.VERIFY_PHONE_TIMEOUT,
                 TimeUnit.SECONDS,
                 this,
-                authCallback()
-        );
-    }
-
-    public void signInWithCode(String code){
-        PhoneAuthCredential credential = PhoneAuthProvider
-                .getCredential(verificationId, code);
-        signInWithPhoneCredential(credential);
+                authCallback());
     }
 
     private PhoneAuthProvider.OnVerificationStateChangedCallbacks authCallback(){
@@ -174,13 +172,18 @@ public class IntroActivity extends MaterialIntroActivity {
         };
     }
 
+    public void signInWithCode(String code){
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
+        signInWithPhoneCredential(credential);
+    }
+
     private void signInWithPhoneCredential(PhoneAuthCredential credential){
         mAuth.signInWithCredential(credential)
             .addOnSuccessListener(authResult -> {
                 Timber.d("Phone Sign In success");
                 FirebaseUser user = authResult.getUser();
                 String name = ((EditText)findViewById(R.id.intro_name_input))
-                        .getText().toString().trim();
+                    .getText().toString().trim();
                 onAuthSuccess(user, name);
             })
             .addOnFailureListener(e -> {
@@ -193,45 +196,71 @@ public class IntroActivity extends MaterialIntroActivity {
         Timber.d("Running onAuthSuccess");
         String uid = userAuth.getUid();
         User user = new User(name);
-        userListRef = rootRef.child("UsersList").child(uid);
-        userListListener = userListRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
-                    Timber.d("Create new user..");
-                    rootRef.child("Users").child(uid).setValue(user,
-                        (err1, ref1)->{
-                            rootRef.child("UsersList").child(uid)
-                                .setValue(true, (err2,ref2)->{
-                                    onFinish();
-                                });
-                        });
+        DatabaseReference userListRef = rootRef.child("UsersList").child(uid);
 
-                } else {
-                    Timber.d("User already registered, updating name..");
-                    rootRef.child("Users").child(uid).child("name")
-                        .setValue(name, (err, ref)->{
-                            onFinish();
-                        });
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Timber.d("userListRef onCancelled");
+        Completable userRegisterCompletable = RxFirebaseDatabase
+            .observeSingleValueEvent(userListRef)
+            .subscribeOn(Schedulers.io())
+            .flatMapCompletable(snap -> {
+               if (!snap.exists()) {
+                   Timber.d("Create new user..");
+                   return setFBUserCompletable(uid, user);
+               }
+               return setFBNameCompletable(uid, name);
+            });
+        compositeDisposable.add(userRegisterCompletable.subscribe());
+    }
+
+    private Completable setFBUserCompletable(String uid, User user) {
+        DatabaseReference ref = rootRef.child(Preferences.FB_REF_USERS).child(uid);
+        return RxFirebaseDatabase.setValue(ref, user)
+            .andThen(setFBUserListCompletable(uid, user.getName()));
+    }
+
+    private Completable setFBUserListCompletable(String uid, String name){
+        DatabaseReference ref = rootRef.child(Preferences.FB_REF_USERSLIST).child(uid);
+        return RxFirebaseDatabase.setValue(ref, true)
+            .doOnComplete(() -> {
+                savePreferences(name, 0);
                 onFinish();
-            }
-        });
+            });
+    }
+
+    private Completable setFBNameCompletable(String uid, String name){
+        DatabaseReference userRef = rootRef.child(Preferences.FB_REF_USERS).child(uid);
+        DatabaseReference nameRef = userRef.child(Preferences.FB_REF_NAME);
+        DatabaseReference countRef = userRef.child(Preferences.FB_REF_REPORTCOUNT);
+        return  RxFirebaseDatabase.observeSingleValueEvent(countRef)
+            .flatMapCompletable(snap ->
+                RxFirebaseDatabase.setValue(nameRef,name)
+                    .doOnComplete(() -> {
+                       savePreferences(name, snap.getValue(Integer.class));
+                       onFinish();
+                    })
+            );
+    }
+
+    private void savePreferences(String name, int reportCount){
+        Timber.d("Saving SharedPreferences");
+        Timber.d("name = "+name+"; reportCount = "+reportCount);
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putString(Preferences.PREF_KEY_USER_NAME, name);
+        editor.putInt(Preferences.PREF_KEY_REPORT_COUNT, reportCount);
+        editor.apply();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Timber.d("onDestroy Called");
-        if (userListRef != null) {
-            Timber.d("Destroying userListRef");
-            userListRef.removeEventListener(userListListener);
-            userListRef = null;
-
+        if (compositeDisposable!=null) {
+            if (!compositeDisposable.isDisposed()){
+                compositeDisposable.dispose();
+            }
+        }
+        if (signInTask != null) {
+            signInTask = null;
         }
     }
 }
