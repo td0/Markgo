@@ -313,8 +313,9 @@ public class PostActivity extends AppCompatActivity
                     .doOnComplete(() -> setLocationFound(streetName, false))
                     .subscribe();
                 compositeDisposable.add(customLocationDisposable);
+            } else {
+                if (!streetName.equals(Consts.STRING_NOT_AVAILABLE)) mFab.show();
             }
-            if (!streetName.equals(Consts.STRING_NOT_AVAILABLE)) mFab.show();
         } else {
             Timber.w("Request Code = "+requestCode);
             Timber.w("Result Code = "+resultCode);

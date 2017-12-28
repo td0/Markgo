@@ -20,15 +20,20 @@
  * SOFTWARE.
  */
 
-package me.tadho.markgo.view.customView;
+package me.tadho.markgo.view.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.AppCompatTextView;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 
@@ -37,48 +42,72 @@ import java.util.HashMap;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.GlideApp;
+import timber.log.Timber;
 
-public class ClusterInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
-    private View mView;
+public class ClusterInfoWindowAdapter
+    implements GoogleMap.InfoWindowAdapter {
+
     private View mContent;
     private HashMap<String,Report> mReports;
     private Context mContext;
     private LayoutInflater inflater;
+    private AppCompatImageView ivThumbnail;
+    private AppCompatTextView tvTitle;
+    private AppCompatTextView tvDesc;
+    private AppCompatTextView tvUpvotes;
+
 
     public ClusterInfoWindowAdapter(HashMap<String,Report> reports, Context context){
         this.mReports = reports;
         this.mContext = context;
         this.inflater = LayoutInflater.from(context);
-        this.mView = inflater.inflate(R.layout.layout_maps_infowindow, null);
         this.mContent = inflater.inflate(R.layout.layout_maps_infowindow_content, null);
+
+        ivThumbnail = mContent.findViewById(R.id.infowindow_thumbnail);
+        tvTitle = mContent.findViewById(R.id.infowindow_title);
+        tvDesc = mContent.findViewById(R.id.infowindow_desc);
+        tvUpvotes = mContent.findViewById(R.id.infowindow_upvotes);
     }
 
     @Override
     public View getInfoWindow(Marker marker) {
-        return null;
+        return  null;
     }
 
+    @SuppressLint("CheckResult")
     @Override
     public View getInfoContents(Marker marker) {
         String key = marker.getTitle();
         Report item = mReports.get(key);
-
-        AppCompatImageView ivThumbnail = mContent.findViewById(R.id.infowindow_thumbnail);
-        AppCompatTextView tvTitle = mContent.findViewById(R.id.infowindow_title);
-        AppCompatTextView tvDesc = mContent.findViewById(R.id.infowindow_desc);
-        AppCompatTextView tvUpvotes = mContent.findViewById(R.id.infowindow_upvotes);
+        String vote = String.valueOf(item.getUpvoteCount());
+        String desc = mContext.getString(R.string.info_window_description)+item.getDescription();
 
         tvTitle.setText(item.getReporterName());
-        tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        tvUpvotes.setText("upvote : "+ item.getUpvoteCount());
-        tvDesc.setText("description : "+ item.getDescription());
-        if (item.getDescription().isEmpty()) tvDesc.setVisibility(View.INVISIBLE);
+//        tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        tvUpvotes.setText(vote);
+        tvDesc.setText(desc);
+        if (item.getDescription().isEmpty()) tvDesc.setVisibility(View.GONE);
         else tvDesc.setVisibility(View.VISIBLE);
 
+//        Bitmap bitmap = Bitmap.createBitmap();
         GlideApp.with(mContext)
+            .asBitmap()
             .load(item.getImageUrl())
-            .into(ivThumbnail);
+            .placeholder(R.drawable.placeholder)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                    ivThumbnail.setImageBitmap(resource);
+                    if (marker.isInfoWindowShown()) {
+                        marker.hideInfoWindow();
+                        marker.showInfoWindow();
+                    }
+                }
+            });
 
         return mContent;
     }
+
+
 }

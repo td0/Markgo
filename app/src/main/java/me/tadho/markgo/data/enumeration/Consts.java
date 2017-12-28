@@ -66,5 +66,7 @@ public final class Consts {
     public static final char MAPS_LIST = 'n';
 
 
+//    TODO : can't figure out how I could take string resource frome outside of the Activity/Fragment
+    public static final String STRING_INFO_WINDOW_DESCRIPTION = "Description : ";
 
 }

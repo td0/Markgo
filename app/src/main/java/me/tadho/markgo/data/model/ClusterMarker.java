@@ -31,8 +31,9 @@ public class ClusterMarker implements ClusterItem {
     private String mTitle;
     private String mSnippet;
 
-    public ClusterMarker(double lat, double lng) {
+    public ClusterMarker(double lat, double lng, String title) {
         mPosition = new LatLng(lat, lng);
+        mTitle = title;
     }
 
     public ClusterMarker(double lat, double lng, String title, String snippet) {
@@ -40,6 +41,7 @@ public class ClusterMarker implements ClusterItem {
         mTitle = title;
         mSnippet = snippet;
     }
+
 
     @Override
     public LatLng getPosition() {

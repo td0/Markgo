@@ -64,6 +64,8 @@
     <!--Map List fragment-->
     <string name="fab_heat_map_label">Heat Map</string>
     <string name="fab_clustering_label">Clustering</string>
+    <string name="info_window_content">Info window content</string>
+    <string name="info_window_description">Description : </string>
 
     <!--Animation-->
     <string name="animation_photo_view">photoViewAnimation</string>
@@ -78,7 +80,6 @@
     (just in case 🙂)
     <br /><br /><br /><br /><b>&copy;Tadho 2017</b>
     <br /><br /><br /><br /><br /><br /><br /> <big><b><u>OPEN SOURCE LIBRARIES</u></b></big>]]></string>
-    <string name="info_window_content">Info window content</string>
 
 
 </resources>

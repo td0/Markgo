@@ -49,12 +49,12 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
@@ -69,7 +69,9 @@ import durdinapps.rxfirebase2.RxFirebaseDatabase;
 import io.reactivex.BackpressureStrategy;
 import io.reactivex.Completable;
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import me.tadho.markgo.R;
@@ -78,12 +80,11 @@ import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.model.ClusterMarker;
 import me.tadho.markgo.data.model.Report;
-import me.tadho.markgo.data.model.ReportMaps;
-import me.tadho.markgo.view.customView.ClusterInfoWindowAdapter;
+import me.tadho.markgo.view.adapter.ClusterInfoWindowAdapter;
 import timber.log.Timber;
 
 public class MapsListFragment extends Fragment
-    implements View.OnClickListener, OnMapReadyCallback {
+    implements View.OnClickListener, OnMapReadyCallback{
 
     private ObjectAnimator scaleInX;
     private com.github.clans.fab.FloatingActionButton fab_heatmap;
@@ -116,11 +117,8 @@ public class MapsListFragment extends Fragment
         DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
         mLatLng = Consts.MALANG_LATLNG;
         compositeDisposable = new CompositeDisposable();
-        compositeDisposable.add(myLocationObservable().subscribe());
-
         dbMapsRef = dbRef.child(Prefs.FD_REF_REPORTS);
         dbMapsRef.keepSynced(true);
-
         compositeDisposable.add(mapEventListenerFlowable().subscribe());
     }
 
@@ -154,7 +152,7 @@ public class MapsListFragment extends Fragment
                 if (animateMyLocationDisposable != null)
                     if (!animateMyLocationDisposable.isDisposed())
                         animateMyLocationDisposable.dispose();
-                animateMyLocationDisposable = setMapsCameraCompletable(50f, true).subscribe();
+                animateMyLocationDisposable = setMapsCameraCompletable(0f, true).subscribe();
                 compositeDisposable.add(animateMyLocationDisposable);
                 break;
             case R.id.fab_mode_cluster :
@@ -193,7 +191,6 @@ public class MapsListFragment extends Fragment
         googleMap.setMaxZoomPreference(20f);
         googleMap.setMinZoomPreference(11f);
         googleMap.setLatLngBoundsForCameraTarget(Consts.MALANG_BOUNDS);
-
 
         setMapsCamera(mLatLng, 13.5f, false);
         compositeDisposable.add(setMapsCameraCompletable(13.5f, false).subscribe());
@@ -249,6 +246,7 @@ public class MapsListFragment extends Fragment
         if (mClusterManager!=null) {
             mClusterManager.clearItems();
             mClusterManager.getMarkerCollection().setOnInfoWindowAdapter(null);
+            mClusterManager.setOnClusterClickListener(null);
         }
         googleMap.setOnCameraIdleListener(null);
         googleMap.setOnMarkerClickListener(null);
@@ -264,11 +262,14 @@ public class MapsListFragment extends Fragment
         mClusterManager.getMarkerCollection()
             .setOnInfoWindowAdapter(new ClusterInfoWindowAdapter(mapItems, getActivity()));
         googleMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
-
         googleMap.setOnCameraIdleListener(mClusterManager);
         googleMap.setOnMarkerClickListener(mClusterManager);
+        mClusterManager.setOnClusterClickListener(cluster -> {
+            float zoom = googleMap.getCameraPosition().zoom+1.5f;
+            setMapsCamera(cluster.getPosition(), zoom, true);
+            return true;
+        });
         mClusterManager.setAnimation(true);
-
         mClusterManager.cluster();
     }
 
@@ -276,9 +277,7 @@ public class MapsListFragment extends Fragment
         for (HashMap.Entry<String,Report> mapItem : mapItems.entrySet()) {
             Double lat = mapItem.getValue().getLatitude();
             Double lng = mapItem.getValue().getLongitude();
-            String title = mapItem.getKey();
-            String desc = "upvote : "+mapItem.getValue().getUpvoteCount();
-            mClusterManager.addItem(new ClusterMarker(lat,lng,title,desc));
+            mClusterManager.addItem(new ClusterMarker(lat,lng,mapItem.getKey()));
         }
     }
 
@@ -301,7 +300,7 @@ public class MapsListFragment extends Fragment
         heatMapOverlay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatMapProvider));
     }
 
-    private Observable<LatLng> myLocationObservable(){
+    private Single<Boolean> myLocationObservable(){
         locationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
             .setNumUpdates(1)
@@ -309,13 +308,26 @@ public class MapsListFragment extends Fragment
         rxLocation = new RxLocation(getActivity().getBaseContext());
         rxLocation.setDefaultTimeout(10, TimeUnit.SECONDS);
         return rxLocation.settings()
-            .checkAndHandleResolution(locationRequest)
-            .flatMapObservable(this::getMyLocationObservable);
+            .checkAndHandleResolution(locationRequest);
     }
 
     @SuppressLint("MissingPermission")
-    private Observable<LatLng> getMyLocationObservable(Boolean isActivated){
+    private Maybe<Boolean> getLastKnownLocationMaybe(Boolean isActivated) {
         if (isActivated) return rxLocation.location()
+            .lastLocation()
+            .map(location -> {
+                LatLng latLng =new LatLng(location.getLatitude(),location.getLongitude());
+                Timber.d("Getting last known location -> "+latLng);
+                mLatLng = latLng;
+                return false;
+            })
+            .onErrorReturn(e -> true);
+        else return Maybe.just(true);
+    }
+
+    @SuppressLint("MissingPermission")
+    private Observable<LatLng> getMyLocationObservable(Boolean isFound){
+        if (isFound) return rxLocation.location()
             .updates(locationRequest)
             .map(loc -> new LatLng(loc.getLatitude(), loc.getLongitude()))
             .doOnNext(latLng -> {
@@ -324,12 +336,14 @@ public class MapsListFragment extends Fragment
             })
             .doOnError(e -> Timber.e(e.getMessage()));
         else {
-            return Observable.just(Consts.MALANG_LATLNG);
+            return Observable.just(mLatLng);
         }
     }
 
     private Completable setMapsCameraCompletable(float zoom, Boolean animate){
         return myLocationObservable()
+            .flatMapMaybe(this::getLastKnownLocationMaybe)
+            .flatMapObservable(this::getMyLocationObservable)
             .flatMapCompletable(latLng -> Completable
                 .fromAction(() ->
                     setMapsCamera(latLng, zoom, animate)
@@ -340,7 +354,8 @@ public class MapsListFragment extends Fragment
     private void setMapsCamera(LatLng latLng, float zoom,  Boolean animate){
         Timber.d("Moving maps camera to -> "+latLng);
         CameraUpdate cameraUpdate;
-        if (zoom <= 20 && zoom >= 12) cameraUpdate = CameraUpdateFactory.newCameraPosition(
+        if (zoom > 20) zoom = 20f;
+        if (zoom >= 12) cameraUpdate = CameraUpdateFactory.newCameraPosition(
             new CameraPosition.Builder().target(latLng).zoom(zoom).build());
         else cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
         if (animate) googleMap.animateCamera(cameraUpdate, 800, null);
@@ -405,6 +420,7 @@ public class MapsListFragment extends Fragment
             mapItems = null;
         }
         if (mClusterManager!=null) {
+            mClusterManager.setOnClusterClickListener(null);
             mClusterManager.clearItems();
             mClusterManager = null;
         }
@@ -458,4 +474,6 @@ public class MapsListFragment extends Fragment
         set.setInterpolator(new OvershootInterpolator(2));
         mFam.setIconToggleAnimatorSet(set);
     }
+
+
 }
