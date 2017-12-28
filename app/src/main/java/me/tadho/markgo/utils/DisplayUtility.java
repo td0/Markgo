@@ -27,6 +27,8 @@ import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import java.util.Calendar;
+
 import me.tadho.markgo.R;
 
 public class DisplayUtility {
@@ -49,5 +51,11 @@ public class DisplayUtility {
     public static AlertDialog.Builder customAlertDialog(Context context){
         return new AlertDialog
                 .Builder(context, R.style.AlertDialogCustom);
+    }
+
+    public static Boolean isDay(){
+        int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+        if (hour>=18 || hour<=6) return false;
+        return true;
     }
 }

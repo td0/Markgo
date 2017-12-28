@@ -28,6 +28,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -56,6 +57,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.heatmaps.Gradient;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.patloew.rxlocation.RxLocation;
@@ -80,6 +82,7 @@ import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.model.ClusterMarker;
 import me.tadho.markgo.data.model.Report;
+import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.view.adapter.ClusterInfoWindowAdapter;
 import timber.log.Timber;
 
@@ -175,8 +178,11 @@ public class MapsListFragment extends Fragment
     public void onMapReady(GoogleMap mMap) {
         googleMap = mMap;
         try {
-            boolean success = googleMap.setMapStyle(MapStyleOptions
+            boolean success;
+            if (DisplayUtility.isDay()) success = googleMap.setMapStyle(MapStyleOptions
                 .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.map_style_no_poi));
+            else success = googleMap.setMapStyle(MapStyleOptions
+                .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.map_style_no_poi_dark));
             if (!success) {
                 Timber.e("MapsActivityRaw", "Style parsing failed.");
             }
@@ -297,6 +303,8 @@ public class MapsListFragment extends Fragment
                 .radius(23)
                 .weightedData(heatMapList)
                 .build();
+        if (DisplayUtility.isDay()) heatMapProvider.setGradient(getCustomGradient());
+        heatMapProvider.setOpacity(0.55d);
         heatMapOverlay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatMapProvider));
     }
 
@@ -473,6 +481,22 @@ public class MapsListFragment extends Fragment
         set.play(scaleInX).with(scaleInY).after(scaleOutX);
         set.setInterpolator(new OvershootInterpolator(2));
         mFam.setIconToggleAnimatorSet(set);
+    }
+
+    private Gradient getCustomGradient(){
+        final int[] ALT_HEATMAP_GRADIENT_COLORS = {
+            Color.argb(0, 0, 255, 255),// transparent
+            Color.argb(255 / 3 * 2, 0, 255, 255),
+            Color.rgb(0, 191, 255),
+            Color.rgb(0, 0, 127),
+            Color.rgb(255, 0, 0)
+        };
+        final float[] ALT_HEATMAP_GRADIENT_START_POINTS = {
+            0.0f, 0.10f, 0.20f, 0.60f, 1.0f
+        };
+
+        return new Gradient(ALT_HEATMAP_GRADIENT_COLORS,
+            ALT_HEATMAP_GRADIENT_START_POINTS);
     }
 
 

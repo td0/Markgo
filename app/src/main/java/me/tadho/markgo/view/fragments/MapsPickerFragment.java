@@ -23,6 +23,7 @@
 package me.tadho.markgo.view.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -41,6 +42,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.patloew.rxlocation.RxLocation;
@@ -51,6 +53,7 @@ import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Consts;
+import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.view.MapsActivity;
 import timber.log.Timber;
 
@@ -124,6 +127,17 @@ public class MapsPickerFragment extends Fragment implements
     @SuppressLint("MissingPermission")
     public void onMapReady(GoogleMap mMap) {
         googleMap = mMap;
+        if (!DisplayUtility.isDay()) {
+            try {
+                boolean success = googleMap.setMapStyle(MapStyleOptions
+                    .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.maps_style_dark));
+                if (!success) {
+                    Timber.e("MapsActivityRaw", "Style parsing failed.");
+                }
+            } catch (Resources.NotFoundException e) {
+                Timber.e("MapsActivityRaw", "Can't find style.", e);
+            }
+        }
         googleMap.getUiSettings().setMapToolbarEnabled(false);
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.setMyLocationEnabled(true);
