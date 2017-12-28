@@ -31,7 +31,8 @@ import android.view.MenuItem;
 import com.google.android.gms.maps.model.LatLng;
 
 import me.tadho.markgo.R;
-import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.data.enumeration.Consts;
+import me.tadho.markgo.view.fragments.MapsListFragment;
 import me.tadho.markgo.view.fragments.MapsPickerFragment;
 import timber.log.Timber;
 
@@ -46,8 +47,8 @@ public class MapsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Timber.d("MapsActivity onCreate()");
         setContentView(R.layout.activity_maps);
-        setTitle(getString(R.string.title_maps));
         setSupportActionBar(findViewById(R.id.toolbar));
+        setTitle(getString(R.string.title_maps));
         if(getSupportActionBar() != null){
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -56,7 +57,7 @@ public class MapsActivity extends AppCompatActivity {
         char mapsMode = 0;
         extras = getIntent().getExtras();
         if (extras != null) {
-            mapsMode = extras.getChar(Constants.MAPS_MODE);
+            mapsMode = extras.getChar(Consts.MAPS_MODE);
         }
         loadMapsMode(mapsMode);
     }
@@ -71,19 +72,24 @@ public class MapsActivity extends AppCompatActivity {
     }
 
     private void loadMapsMode(char mapsMode){
+        Fragment fragment;
         switch (mapsMode){
-            case Constants.MAPS_PICKER:
+            case Consts.MAPS_PICKER:
+                setTitle(getString(R.string.title_maps_picker));
                 Timber.d("Maps location picker mode");
-                Fragment fragment = new MapsPickerFragment();
-                mLatLng = extras.getParcelable(Constants.LATLNG_EXTRA);
+                fragment = new MapsPickerFragment();
+                mLatLng = extras.getParcelable(Consts.LATLNG_EXTRA);
                 if (mLatLng!=null) setFragmentLatLng(fragment);
                 loadFragment(fragment);
                 break;
-            case Constants.MAPS_VIEWER:
+            case Consts.MAPS_VIEWER:
                 Timber.d("Maps location viewer mode");
                 break;
             default:
+                setTitle(getString(R.string.title_maps));
                 Timber.d("Maps location list mode");
+                fragment = new MapsListFragment();
+                loadFragment(fragment);
         }
     }
 
@@ -96,13 +102,13 @@ public class MapsActivity extends AppCompatActivity {
 
     private void setFragmentLatLng(Fragment fragment){
         Bundle bundle = new Bundle();
-        bundle.putParcelable(Constants.LATLNG_EXTRA, mLatLng);
+        bundle.putParcelable(Consts.LATLNG_EXTRA, mLatLng);
         fragment.setArguments(bundle);
     }
 
     public void sendActivityResult(LatLng latLng){
         Intent resultExtra = new Intent();
-        resultExtra.putExtra(Constants.LATLNG_EXTRA, latLng);
+        resultExtra.putExtra(Consts.LATLNG_EXTRA, latLng);
         setResult(RESULT_OK,resultExtra);
         supportFinishAfterTransition();
     }

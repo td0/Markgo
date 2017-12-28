@@ -35,7 +35,7 @@ import com.github.chrisbanes.photoview.PhotoView;
 import java.io.File;
 
 import me.tadho.markgo.R;
-import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.utils.GlideApp;
 
 public class PhotoViewerActivity extends AppCompatActivity {
@@ -45,8 +45,8 @@ public class PhotoViewerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo_viewer);
         Intent intent = getIntent();
-        String imagePath = intent.getStringExtra(Constants.PHOTO_PATH_EXTRA);
-        boolean isLocalFile = intent.getBooleanExtra(Constants.LOCAL_FILE_EXTRA, false);
+        String imagePath = intent.getStringExtra(Consts.PHOTO_PATH_EXTRA);
+        boolean isLocalFile = intent.getBooleanExtra(Consts.LOCAL_FILE_EXTRA, false);
         PhotoView photoView = findViewById(R.id.iv_preview);
 
         if (isLocalFile){

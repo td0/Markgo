@@ -8,7 +8,6 @@
     <color name="colorSecondaryLight">#ffc246</color>
     <color name="colorSecondaryDark">#c56200</color>
     <color name="textColorPrimary">#ffffff</color>
-    <color name="background_light">#FAFAFA</color>
     <color name="textColorSecondary">#000000</color>
     <color name="highlight">#4fff</color>
     <color name="transparentOverlay">#77000000</color>
@@ -18,9 +17,12 @@
     <color name="text_white">#deffffff</color>
     <color name="about_libraries_title_description">@color/text_white</color>
 
-    <!--white-->
+    <!--background-->
     <color name="background_white">#ffffff</color>
+    <color name="background_white_ripple">#dfdfdf</color>
+    <color name="background_light">#FAFAFA</color>
     <color name="background_black">#000000</color>
+
     <!--blue-->
     <color name="blue_300">#64b5f6</color>
     <color name="blue_500">#2196f3</color>

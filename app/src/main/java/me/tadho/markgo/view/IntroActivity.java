@@ -45,7 +45,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.concurrent.TimeUnit;
 
@@ -58,8 +57,8 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.FbPersistence;
-import me.tadho.markgo.data.enumeration.Constants;
-import me.tadho.markgo.data.enumeration.Preferences;
+import me.tadho.markgo.data.enumeration.Consts;
+import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.model.User;
 import me.tadho.markgo.view.customView.FormIntroSlide;
 import timber.log.Timber;
@@ -125,7 +124,7 @@ public class IntroActivity extends MaterialIntroActivity {
     public void getVerificationCode(String phone){
         PhoneAuthProvider
             .getInstance()
-            .verifyPhoneNumber(phone, Constants.VERIFY_PHONE_TIMEOUT,
+            .verifyPhoneNumber(phone, Consts.VERIFY_PHONE_TIMEOUT,
                 TimeUnit.SECONDS,
                 this,
                 authCallback());
@@ -213,13 +212,13 @@ public class IntroActivity extends MaterialIntroActivity {
     }
 
     private Completable setFBUserCompletable(String uid, User user) {
-        DatabaseReference ref = rootRef.child(Preferences.FD_REF_USERS).child(uid);
+        DatabaseReference ref = rootRef.child(Prefs.FD_REF_USERS).child(uid);
         return RxFirebaseDatabase.setValue(ref, user)
             .andThen(setFBUserListCompletable(uid, user.getName()));
     }
 
     private Completable setFBUserListCompletable(String uid, String name){
-        DatabaseReference ref = rootRef.child(Preferences.FD_REF_USERSLIST).child(uid);
+        DatabaseReference ref = rootRef.child(Prefs.FD_REF_USERSLIST).child(uid);
         return RxFirebaseDatabase.setValue(ref, true)
             .doOnComplete(() -> {
                 savePreferences(name, 0);
@@ -228,9 +227,9 @@ public class IntroActivity extends MaterialIntroActivity {
     }
 
     private Completable setFBNameCompletable(String uid, String name){
-        DatabaseReference userRef = rootRef.child(Preferences.FD_REF_USERS).child(uid);
-        DatabaseReference nameRef = userRef.child(Preferences.FD_REF_NAME);
-        DatabaseReference countRef = userRef.child(Preferences.FD_REF_REPORTCOUNT);
+        DatabaseReference userRef = rootRef.child(Prefs.FD_REF_USERS).child(uid);
+        DatabaseReference nameRef = userRef.child(Prefs.FD_REF_NAME);
+        DatabaseReference countRef = userRef.child(Prefs.FD_REF_REPORTCOUNT);
         return  RxFirebaseDatabase.observeSingleValueEvent(countRef)
             .flatMapCompletable(snap ->
                 RxFirebaseDatabase.setValue(nameRef,name)
@@ -246,8 +245,8 @@ public class IntroActivity extends MaterialIntroActivity {
         Timber.d("name = "+name+"; reportCount = "+reportCount);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sp.edit();
-        editor.putString(Preferences.PREF_KEY_USER_NAME, name);
-        editor.putInt(Preferences.PREF_KEY_REPORT_COUNT, reportCount);
+        editor.putString(Prefs.PREF_KEY_USER_NAME, name);
+        editor.putInt(Prefs.PREF_KEY_REPORT_COUNT, reportCount);
         editor.apply();
     }
 

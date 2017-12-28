@@ -23,7 +23,6 @@
 package me.tadho.markgo.view;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -78,7 +77,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import com.github.ybq.android.spinkit.style.DoubleBounce;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -88,14 +86,15 @@ import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.Subject;
 import me.tadho.markgo.BuildConfig;
 import me.tadho.markgo.data.FbPersistence;
-import me.tadho.markgo.data.enumeration.Preferences;
+import me.tadho.markgo.data.enumeration.Consts;
+import me.tadho.markgo.data.enumeration.MultiPathUpdates;
+import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.utils.GlideApp;
 import me.tadho.markgo.utils.PhotoUtility;
 import me.tadho.markgo.view.customView.ThumbnailView;
 import me.tadho.markgo.R;
-import me.tadho.markgo.data.enumeration.Constants;
 import timber.log.Timber;
 
 
@@ -131,7 +130,7 @@ public class PostActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getIntent().getExtras();
-        int mode = (int) (bundle != null ? bundle.get(Constants.TAKE_MODE_EXTRA) : 0);
+        int mode = (int) (bundle != null ? bundle.get(Consts.TAKE_MODE_EXTRA) : 0);
         mAuth = FirebaseAuth.getInstance();
         initiation();
         if (mode != 0) launchTakeMode(mode);
@@ -147,7 +146,7 @@ public class PostActivity extends AppCompatActivity
                 getSupportActionBar().setDisplayShowHomeEnabled(true);
             }
 
-            streetName = Constants.STRING_NOT_AVAILABLE;
+            streetName = Consts.STRING_NOT_AVAILABLE;
             compositeDisposable = new CompositeDisposable();
             thumbnailView = findViewById(R.id.iv_preview);
             mFab = findViewById(R.id.fab_submit_post);
@@ -193,8 +192,8 @@ public class PostActivity extends AppCompatActivity
         if (v.getId() == thumbnailView.getId()){
             Intent intent = new Intent(PostActivity.this,
                     PhotoViewerActivity.class)
-                .putExtra(Constants.PHOTO_PATH_EXTRA, photoPath)
-                .putExtra(Constants.LOCAL_FILE_EXTRA, true);
+                .putExtra(Consts.PHOTO_PATH_EXTRA, photoPath)
+                .putExtra(Consts.LOCAL_FILE_EXTRA, true);
             ActivityOptionsCompat options = ActivityOptionsCompat
                     .makeSceneTransitionAnimation(PostActivity.this, v,
                             getString(R.string.animation_photo_view));
@@ -206,14 +205,14 @@ public class PostActivity extends AppCompatActivity
 
             Bundle extras = new Bundle();
             Intent mapPickerIntent = new Intent(PostActivity.this, MapsActivity.class);
-            extras.putChar(Constants.MAPS_MODE,Constants.MAPS_PICKER);
-            if (mLatLng != null) extras.putParcelable(Constants.LATLNG_EXTRA, mLatLng);
+            extras.putChar(Consts.MAPS_MODE, Consts.MAPS_PICKER);
+            if (mLatLng != null) extras.putParcelable(Consts.LATLNG_EXTRA, mLatLng);
             mapPickerIntent.putExtras(extras);
 
             ActivityOptionsCompat options = ActivityOptionsCompat
                 .makeSceneTransitionAnimation(PostActivity.this, v,
                     getString(R.string.animation_maps_picker));
-            startActivityForResult(mapPickerIntent,Constants.REQUEST_LOCATION_CODE,options.toBundle());
+            startActivityForResult(mapPickerIntent, Consts.REQUEST_LOCATION_CODE,options.toBundle());
         } else if (v.getId() == mFab.getId()) {
             postReport();
         }
@@ -238,7 +237,7 @@ public class PostActivity extends AppCompatActivity
                 return null;
             }
             return new File(mediaStorageDir.getPath() + File.separator
-                + Constants.POST_FILE_NAME + Constants.POST_FILE_EXT);
+                + Consts.POST_FILE_NAME + Consts.POST_FILE_EXT);
         }
         Timber.e("Can't find External Storage / is not mounted");
         return null;
@@ -260,20 +259,20 @@ public class PostActivity extends AppCompatActivity
         photoPath = photoFile.getPath();
         Timber.d("photoPath -> "+ photoPath);
         switch (mode){
-            case Constants.TAKE_MODE_EXTRA_CAMERA:
+            case Consts.TAKE_MODE_EXTRA_CAMERA:
                 Timber.d("Launching Camera");
                 Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                     .putExtra(MediaStore.EXTRA_OUTPUT, getFileProviderUri());
                 if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivityForResult(cameraIntent, Constants.REQUEST_CODE_CAMERA);
+                    startActivityForResult(cameraIntent, Consts.REQUEST_CODE_CAMERA);
                 }
                 break;
-            case Constants.TAKE_MODE_EXTRA_GALLERY:
+            case Consts.TAKE_MODE_EXTRA_GALLERY:
                 Timber.d("Launching Gallery");
                 Intent galleryIntent = new Intent(Intent.ACTION_PICK,
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 if (galleryIntent.resolveActivity(getPackageManager())!=null){
-                    startActivityForResult(galleryIntent, Constants.REQUEST_CODE_GALLERY);
+                    startActivityForResult(galleryIntent, Consts.REQUEST_CODE_GALLERY);
                 }
                 break;
             default:
@@ -283,7 +282,7 @@ public class PostActivity extends AppCompatActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.REQUEST_CODE_CAMERA) {
+        if (requestCode == Consts.REQUEST_CODE_CAMERA) {
             if (resultCode == RESULT_OK) {
                 Timber.d("Camera onActivityResult");
                 cameraAction();
@@ -291,7 +290,7 @@ public class PostActivity extends AppCompatActivity
                 Timber.d("Picture was not taken!");
                 finish();
             }
-        } else if (requestCode == Constants.REQUEST_CODE_GALLERY){
+        } else if (requestCode == Consts.REQUEST_CODE_GALLERY){
             if (resultCode == RESULT_OK) {
                 Timber.d("Gallery onActivityResult");
                 if (data!=null) galleryAction(data.getData());
@@ -299,14 +298,14 @@ public class PostActivity extends AppCompatActivity
                 Timber.d("Picture was not chosen!");
                 finish();
             }
-        } else if (requestCode == Constants.REQUEST_LOCATION_CODE) {
+        } else if (requestCode == Consts.REQUEST_LOCATION_CODE) {
             if (resultCode==RESULT_OK) {
                 Timber.d("Set the street name based on custom location");
                 spinner.start();
                 tvStreetName.setCompoundDrawables(spinner, null, null, null);
                 tvStreetName.setText(R.string.get_street_name);
                 Disposable customLocationDisposable = Completable.fromAction(() -> {
-                        mLatLng = data.getParcelableExtra(Constants.LATLNG_EXTRA);
+                        mLatLng = data.getParcelableExtra(Consts.LATLNG_EXTRA);
                         setStreetName(mLatLng);
                     })
                     .subscribeOn(Schedulers.io())
@@ -315,7 +314,7 @@ public class PostActivity extends AppCompatActivity
                     .subscribe();
                 compositeDisposable.add(customLocationDisposable);
             }
-            if (!streetName.equals(Constants.STRING_NOT_AVAILABLE)) mFab.show();
+            if (!streetName.equals(Consts.STRING_NOT_AVAILABLE)) mFab.show();
         } else {
             Timber.w("Request Code = "+requestCode);
             Timber.w("Result Code = "+resultCode);
@@ -328,7 +327,7 @@ public class PostActivity extends AppCompatActivity
     private void cameraAction(){
         Timber.d("Camera : Loading photo with glide");
         setThumbnailView(Uri.fromFile(photoFile));
-        Disposable camDisposable = Observable.just(Constants.STRING_NOT_AVAILABLE)
+        Disposable camDisposable = Observable.just(Consts.STRING_NOT_AVAILABLE)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .doOnNext(x->{
@@ -347,7 +346,7 @@ public class PostActivity extends AppCompatActivity
     private void galleryAction(Uri uri){
         Timber.d("Gallery : Loading photo with glide");
         setThumbnailView(uri);
-        Disposable galDisposable = Observable.just(Constants.STRING_NOT_AVAILABLE)
+        Disposable galDisposable = Observable.just(Consts.STRING_NOT_AVAILABLE)
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .doOnNext(x -> {
@@ -373,7 +372,7 @@ public class PostActivity extends AppCompatActivity
         return observable -> observable
             .compose(writePhotoObservableTransformer())
             .compose(exifObservableTransformer())
-            .filter(x -> x.equals(Constants.STRING_NOT_AVAILABLE))
+            .filter(x -> x.equals(Consts.STRING_NOT_AVAILABLE))
             .flatMap(x -> getCurrentLocation());
     }
 
@@ -388,7 +387,7 @@ public class PostActivity extends AppCompatActivity
                     .rotateBitmap(PostActivity.this, photoUri, photoTaken);
                 Timber.d("WriteFile|Camera/Gallery : init compress stream");
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 37, bytes);
+                compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 17, bytes);
                 File resizedFile = new File(photoPath);
                 try {
                     Timber.d("WriteFile|Camera/Gallery : writing file...");
@@ -416,7 +415,7 @@ public class PostActivity extends AppCompatActivity
             })
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext(street -> {
-                if (!street.equals(Constants.STRING_NOT_AVAILABLE)) {
+                if (!street.equals(Consts.STRING_NOT_AVAILABLE)) {
                     setLocationFound(street,true);
                     customLocationButton.setVisibility(View.VISIBLE);
                     mFab.show();
@@ -470,7 +469,7 @@ public class PostActivity extends AppCompatActivity
             })
             .takeUntil(customLocationButtonPressed)
             .doOnComplete(() -> {
-                if (streetName.equals(Constants.STRING_NOT_AVAILABLE)) {
+                if (streetName.equals(Consts.STRING_NOT_AVAILABLE)) {
                     setLocationNotFound();
                     Timber.d("Location fetching interupted");
                 }
@@ -478,12 +477,12 @@ public class PostActivity extends AppCompatActivity
     }
 
     private Observable<String> onLocationNotFoundObservable(){
-        return Observable.just(Constants.STRING_NOT_AVAILABLE)
+        return Observable.just(Consts.STRING_NOT_AVAILABLE)
             .doOnNext(s -> setLocationNotFound());
     }
 
     private void setLocationFound(String street, Boolean isExif){
-        if (street.equals(Constants.STRING_NOT_AVAILABLE))
+        if (street.equals(Consts.STRING_NOT_AVAILABLE))
             street = getString(R.string.cant_get_street_name);
         spinner.stop();
         Drawable drw = getResources()
@@ -534,11 +533,11 @@ public class PostActivity extends AppCompatActivity
         progress.show();
         mFab.hide();
 
-        HashMap<String, Object> coord = new HashMap<>();
-        coord.put("latitude", mLatLng.latitude);
-        coord.put("longitude", mLatLng.longitude);
+        HashMap<String, Double> coord = new HashMap<>();
+        coord.put(Consts.KEY_LATITUDE, mLatLng.latitude);
+        coord.put(Consts.KEY_LONGITUDE, mLatLng.longitude);
         sp = PreferenceManager.getDefaultSharedPreferences(PostActivity.this);
-        userName = sp.getString(Preferences.PREF_KEY_USER_NAME, Constants.STRING_NOT_AVAILABLE);
+        userName = sp.getString(Prefs.PREF_KEY_USER_NAME, Consts.STRING_NOT_AVAILABLE);
 
         compositeDisposable.add(uploadPhoto(uid)
             .flatMapCompletable(snap -> {
@@ -552,7 +551,7 @@ public class PostActivity extends AppCompatActivity
     private Maybe<UploadTask.TaskSnapshot> uploadPhoto(String uid){
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference()
-            .child(Preferences.FS_REF_ROOT).child(uid+"/"+fileNameGenerator());
+            .child(Prefs.FS_REF_ROOT).child(uid+"/"+fileNameGenerator());
         Timber.d("reference : "+storageRef.getPath());
         return RxFirebaseStorage
             .putFile(storageRef, Uri.fromFile(photoFile))
@@ -577,15 +576,10 @@ public class PostActivity extends AppCompatActivity
     private Completable saveReportDataCompletable(Report report){
         DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
         String key = dbRef.child("Reports").push().getKey();
-        String uid = report.getReporterId();
-        reportCount = sp.getInt(Preferences.PREF_KEY_REPORT_COUNT, 0);
+        reportCount = sp.getInt(Prefs.PREF_KEY_REPORT_COUNT, 0);
         reportCount++;
-        Map<String, Object> reportUpdates = new HashMap<>();
-        reportUpdates.put(Preferences.FD_REF_REPORTS + "/" + key, report);
-        reportUpdates.put(Preferences.FD_REF_USERREPORTS + "/" + uid + "/" + key, report);
-        reportUpdates.put(Preferences.FD_REF_USERS + "/" + uid + "/"
-            + Preferences.FD_REF_REPORTCOUNT, reportCount);
-        GeoFire geoFire = new GeoFire(dbRef.child(Preferences.FD_REF_GEOFIRENODE));
+        Map<String, Object> reportUpdates = MultiPathUpdates.getPostReportPaths(key,report,reportCount);
+        GeoFire geoFire = new GeoFire(dbRef.child(Prefs.FD_REF_GEOFIRENODE));
         GeoLocation geoLocation = new GeoLocation(mLatLng.latitude,mLatLng.longitude);
 
         return RxFirebaseDatabase.updateChildren(dbRef, reportUpdates)
@@ -610,14 +604,14 @@ public class PostActivity extends AppCompatActivity
         t.setToNow();
         long timestamp=System.currentTimeMillis();
         return "/"+t.year+t.month+t.monthDay+t.hour+t.minute+t.second+":"
-            +timestamp+Constants.POST_FILE_EXT;
+            +timestamp+ Consts.POST_FILE_EXT;
     }
     private GeoFire.CompletionListener geoFireCompletionListener(){
         return (gKey, err) -> {
             if (err == null) {
                 Timber.d("Updating SharedPreferences reportCount");
                 SharedPreferences.Editor editor = sp.edit();
-                editor.putInt(Preferences.PREF_KEY_REPORT_COUNT, reportCount);
+                editor.putInt(Prefs.PREF_KEY_REPORT_COUNT, reportCount);
                 editor.apply();
                 progress.dismiss();
                 finish();

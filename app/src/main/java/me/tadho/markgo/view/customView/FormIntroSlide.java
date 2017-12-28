@@ -47,7 +47,7 @@ import io.reactivex.subjects.Subject;
 import com.jakewharton.rxbinding2.widget.RxTextView;
 import agency.tango.materialintroscreen.SlideFragment;
 
-import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.R;
 import me.tadho.markgo.view.IntroActivity;
@@ -140,7 +140,7 @@ public class FormIntroSlide extends SlideFragment
             Timber.d("Get Verification button pressed");
             if (!submitButtonError){
                 cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error2);
-                setVerifyState(Constants.REG_STATE_GET_AUTH);
+                setVerifyState(Consts.REG_STATE_GET_AUTH);
                 showMessage(getString(R.string.fbauth_enter_get_verification));
                 ((IntroActivity)getActivity())
                     .getVerificationCode(phoneEditText.getText().toString());
@@ -158,7 +158,7 @@ public class FormIntroSlide extends SlideFragment
         }
         else if (v.getId() == R.id.intro_resend_button){
             Timber.d("Resend button pressed");
-            setVerifyState(Constants.REG_STATE_GET_CODE);
+            setVerifyState(Consts.REG_STATE_GET_CODE);
         }
     }
 
@@ -169,7 +169,7 @@ public class FormIntroSlide extends SlideFragment
         signinButtonError = true;
         cantMoveFurtherMessage = getString(R.string.intro_form_snackbar_error1);
         setFormValidation();
-        setVerifyState(Constants.REG_STATE_GET_CODE);
+        setVerifyState(Consts.REG_STATE_GET_CODE);
     }
 
     private void setFormValidation() {
@@ -179,7 +179,7 @@ public class FormIntroSlide extends SlideFragment
 
         Disposable nameDisposable = nameEditObservable
             .doOnNext(charSequence -> hideNameError())
-            .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .debounce(Consts.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
             .filter(charSequence -> !TextUtils.isEmpty(charSequence))
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(charSequence -> {
@@ -190,7 +190,7 @@ public class FormIntroSlide extends SlideFragment
             });
         Disposable phoneDisposable = phoneEditObservable
             .doOnNext(charSequence -> hidePhoneError())
-            .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .debounce(Consts.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
             .filter(charSequence -> !TextUtils.isEmpty(charSequence))
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(charSequence -> {
@@ -201,7 +201,7 @@ public class FormIntroSlide extends SlideFragment
             });
         Disposable codeDisposable = codeEditObservable
             .doOnNext(charSequence -> hideCodeError())
-            .debounce(Constants.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
+            .debounce(Consts.DEBOUNCE_TIMEOUT, TimeUnit.MILLISECONDS)
             .filter(charSequence -> !TextUtils.isEmpty(charSequence))
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(charSequence -> {
@@ -217,10 +217,10 @@ public class FormIntroSlide extends SlideFragment
             .combineLatest(nameEditObservable, phoneEditObservable,
             (nameObs, phoneObs) -> validateName(nameObs.toString())
                     && validatePhone(phoneObs.toString())
-                    && verifyState == Constants.REG_STATE_GET_CODE)
+                    && verifyState == Consts.REG_STATE_GET_CODE)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(valid -> {
-                if (valid && verifyState == Constants.REG_STATE_GET_CODE) {
+                if (valid && verifyState == Consts.REG_STATE_GET_CODE) {
                     Timber.d("buttonDisposable Verify State : 1");
                     submitButtonError = false;
                 } else submitButtonError = true;
@@ -239,7 +239,7 @@ public class FormIntroSlide extends SlideFragment
             });
         Disposable verifyStateDisposable = verifyStateSubject
             .doOnNext(state -> {
-                if (state == Constants.REG_STATE_GET_CODE) {
+                if (state == Consts.REG_STATE_GET_CODE) {
                     Timber.d("Verify State 1 : getting verification code");
                     codeEditText.setText("");
                     nameEditText.setInputType(InputType.TYPE_TEXT_VARIATION_PERSON_NAME);
@@ -249,7 +249,7 @@ public class FormIntroSlide extends SlideFragment
                     signinButton.setVisibility(View.INVISIBLE);
                     resendButton.setVisibility(View.INVISIBLE);
                     resendButton.setEnabled(false);
-                } else if (state == Constants.REG_STATE_GET_AUTH) {
+                } else if (state == Consts.REG_STATE_GET_AUTH) {
                     Timber.d("Verify State 2 : authenticating");
                     nameEditText.setInputType(InputType.TYPE_NULL);
                     phoneEditText.setInputType(InputType.TYPE_NULL);
@@ -259,7 +259,7 @@ public class FormIntroSlide extends SlideFragment
                     resendButton.setVisibility(View.VISIBLE);
                 }
             })
-            .filter(state -> state==Constants.REG_STATE_GET_AUTH)
+            .filter(state -> state== Consts.REG_STATE_GET_AUTH)
             .flatMap(state -> resendTimerObservable)
             .subscribe();
         compositeDisposable.addAll(nameDisposable, phoneDisposable, codeDisposable,

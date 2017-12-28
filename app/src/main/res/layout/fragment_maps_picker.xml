@@ -38,8 +38,7 @@
         app:layout_anchorGravity="top|right|end"
         app:fab_elevationCompat="@dimen/fab_margin"
         app:backgroundTint="@color/background_white"
-        app:fabSize="normal"
-        />
+        app:fabSize="normal" />
 
     <View
         android:id="@+id/fab_separator"
@@ -56,12 +55,16 @@
         android:layout_margin="@dimen/fab_margin"
         app:srcCompat="@drawable/ic_create_black_24dp"
         app:fab_elevationCompat="@dimen/fab_margin"
-        app:fabSize="normal"
-        />
+        app:fabSize="normal" />
 
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/maps_picker_view"
+    <RelativeLayout
+        android:layout_marginTop="?attr/actionBarSize"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/maps_picker_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

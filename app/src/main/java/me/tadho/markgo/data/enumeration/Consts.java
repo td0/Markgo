@@ -24,7 +24,7 @@ package me.tadho.markgo.data.enumeration;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public final class Constants {
+public final class Consts {
     public static final String TAKE_MODE_EXTRA = "takeFrom";
     public static final String STRING_NOT_AVAILABLE = "404-N/A";
 
@@ -38,6 +38,8 @@ public final class Constants {
 
     // MAPS
     public static final LatLng MALANG_LATLNG = new LatLng(-7.9666204, 112.6326321);
+    public static final String KEY_LATITUDE = "latitude";
+    public static final String KEY_LONGITUDE = "longitude";
 
 
     //    Request Code
@@ -49,7 +51,7 @@ public final class Constants {
     public static final String POST_FILE_NAME = "post";
     public static final String POST_FILE_EXT = ".jpg";
 
-    //    Intro Constants
+    //    Intro Consts
     public static final int REG_STATE_GET_CODE = 1;
     public static final int REG_STATE_GET_AUTH = 2;
     public static final long DEBOUNCE_TIMEOUT = 500;

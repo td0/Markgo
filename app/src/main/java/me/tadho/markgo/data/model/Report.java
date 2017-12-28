@@ -36,24 +36,26 @@ public class Report implements Serializable {
     private String streetName;
     private String description;
     private String imageUrl;
-    private int upvoteCount;
-    private String status;
-    private HashMap<String, Object> coordinate;
-    private HashMap<String, Object> date;
+    private Integer upvoteCount;
+    private Boolean fixed;
+    private Double latitude;
+    private Double longitude;
+    private Map<String, Double> coordinate;
+    private Map<String, Object> date;
 
     public Report(){
 
     }
 
-    public Report(String uid, String uname, String strname, String desc, String imgUrl, HashMap<String, Object> coord){
+    public Report(String uid, String uname, String strname, String desc, String imgUrl, Map<String, Double> coord){
         this.reporterId = uid;
         this.reporterName = uname;
         this.streetName = strname;
         this.description = desc;
         this.imageUrl = imgUrl;
-        this.upvoteCount = 0;
-        this.status = "reported";
         this.coordinate = coord;
+        this.upvoteCount = 0;
+        this.fixed = false;
     }
 
     public String getReporterId() {
@@ -72,15 +74,15 @@ public class Report implements Serializable {
         return description;
     }
 
-    public int getUpvoteCount() {
+    public Integer getUpvoteCount() {
         return upvoteCount;
     }
 
-    public String getStatus() {
-        return status;
+    public Boolean getFixed() {
+        return fixed;
     }
 
-    public HashMap<String, Object> getDate() {
+    public Map<String, Object> getDate() {
         if (date != null) return date;
 
         HashMap<String, Object> timeStampNow = new HashMap<>();
@@ -93,11 +95,17 @@ public class Report implements Serializable {
         return (long)date.get("reportTime");
     }
 
-    public HashMap<String, Object> getCoordinate() {
+
+
+    public Map<String, Double> getCoordinate() {
         return coordinate;
     }
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public Double getLatitude() {
+        return latitude;
     }
 }

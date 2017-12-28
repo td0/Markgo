@@ -27,39 +27,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_my_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|top"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_my_location_black_24dp"
-        app:layout_anchor="@id/fab_separator"
-        app:layout_anchorGravity="top|right|end"
-        app:fab_elevationCompat="@dimen/fab_margin"
-        app:backgroundTint="@color/background_white"
-        app:fabSize="normal"
-        />
-
-    <View
-        android:id="@+id/fab_separator"
-        android:layout_width="1dp"
-        android:layout_height="16dp"
-        app:layout_anchor="@id/fab_submit_location"
-        app:layout_anchorGravity="top|right|end" />
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_submit_location"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end|bottom"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@drawable/ic_create_black_24dp"
-        app:fab_elevationCompat="@dimen/fab_margin"
-        app:fabSize="normal"
-        android:transitionName="@string/animation_maps_picker"
-        />
-
     <RelativeLayout
         android:layout_marginTop="?attr/actionBarSize"
         android:layout_width="match_parent"
@@ -69,5 +36,64 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
     </RelativeLayout>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/fam_maps_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|top"
+        android:layout_margin="11dp"
+        app:menu_icon="@drawable/ic_layers_white_24dp"
+        app:fab_elevationCompat="@dimen/fab_margin"
+        app:layout_anchor="@id/fab_separator"
+        app:layout_anchorGravity="top|right|end"
+        app:menu_colorNormal="@color/colorPrimary"
+        app:menu_colorPressed="@color/colorPrimaryLight"
+        app:menu_colorRipple="@color/colorPrimaryLight"
+        app:layout_behavior="me.tadho.markgo.utils.FloatingActionMenuBehavior"
+        >
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_mode_cluster"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_maps_vis_cluster"
+            app:fab_colorNormal="@color/background_white"
+            app:fab_colorPressed="@color/background_white_ripple"
+            app:fab_colorRipple="@color/background_white_ripple"
+            app:fab_size="mini"
+            app:fab_label="@string/fab_clustering_label"
+            />
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_mode_heatmap"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_maps_vis_heat"
+            app:fab_colorNormal="@color/background_white"
+            app:fab_colorPressed="@color/background_white_ripple"
+            app:fab_colorRipple="@color/background_white_ripple"
+            app:fab_size="mini"
+            app:fab_label="@string/fab_heat_map_label"
+            />
+    </com.github.clans.fab.FloatingActionMenu>
+
+    <View
+        android:id="@+id/fab_separator"
+        android:layout_width="1dp"
+        android:layout_height="16dp"
+        app:layout_anchor="@id/fab_my_location"
+        app:layout_anchorGravity="top|right|end" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_my_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="@dimen/fab_margin"
+        app:srcCompat="@drawable/ic_my_location_black_24dp"
+        app:fab_elevationCompat="@dimen/fab_margin"
+        app:backgroundTint="@color/background_white"
+        app:fabSize="normal"
+        />
+
 
 </android.support.design.widget.CoordinatorLayout>

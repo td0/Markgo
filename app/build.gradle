@@ -66,6 +66,9 @@ dependencies {
     implementation "com.android.support:customtabs:$supportLibraryVersion"
     implementation "com.android.support:exifinterface:$supportLibraryVersion"
     implementation "com.android.support:support-annotations:${supportLibraryVersion}"
+    //noinspection GradleDynamicVersion
+    implementation 'com.google.maps.android:android-maps-utils:0.5+'
+
 
     implementation "com.google.android.gms:play-services-maps:$gmsVersion"
     implementation "com.google.android.gms:play-services-location:$gmsVersion"

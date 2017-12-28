@@ -45,9 +45,9 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.firebase.auth.FirebaseAuth;
 
-import me.tadho.markgo.data.enumeration.Constants;
+import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.R;
-import me.tadho.markgo.data.enumeration.Preferences;
+import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.utils.DisplayUtility;
 import timber.log.Timber;
 
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     if (granted){
                         Timber.d("Read external permission granted");
                         Intent intent = new Intent(this, PostActivity.class)
-                                .putExtra(Constants.TAKE_MODE_EXTRA, Constants.TAKE_MODE_EXTRA_GALLERY);
+                                .putExtra(Consts.TAKE_MODE_EXTRA, Consts.TAKE_MODE_EXTRA_GALLERY);
                         startActivity(intent);
                     } else {
                         Timber.d("Permission rejected");
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                     Timber.d("Floating Action Button Camera clicked");
                     mFam.toggle(true);
                     Intent intent = new Intent(MainActivity.this, PostActivity.class)
-                            .putExtra(Constants.TAKE_MODE_EXTRA, Constants.TAKE_MODE_EXTRA_CAMERA);
+                            .putExtra(Consts.TAKE_MODE_EXTRA, Consts.TAKE_MODE_EXTRA_CAMERA);
                     startActivity(intent);
                 });
         compositeDisposable.addAll(fabGalleryDisposable,fabCameraDisposable);
@@ -134,14 +134,14 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MapsActivity.class));
                 return true;
             case R.id.logout_submenu:
-                Timber.d("Logout Preferences submenu pressed");
+                Timber.d("Logout Prefs submenu pressed");
                 signOut();
                 return true;
             // TODO: Temporary helper
             case R.id.changename_submenu:
                 Timber.d("Change name submenu pressed");
                 SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                sp.edit().putInt(Preferences.PREF_KEY_REPORT_COUNT,0).apply();
+                sp.edit().putInt(Prefs.PREF_KEY_REPORT_COUNT,0).apply();
                 DisplayUtility.customAlertDialog(MainActivity.this)
                     .setMessage("report count has been reset to 0")
                     .show();
