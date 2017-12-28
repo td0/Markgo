@@ -77,7 +77,9 @@ import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.model.ClusterMarker;
+import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.data.model.ReportMaps;
+import me.tadho.markgo.view.customView.ClusterInfoWindowAdapter;
 import timber.log.Timber;
 
 public class MapsListFragment extends Fragment
@@ -100,7 +102,7 @@ public class MapsListFragment extends Fragment
 
     private Boolean clusterMode = true;
     private Boolean populated = false;
-    private HashMap<String, ReportMaps> mapItems = new HashMap<>();
+    private HashMap<String, Report> mapItems = new HashMap<>();
     private ClusterManager<ClusterMarker> mClusterManager;
     private TileOverlay heatMapOverlay;
     private HeatmapTileProvider heatMapProvider;
@@ -116,7 +118,7 @@ public class MapsListFragment extends Fragment
         compositeDisposable = new CompositeDisposable();
         compositeDisposable.add(myLocationObservable().subscribe());
 
-        dbMapsRef = dbRef.child(Prefs.FD_REF_REPORTMAPS);
+        dbMapsRef = dbRef.child(Prefs.FD_REF_REPORTS);
         dbMapsRef.keepSynced(true);
 
         compositeDisposable.add(mapEventListenerFlowable().subscribe());
@@ -194,6 +196,7 @@ public class MapsListFragment extends Fragment
         googleMap.setMinZoomPreference(11f);
         googleMap.setLatLngBoundsForCameraTarget(mapsBound);
 
+
         setMapsCamera(mLatLng, 13.5f, false);
         compositeDisposable.add(setMapsCameraCompletable(13.5f, false).subscribe());
         initiateMapsMode();
@@ -205,8 +208,9 @@ public class MapsListFragment extends Fragment
                 Timber.d("ValListn onDataChange,");
                 if (mapItems!=null) mapItems.clear();
                 for (DataSnapshot snap : snaps.getChildren()){
-                    mapItems.put(snap.getKey(), snap.getValue(ReportMaps.class));
-                    Timber.d("ValListn, key : "+snap.getKey()+" -> val : "+snap.getValue());
+                    if (!snap.getValue(Report.class).getFixed())
+                        mapItems.put(snap.getKey(), snap.getValue(Report.class));
+                        Timber.d("ValListn, key : "+snap.getKey()+" -> val : "+snap.getValue());
                 }
                 if (populated) refreshMapsMode();
             })
@@ -224,20 +228,11 @@ public class MapsListFragment extends Fragment
     private void refreshMapsMode(){
         if (clusterMode) {
             if (mClusterManager!=null) mClusterManager.clearItems();
-            for (HashMap.Entry<String,ReportMaps> mapItem : mapItems.entrySet()) {
-                Double lat = mapItem.getValue().getLatitude();
-                Double lng = mapItem.getValue().getLongitude();
-                mClusterManager.addItem(new ClusterMarker(lat,lng));
-            }
+            populateCluster();
             mClusterManager.cluster();
         } else {
             if (heatMapList!=null) heatMapList.clear();
-            for (HashMap.Entry<String,ReportMaps> mapItem : mapItems.entrySet()) {
-                Double lat = mapItem.getValue().getLatitude();
-                Double lng = mapItem.getValue().getLongitude();
-                Double intensity = Double.valueOf(mapItem.getValue().getUpvotes())+1d;
-                heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
-            }
+            populateHeatMap();
             heatMapProvider.setWeightedData(heatMapList);
             heatMapOverlay.clearTileCache();
         }
@@ -253,33 +248,53 @@ public class MapsListFragment extends Fragment
             heatMapOverlay = null;
             heatMapProvider = null;
         }
-        if (mClusterManager!=null) mClusterManager.clearItems();
+        if (mClusterManager!=null) {
+            mClusterManager.clearItems();
+            mClusterManager.getMarkerCollection().setOnInfoWindowAdapter(null);
+        }
         googleMap.setOnCameraIdleListener(null);
         googleMap.setOnMarkerClickListener(null);
+        googleMap.setInfoWindowAdapter(null);
         googleMap.clear();
     }
 
     private void setupClustering(){
         if (mClusterManager==null)
             mClusterManager = new ClusterManager<>(getActivity().getBaseContext(), googleMap);
-        for (HashMap.Entry<String,ReportMaps> mapItem : mapItems.entrySet()) {
-            Double lat = mapItem.getValue().getLatitude();
-            Double lng = mapItem.getValue().getLongitude();
-            mClusterManager.addItem(new ClusterMarker(lat,lng));
-        }
+        populateCluster();
+
+        mClusterManager.getMarkerCollection()
+            .setOnInfoWindowAdapter(new ClusterInfoWindowAdapter(mapItems, getActivity()));
+        googleMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
+
         googleMap.setOnCameraIdleListener(mClusterManager);
         googleMap.setOnMarkerClickListener(mClusterManager);
         mClusterManager.setAnimation(true);
+
         mClusterManager.cluster();
     }
 
-    private void setupHeatMap(){
-        for (HashMap.Entry<String,ReportMaps> mapItem : mapItems.entrySet()) {
+    private void populateCluster(){
+        for (HashMap.Entry<String,Report> mapItem : mapItems.entrySet()) {
             Double lat = mapItem.getValue().getLatitude();
             Double lng = mapItem.getValue().getLongitude();
-            Double intensity = Double.valueOf(mapItem.getValue().getUpvotes())+1d;
+            String title = mapItem.getKey();
+            String desc = "upvote : "+mapItem.getValue().getUpvoteCount();
+            mClusterManager.addItem(new ClusterMarker(lat,lng,title,desc));
+        }
+    }
+
+    private void populateHeatMap(){
+        for (HashMap.Entry<String,Report> mapItem : mapItems.entrySet()) {
+            Double lat = mapItem.getValue().getLatitude();
+            Double lng = mapItem.getValue().getLongitude();
+            Double intensity = Double.valueOf(mapItem.getValue().getUpvoteCount())+1d;
             heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
         }
+    }
+
+    private void setupHeatMap(){
+        populateHeatMap();
         if (heatMapProvider==null)
             heatMapProvider = new HeatmapTileProvider.Builder()
                 .radius(23)

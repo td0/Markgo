@@ -30,6 +30,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.tadho.markgo.data.enumeration.Consts;
+
 public class Report implements Serializable {
     private String reporterId;
     private String reporterName;
@@ -94,8 +96,14 @@ public class Report implements Serializable {
     public long getReportTime(){
         return (long)date.get("reportTime");
     }
-
-
+    @Exclude
+    public Double getLatitude(){
+        return coordinate.get(Consts.KEY_LATITUDE);
+    }
+    @Exclude
+    public Double getLongitude(){
+        return coordinate.get(Consts.KEY_LONGITUDE);
+    }
 
     public Map<String, Double> getCoordinate() {
         return coordinate;
@@ -103,9 +111,5 @@ public class Report implements Serializable {
 
     public String getImageUrl() {
         return imageUrl;
-    }
-
-    public Double getLatitude() {
-        return latitude;
     }
 }
