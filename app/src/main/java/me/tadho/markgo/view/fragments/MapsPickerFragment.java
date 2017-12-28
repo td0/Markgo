@@ -127,6 +127,7 @@ public class MapsPickerFragment extends Fragment implements
         googleMap.getUiSettings().setMapToolbarEnabled(false);
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.setMyLocationEnabled(true);
+        googleMap.setLatLngBoundsForCameraTarget(Consts.MALANG_BOUNDS);
 
         MarkerOptions markerOptions = new MarkerOptions()
 //            .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_custom_marker_orange_flag))

@@ -23,6 +23,7 @@
 package me.tadho.markgo.data.enumeration;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 public final class Consts {
     public static final String TAKE_MODE_EXTRA = "takeFrom";
@@ -38,6 +39,8 @@ public final class Consts {
 
     // MAPS
     public static final LatLng MALANG_LATLNG = new LatLng(-7.9666204, 112.6326321);
+    public static final LatLngBounds MALANG_BOUNDS = new LatLngBounds(new LatLng(-8.20401459d,112.42446899),
+        new LatLng(-7.85657986d,112.80075073d));
     public static final String KEY_LATITUDE = "latitude";
     public static final String KEY_LONGITUDE = "longitude";
 

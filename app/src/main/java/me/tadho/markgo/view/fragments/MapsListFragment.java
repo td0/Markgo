@@ -185,8 +185,6 @@ public class MapsListFragment extends Fragment
         } catch (Resources.NotFoundException e) {
             Timber.e("MapsActivityRaw", "Can't find style.", e);
         }
-        LatLngBounds mapsBound = new LatLngBounds(new LatLng(-8.20401459d,112.42446899),
-            new LatLng(-7.85657986d,112.80075073d));
 
         googleMap.getUiSettings().setMapToolbarEnabled(false);
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -194,7 +192,7 @@ public class MapsListFragment extends Fragment
         googleMap.setMyLocationEnabled(true);
         googleMap.setMaxZoomPreference(20f);
         googleMap.setMinZoomPreference(11f);
-        googleMap.setLatLngBoundsForCameraTarget(mapsBound);
+        googleMap.setLatLngBoundsForCameraTarget(Consts.MALANG_BOUNDS);
 
 
         setMapsCamera(mLatLng, 13.5f, false);
