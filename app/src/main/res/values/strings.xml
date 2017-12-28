@@ -9,6 +9,13 @@
     <string name="title_maps">Maps</string>
     <string name="title_maps_picker">Pick Location</string>
     <string name="title_post">Post Review</string>
+    <!--Tab titles array-->
+    <string-array name="tab_titles">
+        <item>Timeline</item>
+        <item>My Reports</item>
+    </string-array>
+
+
     <!--FAB-->
     <string name="fab_gallery">Gallery</string>
     <string name="fab_camera">Camera</string>

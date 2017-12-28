@@ -473,8 +473,8 @@ public class MapsListFragment extends Fragment
             @Override
             public void onAnimationStart(Animator animation) {
                 mFam.getMenuIconView().setImageResource(mFam.isOpened() ?
-                    R.drawable.ic_layers_white_24dp :
-                    R.drawable.ic_close_white_24dp);
+                    R.drawable.ic_layers_black_24dp :
+                    R.drawable.ic_close_black_24dp);
             }
         });
         set.play(scaleOutX).with(scaleOutY);

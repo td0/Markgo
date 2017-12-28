@@ -27,9 +27,12 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -49,20 +52,24 @@ import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.utils.DisplayUtility;
+import me.tadho.markgo.view.adapter.ViewPagerAdapter;
 import timber.log.Timber;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
-    private FloatingActionMenu mFam;
     private FirebaseAuth mAuth;
     private CompositeDisposable compositeDisposable;
+
+    private FloatingActionMenu mFam;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
+        setupTab();
         setupFab();
         mAuth = FirebaseAuth.getInstance();
     }
@@ -117,7 +124,16 @@ public class MainActivity extends AppCompatActivity {
         compositeDisposable.addAll(fabGalleryDisposable,fabCameraDisposable);
     }
 
-
+    private void setupTab(){
+        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        viewPager = findViewById(R.id.view_pager);
+        viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(
+            getSupportFragmentManager(),MainActivity.this);
+        viewPager.setAdapter(viewPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.addOnTabSelectedListener(this);
+    }
 
 
     @Override
@@ -190,5 +206,21 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, IntroActivity.class));
                 finish();
             }).setNegativeButton(R.string.dialog_cancel, null).show();
+    }
+
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        viewPager.setCurrentItem(tab.getPosition());
+//        if (tab.getPosition() != 0)
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+
     }
 }

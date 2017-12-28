@@ -31,14 +31,16 @@
     <style name="AppTheme.NoActionBar.Overlay.Popup" parent="ThemeOverlay.AppCompat.Light" />
 
     <!--Custom Toolbar-->
-    <style name="Widget.AppTheme.ToolBar" parent="">
+    <style name="Widget.AppTheme.ToolBar.Main" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">?attr/actionBarSize</item>
         <item name="android:background">?attr/colorPrimary</item>
         <item name="android:theme">@style/AppTheme.NoActionBar.Overlay</item>
         <item name="popupTheme">@style/AppTheme.NoActionBar.Overlay.Popup</item>
-        <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
         <item name="layout_scrollFlags">scroll|enterAlways</item>
+    </style>
+    <style name="Widget.AppTheme.ToolBar" parent="Widget.AppTheme.ToolBar.Main">
+        <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
     </style>
 
     <!--Button Themes-->
