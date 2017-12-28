@@ -42,6 +42,7 @@ import java.util.HashMap;
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.GlideApp;
+import me.tadho.markgo.utils.PhotoUtility;
 import timber.log.Timber;
 
 public class ClusterInfoWindowAdapter
@@ -55,6 +56,7 @@ public class ClusterInfoWindowAdapter
     private AppCompatTextView tvTitle;
     private AppCompatTextView tvDesc;
     private AppCompatTextView tvUpvotes;
+    private int dimension;
 
 
     public ClusterInfoWindowAdapter(HashMap<String,Report> reports, Context context){
@@ -63,6 +65,7 @@ public class ClusterInfoWindowAdapter
         this.inflater = LayoutInflater.from(context);
         this.mContent = inflater.inflate(R.layout.layout_maps_infowindow_content, null);
 
+        dimension = PhotoUtility.dp2px(mContext, 120);
         ivThumbnail = mContent.findViewById(R.id.infowindow_thumbnail);
         tvTitle = mContent.findViewById(R.id.infowindow_title);
         tvDesc = mContent.findViewById(R.id.infowindow_desc);
@@ -88,12 +91,11 @@ public class ClusterInfoWindowAdapter
         tvDesc.setText(desc);
         if (item.getDescription().isEmpty()) tvDesc.setVisibility(View.GONE);
         else tvDesc.setVisibility(View.VISIBLE);
-
-//        Bitmap bitmap = Bitmap.createBitmap();
+        ivThumbnail.setImageResource(R.drawable.placeholder);
         GlideApp.with(mContext)
             .asBitmap()
             .load(item.getImageUrl())
-            .placeholder(R.drawable.placeholder)
+            .override(dimension,dimension)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .into(new SimpleTarget<Bitmap>() {
                 @Override

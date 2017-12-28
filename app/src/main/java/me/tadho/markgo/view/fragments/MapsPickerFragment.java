@@ -144,7 +144,6 @@ public class MapsPickerFragment extends Fragment implements
         googleMap.setLatLngBoundsForCameraTarget(Consts.MALANG_BOUNDS);
 
         MarkerOptions markerOptions = new MarkerOptions()
-//            .icon(BitmapDescriptorFactory.fromResource(R.drawable.maps_custom_marker_orange_flag))
             .position(mLatLng)
             .draggable(true);
         pickerMarker = googleMap.addMarker(markerOptions);

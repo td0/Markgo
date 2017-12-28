@@ -28,8 +28,8 @@
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/infowindow_thumbnail"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
         android:layout_gravity="center_vertical"
         android:scaleType="centerCrop"
         android:layout_marginTop="5dp"
