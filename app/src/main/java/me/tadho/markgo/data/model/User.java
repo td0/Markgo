@@ -31,7 +31,7 @@ import java.util.HashMap;
 
 // [START blog_user_class]
 @IgnoreExtraProperties
-public class User implements Serializable {
+public class User {
     private String name;
     private int reportCount;
     private int status;

@@ -22,9 +22,12 @@
 
 package me.tadho.markgo.data.model;
 
-import com.google.android.gms.maps.model.LatLng;
+import android.os.Parcelable;
+
 import com.google.firebase.database.Exclude;
 import com.google.firebase.database.ServerValue;
+
+import org.parceler.Parcel;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -32,7 +35,8 @@ import java.util.Map;
 
 import me.tadho.markgo.data.enumeration.Consts;
 
-public class Report implements Serializable {
+
+public class Report implements Serializable{
     private String reporterId;
     private String reporterName;
     private String streetName;
@@ -49,10 +53,10 @@ public class Report implements Serializable {
 
     }
 
-    public Report(String uid, String uname, String strname, String desc, String imgUrl, Map<String, Double> coord){
+    public Report(String uid, String uname, String street, String desc, String imgUrl, Map<String, Double> coord){
         this.reporterId = uid;
         this.reporterName = uname;
-        this.streetName = strname;
+        this.streetName = street;
         this.description = desc;
         this.imageUrl = imgUrl;
         this.coordinate = coord;

@@ -37,9 +37,9 @@
         <item name="android:background">?attr/colorPrimary</item>
         <item name="android:theme">@style/AppTheme.NoActionBar.Overlay</item>
         <item name="popupTheme">@style/AppTheme.NoActionBar.Overlay.Popup</item>
-        <item name="layout_scrollFlags">scroll|enterAlways</item>
     </style>
     <style name="Widget.AppTheme.ToolBar" parent="Widget.AppTheme.ToolBar.Main">
+        <item name="layout_scrollFlags">scroll|enterAlways</item>
         <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
     </style>
 

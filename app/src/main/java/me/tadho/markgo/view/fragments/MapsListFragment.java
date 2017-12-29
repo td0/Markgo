@@ -210,23 +210,28 @@ public class MapsListFragment extends Fragment
         return RxFirebaseDatabase.observeValueEvent(dbMapsRef, BackpressureStrategy.LATEST)
             .doOnNext(snaps -> {
                 Timber.d("ValListn onDataChange,");
-                if (mapItems!=null) mapItems.clear();
-                for (DataSnapshot snap : snaps.getChildren()){
-                    if (!snap.getValue(Report.class).getFixed())
-                        mapItems.put(snap.getKey(), snap.getValue(Report.class));
-                        Timber.d("ValListn, key : "+snap.getKey()+" -> val : "+snap.getValue());
+                if (snaps.exists()) {
+                    if (mapItems != null) mapItems.clear();
+                    for (DataSnapshot snap : snaps.getChildren()) {
+                        if (!snap.getValue(Report.class).getFixed())
+                            mapItems.put(snap.getKey(), snap.getValue(Report.class));
+                        Timber.d("ValListn, key : " + snap.getKey() + " -> val : " + snap.getValue());
+                    }
+                    if (populated) refreshMapsMode();
                 }
-                if (populated) refreshMapsMode();
             })
             .doOnCancel(() -> Timber.d("RxFirebase ValueEventListener onCancel triggered!"));
     }
 
-    private void initiateMapsMode(){
+    private void initiateMapsMode() {
         populated = false;
-        cleanMaps();
-        if (clusterMode) setupClustering();
-        else setupHeatMap();
-        populated = true;
+        if (!mapItems.isEmpty()) {
+            cleanMaps();
+            if (clusterMode) setupClustering();
+            else setupHeatMap();
+            populated = true;
+        }
+
     }
 
     private void refreshMapsMode(){
@@ -243,6 +248,7 @@ public class MapsListFragment extends Fragment
     }
 
     private void cleanMaps(){
+
         if (heatMapList != null){
             heatMapList.clear();
         }
@@ -282,6 +288,18 @@ public class MapsListFragment extends Fragment
         mClusterManager.cluster();
     }
 
+    private void setupHeatMap(){
+        populateHeatMap();
+        if (heatMapProvider==null)
+            heatMapProvider = new HeatmapTileProvider.Builder()
+                .radius(23)
+                .weightedData(heatMapList)
+                .build();
+        if (DisplayUtility.isDay()) heatMapProvider.setGradient(getCustomGradient());
+        heatMapProvider.setOpacity(0.55d);
+        heatMapOverlay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatMapProvider));
+    }
+
     private void populateCluster(){
         for (HashMap.Entry<String,Report> mapItem : mapItems.entrySet()) {
             Double lat = mapItem.getValue().getLatitude();
@@ -297,18 +315,6 @@ public class MapsListFragment extends Fragment
             Double intensity = Double.valueOf(mapItem.getValue().getUpvoteCount())+1d;
             heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
         }
-    }
-
-    private void setupHeatMap(){
-        populateHeatMap();
-        if (heatMapProvider==null)
-            heatMapProvider = new HeatmapTileProvider.Builder()
-                .radius(23)
-                .weightedData(heatMapList)
-                .build();
-        if (DisplayUtility.isDay()) heatMapProvider.setGradient(getCustomGradient());
-        heatMapProvider.setOpacity(0.55d);
-        heatMapOverlay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatMapProvider));
     }
 
     private Single<Boolean> myLocationObservable(){

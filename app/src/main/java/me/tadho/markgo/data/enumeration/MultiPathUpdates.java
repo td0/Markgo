@@ -22,13 +22,10 @@
 
 package me.tadho.markgo.data.enumeration;
 
-import android.preference.PreferenceManager;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import me.tadho.markgo.data.model.Report;
-import me.tadho.markgo.data.model.ReportMaps;
 import timber.log.Timber;
 
 public final class MultiPathUpdates {
@@ -36,13 +33,11 @@ public final class MultiPathUpdates {
     // Post Report
     public static Map<String, Object> getPostReportPaths(String key, Report report, int reportCount){
         String uid = report.getReporterId();
-        ReportMaps reportMaps = new ReportMaps(report.getCoordinate());
         Map<String, Object> object = new HashMap<>();
         object.put(pathJoin(Prefs.FD_REF_REPORTS ,key), report);
         object.put(pathJoin(Prefs.FD_REF_USERREPORTS, uid, key), report);
         object.put(pathJoin(Prefs.FD_REF_USERS, uid, Prefs.FD_REF_REPORTCOUNT),
             reportCount);
-        object.put(pathJoin(Prefs.FD_REF_REPORTMAPS, key), reportMaps);
         return object;
     }
 
@@ -64,7 +59,6 @@ public final class MultiPathUpdates {
         object.put(pathJoin(Prefs.FD_REF_USERUPVOTES, voterUid, key), true);
         object.put(pathJoin(Prefs.FD_REF_REPORTS, key, Prefs.FD_REF_UPVOTECOUNT), voteCount);
         object.put(pathJoin(Prefs.FD_REF_USERREPORTS, reporterUid, key, Prefs.FD_REF_UPVOTECOUNT), voteCount);
-        object.put(pathJoin(Prefs.FD_REF_REPORTMAPS, key, Prefs.FD_REF_UPVOTECOUNT), voteCount);
         return object;
     }
 

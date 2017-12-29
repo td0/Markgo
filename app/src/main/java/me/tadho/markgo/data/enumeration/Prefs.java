@@ -16,9 +16,6 @@ public final class Prefs {
     public final static String FD_REF_USERSLIST = "UsersList";
     public final static String FD_REF_USERUPVOTES = "UserUpvotes";
     public final static String FD_REF_REPORTS = "Reports";
-    public final static String FD_REF_REPORTFIXED = "ReportFixed";
-    public final static String FD_REF_REPORTUPVOTES = "ReportUpvotes";
-    public final static String FD_REF_REPORTMAPS = "ReportMaps";
     public final static String FD_REF_USERREPORTS = "UserReports";
     public final static String FD_REF_GEOFIRENODE = "GeoFire";
     public final static String FD_REF_UPVOTECOUNT = "upvoteCount";
