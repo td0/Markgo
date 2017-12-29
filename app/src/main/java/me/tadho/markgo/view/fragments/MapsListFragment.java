@@ -123,6 +123,7 @@ public class MapsListFragment extends Fragment
         dbMapsRef = dbRef.child(Prefs.FD_REF_REPORTS);
         dbMapsRef.keepSynced(true);
         compositeDisposable.add(mapEventListenerFlowable().subscribe());
+        getActivity().setTitle(R.string.maps_cluster_mode);
     }
 
     @Nullable
@@ -162,12 +163,14 @@ public class MapsListFragment extends Fragment
                 mFam.close(true);
                 if (clusterMode) break;
                 clusterMode = true;
+                getActivity().setTitle(R.string.maps_cluster_mode);
                 initiateMapsMode();
                 break;
             case R.id.fab_mode_heatmap :
                 mFam.close(true);
                 if (!clusterMode) break;
                 clusterMode = false;
+                getActivity().setTitle(R.string.maps_heatmap_mode);
                 initiateMapsMode();
                 break;
         }
