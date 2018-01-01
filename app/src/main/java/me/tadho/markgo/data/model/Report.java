@@ -109,6 +109,11 @@ public class Report implements Serializable{
         return coordinate.get(Consts.KEY_LONGITUDE);
     }
 
+    @Exclude
+    public void setUpvoteCount(int count){
+        this.upvoteCount = count;
+    }
+
     public Map<String, Double> getCoordinate() {
         return coordinate;
     }

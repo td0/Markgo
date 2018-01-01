@@ -22,13 +22,19 @@
 
 package me.tadho.markgo.data.enumeration;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import me.tadho.markgo.data.model.Report;
 import timber.log.Timber;
 
-public final class MultiPathUpdates {
+public final class UpdatePaths {
 
     // Post Report
     public static Map<String, Object> getPostReportPaths(String key, Report report, int reportCount){
@@ -42,26 +48,30 @@ public final class MultiPathUpdates {
     }
 
     // Vote Report
-    public static Map<String, Object> getVoteReportPaths(String voterUid, String reporterUid, String key, int voteCount){
-        Map<String, Object> object = new HashMap<>();
-        voteCount++;
-        return updateReportVotes(voterUid, reporterUid, key, voteCount);
-    }
-
-    // Devote Report
-    public static Map<String, Object> getDevoteReportPaths(String voterUid, String reporterUid, String key, int voteCount){
-        voteCount--;
-        return updateReportVotes(voterUid, reporterUid, key, voteCount);
-    }
-
-    private static Map<String, Object> updateReportVotes(String voterUid, String reporterUid, String key, int voteCount) {
-        Map<String, Object> object = new HashMap<>();
-        object.put(pathJoin(Prefs.FD_REF_USERUPVOTES, voterUid, key), true);
-        object.put(pathJoin(Prefs.FD_REF_REPORTS, key, Prefs.FD_REF_UPVOTECOUNT), voteCount);
-        object.put(pathJoin(Prefs.FD_REF_USERREPORTS, reporterUid, key, Prefs.FD_REF_UPVOTECOUNT), voteCount);
+    public static Map<String, Object> getVoteReportPaths(String key, Boolean isAdded){
+        HashMap<String, Object> object = new HashMap<>();
+        if (isAdded) object.put(key, true);
+        else object.put(key, null);
         return object;
     }
 
+    public static void runVoteTransactions(String reportKey, Boolean isAdded, DatabaseReference... refs){
+        for (DatabaseReference ref : refs) {
+            ref.child(reportKey).runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    Report r = mutableData.getValue(Report.class);
+                    if (r == null) return Transaction.success(mutableData);
+                    if (isAdded) r.setUpvoteCount(r.getUpvoteCount() + 1);
+                    else r.setUpvoteCount(r.getUpvoteCount() - 1);
+                    mutableData.setValue(r);
+                    return Transaction.success(mutableData);
+                }
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {}
+            });
+        }
+    }
 
     private static String pathJoin(String... strings){
         final String SLASH = "/";

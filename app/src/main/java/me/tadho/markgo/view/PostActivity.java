@@ -87,7 +87,7 @@ import io.reactivex.subjects.Subject;
 import me.tadho.markgo.BuildConfig;
 import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Consts;
-import me.tadho.markgo.data.enumeration.MultiPathUpdates;
+import me.tadho.markgo.data.enumeration.UpdatePaths;
 import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.DisplayUtility;
@@ -579,7 +579,7 @@ public class PostActivity extends AppCompatActivity
         String key = dbRef.child("Reports").push().getKey();
         reportCount = sp.getInt(Prefs.PREF_KEY_REPORT_COUNT, 0);
         reportCount++;
-        Map<String, Object> reportUpdates = MultiPathUpdates.getPostReportPaths(key,report,reportCount);
+        Map<String, Object> reportUpdates = UpdatePaths.getPostReportPaths(key,report,reportCount);
         GeoFire geoFire = new GeoFire(dbRef.child(Prefs.FD_REF_GEOFIRENODE));
         GeoLocation geoLocation = new GeoLocation(mLatLng.latitude,mLatLng.longitude);
 

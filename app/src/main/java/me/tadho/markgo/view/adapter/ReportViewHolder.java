@@ -64,7 +64,7 @@ public class ReportViewHolder extends RecyclerView.ViewHolder {
         menuIV = itemView.findViewById(R.id.report_menu);
     }
 
-    public void bindToReportItem(Context ctx, Report report, View.OnClickListener onClickListener, Boolean upvoted) {
+    public void bindToReportItem(Context ctx, Report report, View.OnClickListener onClickListener, boolean upvoted) {
         String date = getDate(report.getReportTime());
         String desc = report.getDescription();
         GlideApp.with(ctx)

@@ -22,143 +22,15 @@
 
 package me.tadho.markgo.view.fragments;
 
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-
-import me.tadho.markgo.R;
-import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Prefs;
-import me.tadho.markgo.data.model.Report;
-import me.tadho.markgo.view.adapter.ReportViewHolder;
 
-public class MainMyReportFragment extends Fragment {
-    FirebaseAuth mAuth;
-    DatabaseReference dbRef;
-    DatabaseReference myReportRef;
-    RecyclerView mRecycler;
-    LinearLayoutManager mManager;
-    FirebaseRecyclerAdapter<Report, ReportViewHolder> mAdapter;
-
+public class MainMyReportFragment extends ReportListFragment {
     public MainMyReportFragment(){}
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mAuth = FirebaseAuth.getInstance();
-        dbRef = FbPersistence.getDatabase().getReference();
-        myReportRef = dbRef.child(Prefs.FD_REF_USERREPORTS).child(getUid());
-        myReportRef.keepSynced(true);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_timeline, container, false);
-
-        mRecycler = rootView.findViewById(R.id.recycler_timeline);
-        mRecycler.setHasFixedSize(true);
-        return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        mManager = new LinearLayoutManager(getActivity());
-        mManager.setReverseLayout(true);
-        mManager.setStackFromEnd(true);
-        mRecycler.setLayoutManager(mManager);
-
-        Query myReportQuery = getQuery();
-
-        FirebaseRecyclerOptions<Report> options = new FirebaseRecyclerOptions.Builder<Report>()
-            .setQuery(myReportQuery, Report.class)
-            .build();
-
-        mAdapter = new FirebaseRecyclerAdapter<Report, ReportViewHolder>(options) {
-            @Override
-            public ReportViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-                return new ReportViewHolder(inflater.inflate(R.layout.layout_item_report, parent, false));
-            }
-            @Override
-            protected void onBindViewHolder(@NonNull ReportViewHolder holder, int position, @NonNull Report model) {
-                Boolean upvoted = true;
-                holder.bindToReportItem(getActivity(), model, null, upvoted);
-            }
-        };
-
-        mRecycler.setAdapter(mAdapter);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (mAdapter != null ){
-            mAdapter.startListening();
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        myReportRef.keepSynced(false);
-    }
-
-    private String getUid(){
-        return mAuth.getUid();
-    }
-
-    private Query getQuery(){
-        return myReportRef.limitToFirst(15);
+    public Query getQuery(DatabaseReference qRef){
+        return qRef.child(Prefs.FD_REF_USERREPORTS).child(getUid());
     }
 }
