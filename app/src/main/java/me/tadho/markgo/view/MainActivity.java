@@ -156,8 +156,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
             // TODO: Temporary helper
             case R.id.changename_submenu:
                 Timber.d("Change name submenu pressed");
-                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                sp.edit().putInt(Prefs.PREF_KEY_REPORT_COUNT,0).apply();
                 DisplayUtility.customAlertDialog(MainActivity.this)
                     .setMessage("report count has been reset to 0")
                     .show();

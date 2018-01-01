@@ -50,6 +50,7 @@ public class ReportViewHolder extends RecyclerView.ViewHolder {
     private ThumbnailView photoIV;
     private ImageView upvoteIconIV;
     private ImageView menuIV;
+    private TextView fixedFlairTV;
 
     public ReportViewHolder(View itemView) {
         super(itemView);
@@ -62,6 +63,7 @@ public class ReportViewHolder extends RecyclerView.ViewHolder {
         photoIV = itemView.findViewById(R.id.report_photo);
         upvoteIconIV = itemView.findViewById(R.id.upvote_icon);
         menuIV = itemView.findViewById(R.id.report_menu);
+        fixedFlairTV = itemView.findViewById(R.id.fixed_flair);
     }
 
     public void bindToReportItem(Context ctx, Report report, View.OnClickListener onClickListener, boolean upvoted) {
@@ -75,17 +77,31 @@ public class ReportViewHolder extends RecyclerView.ViewHolder {
         dateTV.setText(date);
         streetNameTV.setText(report.getStreetName());
         streetNameTV.setPaintFlags(streetNameTV.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        upvoteCountTV.setText(String.valueOf(report.getUpvoteCount()));
+        upvoteCountTV.setText(String.valueOf(report.getUpvoteCount()+1));
         if (desc.isEmpty()) descriptionTV.setVisibility(View.GONE);
         else {
             descriptionTV.setText(desc);
             descriptionTV.setVisibility(View.VISIBLE);
         }
-        if (upvoted) upvoteIconIV.setImageResource(R.drawable.ic_star_yellow_24dp);
-        else upvoteIconIV.setImageResource(R.drawable.ic_star_border_yellow_24dp);
+        upvoteIconIV.setOnClickListener(null);
+        menuIV.setOnClickListener(null);
 
-        upvoteIconIV.setOnClickListener(onClickListener);
-        menuIV.setOnClickListener(onClickListener);
+        if (!report.getFixed()) {
+            if (upvoted) upvoteIconIV.setImageResource(R.drawable.ic_star_yellow_24dp);
+            else upvoteIconIV.setImageResource(R.drawable.ic_star_border_yellow_24dp);
+            upvoteCountTV.setVisibility(View.VISIBLE);
+            upvoteIconIV.setVisibility(View.VISIBLE);
+            fixedFlairTV.setVisibility(View.GONE);
+            upvoteIconIV.setOnClickListener(onClickListener);
+            menuIV.setOnClickListener(onClickListener);
+        } else {
+            upvoteCountTV.setVisibility(View.GONE);
+            upvoteIconIV.setVisibility(View.GONE);
+            fixedFlairTV.setVisibility(View.VISIBLE);
+
+        }
+
+
     }
 
     private String getDate(long time) {

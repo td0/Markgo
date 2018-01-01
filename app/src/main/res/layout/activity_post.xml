@@ -96,7 +96,7 @@
                         android:layout_weight="1"
                         android:visibility="invisible"
                         app:backgroundTint="@color/colorPrimary"
-                        app:srcCompat="@drawable/ic_create_secondary_24dp" />
+                        app:srcCompat="@drawable/ic_create_primary_24dp" />
                 </LinearLayout>
 
             </LinearLayout>

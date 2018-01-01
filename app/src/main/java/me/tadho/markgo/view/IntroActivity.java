@@ -221,7 +221,7 @@ public class IntroActivity extends MaterialIntroActivity {
         DatabaseReference ref = rootRef.child(Prefs.FD_REF_USERSLIST).child(uid);
         return RxFirebaseDatabase.setValue(ref, true)
             .doOnComplete(() -> {
-                savePreferences(name, 0);
+                savePreferences(name);
                 onFinish();
             });
     }
@@ -229,24 +229,19 @@ public class IntroActivity extends MaterialIntroActivity {
     private Completable setFBNameCompletable(String uid, String name){
         DatabaseReference userRef = rootRef.child(Prefs.FD_REF_USERS).child(uid);
         DatabaseReference nameRef = userRef.child(Prefs.FD_REF_NAME);
-        DatabaseReference countRef = userRef.child(Prefs.FD_REF_REPORTCOUNT);
-        return  RxFirebaseDatabase.observeSingleValueEvent(countRef)
-            .flatMapCompletable(snap ->
-                RxFirebaseDatabase.setValue(nameRef,name)
-                    .doOnComplete(() -> {
-                       savePreferences(name, snap.getValue(Integer.class));
-                       onFinish();
-                    })
-            );
+        return RxFirebaseDatabase.setValue(nameRef,name)
+                .doOnComplete(() -> {
+                   savePreferences(name);
+                   onFinish();
+        });
     }
 
-    private void savePreferences(String name, int reportCount){
+    private void savePreferences(String name){
         Timber.d("Saving SharedPreferences");
-        Timber.d("name = "+name+"; reportCount = "+reportCount);
+        Timber.d("name = "+name);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sp.edit();
         editor.putString(Prefs.PREF_KEY_USER_NAME, name);
-        editor.putInt(Prefs.PREF_KEY_REPORT_COUNT, reportCount);
         editor.apply();
     }
 

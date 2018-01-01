@@ -28,7 +28,7 @@
         <item name="android:textColor">@color/text_white</item>
     </style>
     <!--Theme Overlay Light-->
-    <style name="AppTheme.NoActionBar.Overlay.Popup" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.NoActionBar.Overlay.Popup" parent="ThemeOverlay.AppCompat" />
 
     <!--Custom Toolbar-->
     <style name="Widget.AppTheme.ToolBar.Main" parent="">
@@ -41,6 +41,7 @@
     </style>
     <style name="Widget.AppTheme.ToolBar" parent="Widget.AppTheme.ToolBar.Main">
         <item name="android:elevation" tools:ignore="NewApi">@dimen/toolbar_elevation</item>
+        <item name="layout_scrollFlags">enterAlwaysCollapsed</item>
     </style>
 
     <!--Button Themes-->
@@ -103,5 +104,10 @@
     <!--Actionbar style-->
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="popupMenuStyle" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:textColor">@color/text_white</item>
+        <item name="android:itemBackground">@color/colorPrimary</item>
     </style>
 </resources>

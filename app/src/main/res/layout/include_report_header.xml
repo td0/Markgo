@@ -34,7 +34,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:layout_weight="18"
+        android:layout_weight="10"
         android:orientation="vertical">
         <TextView
             android:id="@+id/reporter_name"
@@ -60,10 +60,10 @@
     <ImageView
         android:id="@+id/report_menu"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="27dp"
         android:layout_gravity="end|center_vertical"
         android:layout_weight="1"
-        app:srcCompat="@drawable/ic_more_vert_grey_900_24dp"
+        app:srcCompat="@drawable/ic_more_horiz_grey_900_18dp"
         android:background="?attr/selectableItemBackground"
         android:contentDescription="upvote icon" />
 

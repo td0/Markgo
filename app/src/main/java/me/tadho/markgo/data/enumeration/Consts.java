@@ -30,6 +30,7 @@ public final class Consts {
     public static final String STRING_NOT_AVAILABLE = "404-N/A";
 
     // POST
+    public static final int PHOTO_QUALITY = 23;
     public static final int TAKE_MODE_EXTRA_GALLERY = 3;
     public static final int TAKE_MODE_EXTRA_CAMERA = 29;
     public static final String PHOTO_PATH_EXTRA = "imagePath";

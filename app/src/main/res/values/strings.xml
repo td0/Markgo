@@ -26,7 +26,12 @@
     <string name="dialog_exit">Do you want to quit the app?</string>
     <string name="dialog_permission_denied">Permission is not granted</string>
     <string name="dialog_storage_permission_reasoning">Please grant the permission to pick a photo from the Gallery</string>
+    <string name="dialog_delete_report">Proceed to delete the report?</string>
+    <string name="dialog_issuing_fixed_road">Fixed road issued, waiting for admin confirmation…</string>
+    <string name="dialog_cancelling_fixed_road">Fixed road issue cancelled</string>
+    <string name="dialog_reasoning_text">Please explain your reasoning</string>
     <string name="dialog_ok">OK</string>
+    <string name="dialog_delete">Delete</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="about_submenu">About</string>
     <string name="edit_name_submenu">Edit Name</string>
@@ -90,6 +95,13 @@
     (just in case 🙂)
     <br /><br /><br /><br /><b>&copy;Tadho 2017</b>
     <br /><br /><br /><br /><br /><br /><br /> <big><b><u>OPEN SOURCE LIBRARIES</u></b></big>]]></string>
+
+    <!--Report Menu-->
+    <string name="menu_delete_report">Delete Report</string>
+    <string name="menu_issue_fixed">Issue Fixed Road</string>
+    <string name="menu_cancel_fixed_issue">Cancel Fixed Issue</string>
+    <string name="menu_issue_abuse">Issue Abusive Post</string>
+    <string name="fixed_flair">FIXED</string>
 
 
 </resources>

@@ -48,12 +48,28 @@
             android:textSize="14sp"
             android:drawableStart="@drawable/ic_location_on_red_400_18dp"
             android:gravity="start|top"
+            android:background="?attr/selectableItemBackground"
             tools:text="Jalan Soekarno Hatta" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="end|top">
+            <TextView
+                android:id="@+id/fixed_flair"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/green_a400"
+                android:textColor="@color/text_white"
+                android:textSize="15sp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:paddingStart="3dp"
+                android:paddingEnd="7dp"
+                android:text="@string/fixed_flair"
+                android:drawableStart="@drawable/ic_check_white_18dp"
+                android:visibility="gone"
+                />
             <ImageView
                 android:id="@+id/upvote_icon"
                 android:layout_width="wrap_content"
@@ -62,6 +78,7 @@
                 android:layout_marginEnd="5dp"
                 android:background="?attr/selectableItemBackground"
                 app:srcCompat="@drawable/ic_star_border_yellow_24dp"
+                android:visibility="visible"
                 android:contentDescription="upvote" />
 
             <TextView
@@ -70,7 +87,9 @@
                 android:layout_height="wrap_content"
                 android:gravity="start"
                 android:textSize="18sp"
-                tools:text="7" />
+                tools:text="7"
+                android:visibility="visible"
+                />
         </LinearLayout>
 
     </LinearLayout>

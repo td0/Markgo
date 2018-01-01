@@ -34,17 +34,47 @@ import java.util.Map;
 import me.tadho.markgo.data.model.Report;
 import timber.log.Timber;
 
-public final class UpdatePaths {
+public final class RefPaths {
 
     // Post Report
-    public static Map<String, Object> getPostReportPaths(String key, Report report, int reportCount){
+    public static Map<String, Object> getPostReportPaths(String key, Report report){
         String uid = report.getReporterId();
         Map<String, Object> object = new HashMap<>();
         object.put(pathJoin(Prefs.FD_REF_REPORTS ,key), report);
         object.put(pathJoin(Prefs.FD_REF_USERREPORTS, uid, key), report);
-        object.put(pathJoin(Prefs.FD_REF_USERS, uid, Prefs.FD_REF_REPORTCOUNT),
-            reportCount);
         return object;
+    }
+
+    public static Map<String, Object> getDeleteReportPaths(String uid, String key){
+        Map<String, Object> object = new HashMap<>();
+        object.put(pathJoin(Prefs.FD_REF_REPORTS, key), null);
+        object.put(pathJoin(Prefs.FD_REF_USERREPORTS, uid, key), null);
+        return  object;
+    }
+
+    public static Map<String, Object> getFixedPaths(String uid, String key){
+        Map<String, Object> object = new HashMap<>();
+        object.put(pathJoin(Prefs.FD_REF_USERFIXEDISSUES,uid,key), true);
+        object.put(pathJoin(Prefs.FD_REF_REPORTFIXEDISSUES,key,uid), true);
+        return object;
+    }
+
+    public static Map<String, Object> getCancelFixedPaths(String uid, String key){
+        Map<String, Object> object = new HashMap<>();
+        object.put(pathJoin(Prefs.FD_REF_USERFIXEDISSUES,uid,key), null);
+        object.put(pathJoin(Prefs.FD_REF_REPORTFIXEDISSUES,key,uid), null);
+        return object;
+    }
+
+    public static Map<String, Object> getAbuseIssuePaths(String issuerUid, String issuerName,
+                                                         Report report, String key, String reasoning){
+        Map<String, Object> object = new HashMap<>();
+        String prefix = pathJoin(Prefs.FD_REF_REPORTABUSEISSUES, key, issuerUid);
+        object.put(pathJoin(prefix, Prefs.FD_REF_ISSUERNAME), issuerName);
+        object.put(pathJoin(prefix, Prefs.FD_REF_ISSUEDUID), report.getReporterId());
+        object.put(pathJoin(prefix, Prefs.FD_REF_ISSUEDNAME), report.getReporterName());
+        object.put(pathJoin(prefix, Prefs.FD_REF_ISSUEREASONING), reasoning);
+        return  object;
     }
 
     // Vote Report
@@ -80,7 +110,12 @@ public final class UpdatePaths {
             combinedPath.append(string);
             combinedPath.append(SLASH);
         }
-        Timber.d("Combined path -> "+combinedPath.toString());
+//        Timber.d("Combined path -> "+combinedPath.toString());
         return combinedPath.toString();
+    }
+
+
+    public static String getPhotoStorageRef(String uid){
+        return pathJoin(Prefs.FS_REF_ROOT, uid);
     }
 }

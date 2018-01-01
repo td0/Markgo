@@ -22,16 +22,23 @@
 
 package me.tadho.markgo.view.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
+import com.firebase.ui.common.ChangeEventType;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,29 +47,35 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import me.tadho.markgo.R;
 import me.tadho.markgo.data.FbPersistence;
+import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.data.enumeration.Prefs;
-import me.tadho.markgo.data.enumeration.UpdatePaths;
+import me.tadho.markgo.data.enumeration.RefPaths;
 import me.tadho.markgo.data.model.Report;
+import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.view.adapter.ReportViewHolder;
 import timber.log.Timber;
 
 public abstract class ReportListFragment extends Fragment{
 
-    FirebaseAuth mAuth;
-    DatabaseReference dbRef;
-    DatabaseReference timelineRef;
-    DatabaseReference myReportRef;
-    DatabaseReference userUpvotesRef;
-    RecyclerView mRecycler;
-    LinearLayoutManager mManager;
-    FirebaseRecyclerAdapter<Report, ReportViewHolder> mAdapter;
-    HashMap<String, Boolean> userUpvotes;
+    private String mName;
+    private FirebaseAuth mAuth;
+    private DatabaseReference dbRef;
+    private DatabaseReference timelineRef;
+    private DatabaseReference myReportRef;
+    private DatabaseReference userUpvotesRef;
+    private DatabaseReference userFixedIssueRef;
+    private RecyclerView mRecycler;
+    private LinearLayoutManager mManager;
+    private FirebaseRecyclerAdapter<Report, ReportViewHolder> mAdapter;
+    private HashMap<String, Boolean> userUpvotes;
+    private HashMap<String, Boolean> userFixedIssue;
 
     public ReportListFragment(){}
 
@@ -70,19 +83,25 @@ public abstract class ReportListFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userUpvotes = new HashMap<>();
+        userFixedIssue = new HashMap<>();
         mAuth = FirebaseAuth.getInstance();
         dbRef = FbPersistence.getDatabase().getReference();
         timelineRef = dbRef.child(Prefs.FD_REF_REPORTS);
         myReportRef = dbRef.child(Prefs.FD_REF_USERREPORTS).child(getUid());
         userUpvotesRef = dbRef.child(Prefs.FD_REF_USERUPVOTES).child(getUid());
+        userFixedIssueRef = dbRef.child(Prefs.FD_REF_USERFIXEDISSUES).child(getUid());
         timelineRef.keepSynced(true);
         myReportRef.keepSynced(true);
         userUpvotesRef.keepSynced(true);
+        userFixedIssueRef.keepSynced(true);
+        userUpvotesRef.addValueEventListener(upvoteEventListener());
+        userFixedIssueRef.addValueEventListener(fixedEventListener());
 
-        userUpvotesRef.addValueEventListener(valueEventListener());
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mName = sp.getString(Prefs.PREF_KEY_USER_NAME, Consts.STRING_NOT_AVAILABLE);
     }
 
-    private ValueEventListener valueEventListener(){
+    private ValueEventListener upvoteEventListener(){
         return new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -90,14 +109,26 @@ public abstract class ReportListFragment extends Fragment{
                     userUpvotes = (HashMap<String, Boolean>) dataSnapshot.getValue();
                 } else userUpvotes.clear();
             }
+            @Override public void onCancelled(DatabaseError databaseError) {}
+        };
+    }
+
+    private ValueEventListener fixedEventListener(){
+        return new ValueEventListener() {
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists())
+                    userFixedIssue = (HashMap<String, Boolean>) dataSnapshot.getValue();
+                else userFixedIssue.clear();
+            }
+            @Override public void onCancelled(DatabaseError databaseError) {}
         };
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main_timeline, container, false);
 
         mRecycler = rootView.findViewById(R.id.recycler_timeline);
@@ -108,14 +139,12 @@ public abstract class ReportListFragment extends Fragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         mManager = new LinearLayoutManager(getActivity());
         mManager.setReverseLayout(true);
         mManager.setStackFromEnd(true);
         mRecycler.setLayoutManager(mManager);
 
         Query timelineQuery = getQuery(dbRef);
-
         FirebaseRecyclerOptions<Report> options = new FirebaseRecyclerOptions.Builder<Report>()
             .setQuery(timelineQuery, Report.class)
             .build();
@@ -129,43 +158,112 @@ public abstract class ReportListFragment extends Fragment{
             @Override
             protected void onBindViewHolder(@NonNull ReportViewHolder holder, int position, @NonNull Report model) {
                 final String reportKey = getRef(position).getKey();
-                final String reportUid = model.getReporterId();
                 Boolean upvote = userUpvotes.get(reportKey) != null;
                 if (model.getReporterId().equals(getUid())) upvote = true;
                 holder.bindToReportItem(getActivity(), model,
-                    onClickListener(reportUid, reportKey), upvote);
+                    onClickListener(reportKey, model), upvote);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull ChangeEventType type, @NonNull DataSnapshot snapshot, int newIndex, int oldIndex) {
+                super.onChildChanged(type, snapshot, newIndex, oldIndex);
+                if (type == ChangeEventType.ADDED) {
+                    if (snapshot.getValue(Report.class).getReporterId().equals(getUid())){
+                        mRecycler.scrollToPosition(newIndex);
+                    }
+                }
             }
         };
-        mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                super.onItemRangeInserted(positionStart, itemCount);
-                mManager.findLastCompletelyVisibleItemPosition();
-            }
-        });
-
         mRecycler.setAdapter(mAdapter);
     }
 
-    private View.OnClickListener onClickListener(String reportUid, String reportKey){
+    private View.OnClickListener onClickListener(String reportKey, Report report){
+        String reporterId = report.getReporterId();
         return v -> {
             if (v.getId() == R.id.report_menu){
                 Timber.d("Report Menu clicked! -> "+reportKey);
+                Context wrapper = new ContextThemeWrapper(getActivity(), R.style.popupMenuStyle);
+                PopupMenu popup = new PopupMenu(wrapper, v);
+                int menuResId;
+                if (reporterId.equals(getUid())) menuResId = R.menu.my_report_menu;
+                else menuResId = R.menu.timeline_report_menu;
+                popup.getMenuInflater().inflate(menuResId, popup.getMenu());
+                if (userFixedIssue.get(reportKey) != null)
+                    popup.getMenu().findItem(R.id.menu_issue_fixed).setTitle(R.string.menu_cancel_fixed_issue);
+                popup.setOnMenuItemClickListener(onMenuItemClickListener(reportKey, report));
+                popup.show();
             } else if (v.getId() == R.id.upvote_icon) {
-                if (!reportUid.equals(getUid()))
-                    updateVote(reportUid, reportKey, userUpvotes.get(reportKey) == null);
+                if (!reporterId.equals(getUid()))
+                    updateVote(reporterId, reportKey, userUpvotes.get(reportKey) == null);
             }
         };
     }
 
     private void updateVote(String reportUid, String reportKey, Boolean isAdded){
         DatabaseReference reportRef = dbRef.child(Prefs.FD_REF_USERREPORTS).child(reportUid);
-        Map<String, Object> userUpvotesPath = UpdatePaths.getVoteReportPaths(reportKey, isAdded);
+        Map<String, Object> userUpvotesPath = RefPaths.getVoteReportPaths(reportKey, isAdded);
         userUpvotesRef.updateChildren(userUpvotesPath, (error, ref) -> {
             if (error == null)
-                UpdatePaths.runVoteTransactions(reportKey, isAdded, timelineRef, reportRef);
+                RefPaths.runVoteTransactions(reportKey, isAdded, reportRef, timelineRef);
         });
     }
+
+    private PopupMenu.OnMenuItemClickListener onMenuItemClickListener(String key, Report report){
+        return (item -> {
+            switch (item.getItemId()){
+                case R.id.menu_delete_report:
+                    DisplayUtility.customAlertDialog(getActivity())
+                        .setTitle(R.string.dialog_delete_report)
+                        .setPositiveButton(R.string.dialog_delete,((dialog, which) -> {
+                            Map<String,Object> deleteReportPaths = RefPaths.getDeleteReportPaths(getUid(), key);
+                            dbRef.updateChildren(deleteReportPaths);
+                            String photoStorageRef = RefPaths.getPhotoStorageRef(getUid())+key+".jpg";
+                            FirebaseStorage.getInstance()
+                                .getReference(photoStorageRef)
+                                .delete();
+                        }))
+                        .setNegativeButton(R.string.dialog_cancel,null)
+                        .show();
+                    return true;
+                case R.id.menu_issue_fixed:
+                    Map<String, Object> fixedIssuePaths;
+                    int dialogMsgId;
+                    if (userFixedIssue.get(key) == null) {
+                        fixedIssuePaths = RefPaths.getFixedPaths(getUid(), key);
+                        dialogMsgId = R.string.dialog_issuing_fixed_road;
+                    } else {
+                        fixedIssuePaths = RefPaths.getCancelFixedPaths(getUid(), key);
+                        dialogMsgId = R.string.dialog_cancelling_fixed_road;
+                    }
+                    DisplayUtility.customAlertDialog(getActivity())
+                        .setMessage(dialogMsgId)
+                        .setPositiveButton(R.string.dialog_ok,null)
+                        .show();
+                    dbRef.updateChildren(fixedIssuePaths);
+                    return true;
+                case R.id.menu_issue_abuse:
+                    LayoutInflater li = LayoutInflater.from(getActivity());
+                    View abuseDialogLayout = li.inflate(R.layout.dialog_abuse_reasoning, null);
+                    final EditText reasoningET = abuseDialogLayout.findViewById(R.id.reasoning_input);
+                    DisplayUtility.customAlertDialog(getActivity())
+                        .setView(abuseDialogLayout)
+                        .setNegativeButton(R.string.dialog_cancel,null)
+                        .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
+                            String reasoning = reasoningET.getText().toString();
+                            Map<String, Object> abuseIssuePaths;
+                            abuseIssuePaths = RefPaths.getAbuseIssuePaths(getUid(), mName, report,
+                                key, reasoning);
+                            dbRef.updateChildren(abuseIssuePaths);
+                        })
+                        .show();
+                    return true;
+                default:
+                    return false;
+            }
+        });
+    }
+
+
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -214,10 +312,13 @@ public abstract class ReportListFragment extends Fragment{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        userUpvotesRef.removeEventListener(valueEventListener());
+        userUpvotesRef.removeEventListener(upvoteEventListener());
+        userFixedIssueRef.removeEventListener(fixedEventListener());
         timelineRef.keepSynced(false);
         myReportRef.keepSynced(false);
         userUpvotesRef.keepSynced(false);
+        userFixedIssueRef.keepSynced(false);
+        userUpvotes.clear();
     }
 
     protected String getUid(){

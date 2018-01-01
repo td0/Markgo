@@ -82,7 +82,7 @@ public class ClusterInfoWindowAdapter
     public View getInfoContents(Marker marker) {
         String key = marker.getTitle();
         Report item = mReports.get(key);
-        String vote = String.valueOf(item.getUpvoteCount());
+        String vote = String.valueOf(item.getUpvoteCount()+1);
         String desc = mContext.getString(R.string.info_window_description)+item.getDescription();
 
         tvTitle.setText(item.getReporterName());

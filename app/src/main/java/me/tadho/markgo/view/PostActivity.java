@@ -41,7 +41,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.AppCompatEditText;
-import android.text.format.Time;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -87,7 +86,7 @@ import io.reactivex.subjects.Subject;
 import me.tadho.markgo.BuildConfig;
 import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Consts;
-import me.tadho.markgo.data.enumeration.UpdatePaths;
+import me.tadho.markgo.data.enumeration.RefPaths;
 import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.DisplayUtility;
@@ -388,7 +387,7 @@ public class PostActivity extends AppCompatActivity
                     .rotateBitmap(PostActivity.this, photoUri, photoTaken);
                 Timber.d("WriteFile|Camera/Gallery : init compress stream");
                 ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-                compressedBitmap.compress(Bitmap.CompressFormat.JPEG, 17, bytes);
+                compressedBitmap.compress(Bitmap.CompressFormat.JPEG, Consts.PHOTO_QUALITY, bytes);
                 File resizedFile = new File(photoPath);
                 try {
                     Timber.d("WriteFile|Camera/Gallery : writing file...");
@@ -540,19 +539,23 @@ public class PostActivity extends AppCompatActivity
         sp = PreferenceManager.getDefaultSharedPreferences(PostActivity.this);
         userName = sp.getString(Prefs.PREF_KEY_USER_NAME, Consts.STRING_NOT_AVAILABLE);
 
-        compositeDisposable.add(uploadPhoto(uid)
+        DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
+        String key = dbRef.child("Reports").push().getKey();
+
+        compositeDisposable.add(uploadPhoto(uid, key)
             .flatMapCompletable(snap -> {
                 Report report = new Report(uid, userName, streetName,
                     description, snap.getDownloadUrl().toString(), coord);
-                return saveReportDataCompletable(report);
+                return saveReportDataCompletable(dbRef, key, report);
             })
             .subscribe());
     }
 
-    private Maybe<UploadTask.TaskSnapshot> uploadPhoto(String uid){
+    private Maybe<UploadTask.TaskSnapshot> uploadPhoto(String uid, String key){
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference()
-            .child(Prefs.FS_REF_ROOT).child(uid+"/"+fileNameGenerator());
+            .child(Prefs.FS_REF_ROOT).child(uid+"/"+key+".jpg");
+
         Timber.d("reference : "+storageRef.getPath());
         return RxFirebaseStorage
             .putFile(storageRef, Uri.fromFile(photoFile))
@@ -574,12 +577,8 @@ public class PostActivity extends AppCompatActivity
             });
     }
 
-    private Completable saveReportDataCompletable(Report report){
-        DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
-        String key = dbRef.child("Reports").push().getKey();
-        reportCount = sp.getInt(Prefs.PREF_KEY_REPORT_COUNT, 0);
-        reportCount++;
-        Map<String, Object> reportUpdates = UpdatePaths.getPostReportPaths(key,report,reportCount);
+    private Completable saveReportDataCompletable(DatabaseReference dbRef, String key, Report report){
+        Map<String, Object> reportUpdates = RefPaths.getPostReportPaths(key,report);
         GeoFire geoFire = new GeoFire(dbRef.child(Prefs.FD_REF_GEOFIRENODE));
         GeoLocation geoLocation = new GeoLocation(mLatLng.latitude,mLatLng.longitude);
 
@@ -596,24 +595,14 @@ public class PostActivity extends AppCompatActivity
             })
             .doOnComplete(() -> {
                 progress.setMessage("restructuring location...");
-                geoFire.setLocation(key,geoLocation,geoFireCompletionListener());
+                geoFire.setLocation(key, geoLocation, geoFireCompletionListener());
             });
     }
 
-    private String fileNameGenerator(){
-        Time t = new Time();
-        t.setToNow();
-        long timestamp=System.currentTimeMillis();
-        return "/"+t.year+t.month+t.monthDay+t.hour+t.minute+t.second+":"
-            +timestamp+ Consts.POST_FILE_EXT;
-    }
     private GeoFire.CompletionListener geoFireCompletionListener(){
         return (gKey, err) -> {
             if (err == null) {
                 Timber.d("Updating SharedPreferences reportCount");
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putInt(Prefs.PREF_KEY_REPORT_COUNT, reportCount);
-                editor.apply();
                 progress.dismiss();
                 finish();
             } else {
