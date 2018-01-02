@@ -54,15 +54,16 @@ public class PhotoViewerActivity extends AppCompatActivity {
             Uri fileUri = Uri.fromFile(file);
 
             RequestOptions requestOptions = new RequestOptions()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE);
+                .diskCacheStrategy(DiskCacheStrategy.NONE);
             GlideApp.with(PhotoViewerActivity.this)
-                    .load(fileUri)
-                    .apply(requestOptions)
-                    .into(photoView);
+                .load(fileUri)
+                .apply(requestOptions)
+                .into(photoView);
         } else {
             GlideApp.with(PhotoViewerActivity.this)
-                    .load(imagePath)
-                    .into(photoView);
+                .load(imagePath)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .into(photoView);
         }
 
         photoView.setOnPhotoTapListener((view, x, y) -> supportFinishAfterTransition());

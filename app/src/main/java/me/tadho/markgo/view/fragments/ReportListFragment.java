@@ -23,11 +23,14 @@
 package me.tadho.markgo.view.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -41,6 +44,7 @@ import android.widget.EditText;
 import com.firebase.ui.common.ChangeEventType;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -59,6 +63,8 @@ import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.enumeration.RefPaths;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.DisplayUtility;
+import me.tadho.markgo.view.PhotoViewerActivity;
+import me.tadho.markgo.view.PostActivity;
 import me.tadho.markgo.view.adapter.ReportViewHolder;
 import timber.log.Timber;
 
@@ -195,6 +201,15 @@ public abstract class ReportListFragment extends Fragment{
             } else if (v.getId() == R.id.upvote_icon) {
                 if (!reporterId.equals(getUid()))
                     updateVote(reporterId, reportKey, userUpvotes.get(reportKey) == null);
+            } else if (v.getId() == R.id.report_photo) {
+                Timber.d("Photo clicked");
+                Intent intent = new Intent(getActivity(),PhotoViewerActivity.class)
+                    .putExtra(Consts.PHOTO_PATH_EXTRA, report.getImageUrl())
+                    .putExtra(Consts.LOCAL_FILE_EXTRA, false);
+                ActivityOptionsCompat options = ActivityOptionsCompat
+                    .makeSceneTransitionAnimation(getActivity(), v,
+                        getActivity().getString(R.string.animation_photo_view));
+                startActivity(intent, options.toBundle());
             }
         };
     }
@@ -212,50 +227,13 @@ public abstract class ReportListFragment extends Fragment{
         return (item -> {
             switch (item.getItemId()){
                 case R.id.menu_delete_report:
-                    DisplayUtility.customAlertDialog(getActivity())
-                        .setTitle(R.string.dialog_delete_report)
-                        .setPositiveButton(R.string.dialog_delete,((dialog, which) -> {
-                            Map<String,Object> deleteReportPaths = RefPaths.getDeleteReportPaths(getUid(), key);
-                            dbRef.updateChildren(deleteReportPaths);
-                            String photoStorageRef = RefPaths.getPhotoStorageRef(getUid())+key+".jpg";
-                            FirebaseStorage.getInstance()
-                                .getReference(photoStorageRef)
-                                .delete();
-                        }))
-                        .setNegativeButton(R.string.dialog_cancel,null)
-                        .show();
+                    menuDeleteReport(key);
                     return true;
                 case R.id.menu_issue_fixed:
-                    Map<String, Object> fixedIssuePaths;
-                    int dialogMsgId;
-                    if (userFixedIssue.get(key) == null) {
-                        fixedIssuePaths = RefPaths.getFixedPaths(getUid(), key);
-                        dialogMsgId = R.string.dialog_issuing_fixed_road;
-                    } else {
-                        fixedIssuePaths = RefPaths.getCancelFixedPaths(getUid(), key);
-                        dialogMsgId = R.string.dialog_cancelling_fixed_road;
-                    }
-                    DisplayUtility.customAlertDialog(getActivity())
-                        .setMessage(dialogMsgId)
-                        .setPositiveButton(R.string.dialog_ok,null)
-                        .show();
-                    dbRef.updateChildren(fixedIssuePaths);
+                    menuIssueFixed(key);
                     return true;
                 case R.id.menu_issue_abuse:
-                    LayoutInflater li = LayoutInflater.from(getActivity());
-                    View abuseDialogLayout = li.inflate(R.layout.dialog_abuse_reasoning, null);
-                    final EditText reasoningET = abuseDialogLayout.findViewById(R.id.reasoning_input);
-                    DisplayUtility.customAlertDialog(getActivity())
-                        .setView(abuseDialogLayout)
-                        .setNegativeButton(R.string.dialog_cancel,null)
-                        .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
-                            String reasoning = reasoningET.getText().toString();
-                            Map<String, Object> abuseIssuePaths;
-                            abuseIssuePaths = RefPaths.getAbuseIssuePaths(getUid(), mName, report,
-                                key, reasoning);
-                            dbRef.updateChildren(abuseIssuePaths);
-                        })
-                        .show();
+                    menuIssueAbuse(key, report);
                     return true;
                 default:
                     return false;
@@ -263,7 +241,52 @@ public abstract class ReportListFragment extends Fragment{
         });
     }
 
+    private void menuDeleteReport(String key){
+        DisplayUtility.customAlertDialog(getActivity())
+            .setTitle(R.string.dialog_delete_report)
+            .setPositiveButton(R.string.dialog_delete,((dialog, which) -> {
+                Map<String,Object> deleteReportPaths = RefPaths.getDeleteReportPaths(getUid(), key);
+                dbRef.updateChildren(deleteReportPaths);
+                String photoStorageRef = RefPaths.getPhotoStorageRef(getUid())+key+".jpg";
+                FirebaseStorage.getInstance()
+                    .getReference(photoStorageRef)
+                    .delete();
+            }))
+            .setNegativeButton(R.string.dialog_cancel,null)
+            .show();
+    }
 
+    private void menuIssueFixed(String key){
+        Map<String, Object> fixedIssuePaths;
+        FloatingActionMenu fam = getActivity().findViewById(R.id.mFam);
+        int dialogMsgId;
+        if (userFixedIssue.get(key) == null) {
+            fixedIssuePaths = RefPaths.getFixedPaths(getUid(), key);
+            dialogMsgId = R.string.dialog_issuing_fixed_road;
+        } else {
+            fixedIssuePaths = RefPaths.getCancelFixedPaths(getUid(), key);
+            dialogMsgId = R.string.dialog_cancelling_fixed_road;
+        }
+        Snackbar.make(fam, dialogMsgId, Snackbar.LENGTH_SHORT).show();
+        dbRef.updateChildren(fixedIssuePaths);
+    }
+
+    private  void menuIssueAbuse(String key, Report report){
+        LayoutInflater li = LayoutInflater.from(getActivity());
+        View abuseDialogLayout = li.inflate(R.layout.dialog_abuse_reasoning, null);
+        final EditText reasoningET = abuseDialogLayout.findViewById(R.id.reasoning_input);
+        DisplayUtility.customAlertDialog(getActivity())
+            .setView(abuseDialogLayout)
+            .setNegativeButton(R.string.dialog_cancel,null)
+            .setPositiveButton(R.string.dialog_ok, (dialog, which) -> {
+                String reasoning = reasoningET.getText().toString();
+                Map<String, Object> abuseIssuePaths;
+                abuseIssuePaths = RefPaths.getAbuseIssuePaths(getUid(), mName, report,
+                    key, reasoning);
+                dbRef.updateChildren(abuseIssuePaths);
+            })
+            .show();
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {

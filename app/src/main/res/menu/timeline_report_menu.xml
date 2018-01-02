@@ -22,9 +22,9 @@
   -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/menu_issue_fixed"
-        android:title="@string/menu_issue_fixed" />
-    <item
         android:id="@+id/menu_issue_abuse"
         android:title="@string/menu_issue_abuse" />
+    <item
+        android:id="@+id/menu_issue_fixed"
+        android:title="@string/menu_issue_fixed" />
 </menu>
