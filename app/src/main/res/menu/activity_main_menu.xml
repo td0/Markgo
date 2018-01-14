@@ -36,10 +36,6 @@
         android:icon="@drawable/ic_more_vert_white_24dp">
         <menu>
             <item
-                android:id="@+id/changename_submenu"
-                android:title="@string/edit_name_submenu"
-                app:showAsAction="never" />
-            <item
                 android:id="@+id/about_submenu"
                 android:title="@string/about_submenu"
                 app:showAsAction="never"/>

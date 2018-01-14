@@ -94,9 +94,6 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         FloatingActionButton fabCamera = findViewById(R.id.fabCamera);
         mFam.setClosedOnTouchOutside(true);
 
-        // TODO : might need to hide this FAB later
-        // mFam.hideMenuButton(true);
-
         Disposable fabGalleryDisposable = RxView.clicks(fabGallery)
                 .compose(new RxPermissions(MainActivity.this)
                         .ensure(Manifest.permission.READ_EXTERNAL_STORAGE))
@@ -153,13 +150,13 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                 Timber.d("Logout Prefs submenu pressed");
                 signOut();
                 return true;
-            // TODO: Temporary helper
-            case R.id.changename_submenu:
-                Timber.d("Change name submenu pressed");
-                DisplayUtility.customAlertDialog(MainActivity.this)
-                    .setMessage("report count has been reset to 0")
-                    .show();
-                return true;
+            // TODO: Change name
+//            case R.id.changename_submenu:
+//                Timber.d("Change name submenu pressed");
+//                DisplayUtility.customAlertDialog(MainActivity.this)
+//                    .setMessage("report count has been reset to 0")
+//                    .show();
+//                return true;
             case R.id.about_submenu:
                 Timber.d("About submenu pressed");
                 new LibsBuilder()
