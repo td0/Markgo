@@ -17,12 +17,12 @@ public class App extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
         // Leak Canary init
-        if (LeakCanary.isInAnalyzerProcess(this)) {
-            // This process is dedicated to LeakCanary for heap analysis.
-            // You should not init your app in this process.
-            return;
-        }
-        LeakCanary.install(this);
+//        if (LeakCanary.isInAnalyzerProcess(this)) {
+//            // This process is dedicated to LeakCanary for heap analysis.
+//            // You should not init your app in this process.
+//            return;
+//        }
+//        LeakCanary.install(this);
 
         // Timber init
         if (BuildConfig.DEBUG) {
