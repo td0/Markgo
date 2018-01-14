@@ -289,7 +289,8 @@ public class FormIntroSlide extends SlideFragment
     }
 
     private boolean validateName(String name) {
-        return name.matches("^\\p{L}+[\\p{L}\\p{Z}\\p{P}]*");
+//        return name.matches("^\\p{L}+[\\p{L}\\p{Z}\\p{P}]*");
+        return name.matches("[A-Za-z0-9\\s]*");
     }
     private boolean validatePhone(String phoneNumber){
         if (TextUtils.isEmpty(phoneNumber)) return false;

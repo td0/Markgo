@@ -229,11 +229,18 @@ public class IntroActivity extends MaterialIntroActivity {
     private Completable setFBNameCompletable(String uid, String name){
         DatabaseReference userRef = rootRef.child(Prefs.FD_REF_USERS).child(uid);
         DatabaseReference nameRef = userRef.child(Prefs.FD_REF_NAME);
-        return RxFirebaseDatabase.setValue(nameRef,name)
+        return RxFirebaseDatabase.observeSingleValueEvent(nameRef)
+            .map(snap -> {
+                String registeredName = snap.getValue(String.class);
+                return registeredName;
+            })
+            .flatMapCompletable(registeredName -> Completable.complete()
                 .doOnComplete(() -> {
-                   savePreferences(name);
-                   onFinish();
-        });
+                    Timber.d("Registered name -> " + registeredName);
+                    savePreferences(registeredName);
+                    onFinish();
+                })
+            );
     }
 
     private void savePreferences(String name){
