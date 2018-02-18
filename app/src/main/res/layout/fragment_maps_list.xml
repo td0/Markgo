@@ -47,9 +47,9 @@
         app:fab_elevationCompat="@dimen/fab_margin"
         app:layout_anchor="@id/fab_separator"
         app:layout_anchorGravity="top|right|end"
-        app:menu_colorNormal="@color/colorSecondary"
-        app:menu_colorPressed="@color/colorSecondaryLight"
-        app:menu_colorRipple="@color/colorSecondaryLight"
+        app:menu_colorNormal="@color/background_white"
+        app:menu_colorPressed="@color/background_white_ripple"
+        app:menu_colorRipple="@color/background_white_ripple"
         app:layout_behavior="me.tadho.markgo.utils.FloatingActionMenuBehavior"
         >
         <com.github.clans.fab.FloatingActionButton

@@ -296,7 +296,7 @@ public class MapsListFragment extends Fragment
                 .radius(23)
                 .weightedData(heatMapList)
                 .build();
-        if (DisplayUtility.isDay()) heatMapProvider.setGradient(getCustomGradient());
+        if (!DisplayUtility.isDay()) heatMapProvider.setGradient(getCustomGradient());
         heatMapProvider.setOpacity(0.55d);
         heatMapOverlay = googleMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatMapProvider));
     }
