@@ -108,7 +108,6 @@ public class PostActivity extends AppCompatActivity
     private LatLng mLatLng;
     private String streetName;
     private String userName;
-    private int reportCount;
 
     private TextView tvStreetName;
     private ThumbnailView thumbnailView;

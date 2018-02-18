@@ -29,6 +29,7 @@
     <string name="dialog_delete_report">Proceed to delete the report?</string>
     <string name="dialog_issuing_fixed_road">Fixed road issued, waiting for admin confirmation…</string>
     <string name="dialog_cancelling_fixed_road">Fixed road issue cancelled</string>
+    <string name="dialog_confirm_signout">Confirm sign out?</string>
     <string name="dialog_reasoning_text">Please explain your reasoning</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_delete">Delete</string>

@@ -8,15 +8,14 @@ if (keystorePropsFile.exists()) {
 }
 
 android {
-    buildToolsVersion buildTools
-    compileSdkVersion compileSdk
+    buildToolsVersion '26.0.3'
+    compileSdkVersion 27
     defaultConfig {
         applicationId "me.tadho.markgo"
         minSdkVersion 19
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         signingConfig signingConfigs.debug
         resValue "string", "google_maps_key", (project.findProperty("GOOGLE_MAPS_API_KEY") ?: "")
@@ -27,17 +26,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     signingConfigs {
-        debug {
-            if (keystoreProps != null) {
-                storeFile file(keystoreProps['STORE_FILE_DEBUG'])
-                storePassword keystoreProps['STORE_PASSWORD_DEBUG']
-                keyAlias keystoreProps['KEY_ALIAS_DEBUG']
-                keyPassword keystoreProps['KEY_PASSWORD_DEBUG']
-            }
-            keyAlias 'markgoDebug'
-            keyPassword 'android'
-            storeFile file('/Users/tdh/Dev/androidCode/Markgo/.signing/debug.keystore')
-            storePassword 'android'
+        markgoDebug {
+            storeFile file(keystoreProps['STORE_FILE_DEBUG'])
+            storePassword keystoreProps['STORE_PASSWORD_DEBUG']
+            keyAlias keystoreProps['KEY_ALIAS_DEBUG']
+            keyPassword keystoreProps['KEY_PASSWORD_DEBUG']
         }
     }
     buildTypes {
@@ -46,8 +39,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.debug
-            debuggable true
+            signingConfig signingConfigs.markgoDebug
         }
     }
     productFlavors {}

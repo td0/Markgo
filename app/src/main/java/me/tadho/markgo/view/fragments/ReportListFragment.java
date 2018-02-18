@@ -64,7 +64,6 @@ import me.tadho.markgo.data.enumeration.RefPaths;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.view.PhotoViewerActivity;
-import me.tadho.markgo.view.PostActivity;
 import me.tadho.markgo.view.adapter.ReportViewHolder;
 import timber.log.Timber;
 
@@ -82,6 +81,8 @@ public abstract class ReportListFragment extends Fragment{
     private FirebaseRecyclerAdapter<Report, ReportViewHolder> mAdapter;
     private HashMap<String, Boolean> userUpvotes;
     private HashMap<String, Boolean> userFixedIssue;
+
+    private Report report;
 
     public ReportListFragment(){}
 
