@@ -15,6 +15,7 @@
     <!--Tab titles array-->
     <string-array name="tab_titles">
         <item>Timeline</item>
+        <item>Fixed</item>
         <item>My Reports</item>
     </string-array>
 
@@ -102,7 +103,7 @@
     <string name="menu_issue_fixed">Issue Fixed Road</string>
     <string name="menu_cancel_fixed_issue">Cancel Fixed Issue</string>
     <string name="menu_issue_abuse">Issue Abusive Post</string>
-    <string name="fixed_flair">REPAIRED</string>
+    <string name="fixed_flair">FIXED</string>
 
 
 </resources>

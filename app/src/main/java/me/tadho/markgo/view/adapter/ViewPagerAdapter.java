@@ -29,6 +29,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import me.tadho.markgo.R;
+import me.tadho.markgo.view.fragments.MainFixedFragment;
 import me.tadho.markgo.view.fragments.MainMyReportFragment;
 import me.tadho.markgo.view.fragments.MainTimelineFragment;
 
@@ -49,6 +50,8 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return new MainTimelineFragment();
             case 1:
+                return new MainFixedFragment();
+            case 2:
                 return new MainMyReportFragment();
             default:
                 return null;
