@@ -83,8 +83,6 @@
     <string name="fab_heat_map_label">Heat Map</string>
     <string name="fab_clustering_label">Clustering</string>
     <string name="info_window_content">Info window content</string>
-    <string name="info_window_description">Description : </string>
-
     <!--Animation-->
     <string name="animation_photo_view">photoViewAnimation</string>
     <string name="animation_maps_picker">mapsPickerAnimation</string>
@@ -104,7 +102,7 @@
     <string name="menu_issue_fixed">Issue Fixed Road</string>
     <string name="menu_cancel_fixed_issue">Cancel Fixed Issue</string>
     <string name="menu_issue_abuse">Issue Abusive Post</string>
-    <string name="fixed_flair">FIXED</string>
+    <string name="fixed_flair">REPAIRED</string>
 
 
 </resources>

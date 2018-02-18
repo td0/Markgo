@@ -39,7 +39,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -130,7 +129,7 @@ public class MapsPickerFragment extends Fragment implements
         if (!DisplayUtility.isDay()) {
             try {
                 boolean success = googleMap.setMapStyle(MapStyleOptions
-                    .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.maps_style_dark));
+                    .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.map_style_dark));
                 if (!success) {
                     Timber.e("MapsActivityRaw", "Style parsing failed.");
                 }

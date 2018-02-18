@@ -55,7 +55,6 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
-import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.heatmaps.Gradient;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
@@ -106,6 +105,7 @@ public class MapsListFragment extends Fragment
 
     private Boolean clusterMode = true;
     private Boolean populated = false;
+    private Boolean initialLatLng = false;
     private HashMap<String, Report> mapItems = new HashMap<>();
     private ClusterManager<ClusterMarker> mClusterManager;
     private TileOverlay heatMapOverlay;
@@ -117,13 +117,17 @@ public class MapsListFragment extends Fragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
+        getActivity().setTitle(R.string.maps_cluster_mode);
         mLatLng = Consts.MALANG_LATLNG;
-        compositeDisposable = new CompositeDisposable();
+        if (getArguments() != null) {
+            mLatLng = getArguments().getParcelable(Consts.LATLNG_EXTRA);
+            initialLatLng = true;
+            Timber.d("Argument found -> "+mLatLng);
+        }
+        DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
         dbMapsRef = dbRef.child(Prefs.FD_REF_REPORTS);
         dbMapsRef.keepSynced(true);
-        compositeDisposable.add(mapEventListenerFlowable().subscribe());
-        getActivity().setTitle(R.string.maps_cluster_mode);
+        compositeDisposable = new CompositeDisposable();
     }
 
     @Nullable
@@ -181,14 +185,10 @@ public class MapsListFragment extends Fragment
     public void onMapReady(GoogleMap mMap) {
         googleMap = mMap;
         try {
-            boolean success;
-            if (DisplayUtility.isDay()) success = googleMap.setMapStyle(MapStyleOptions
-                .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.map_style_no_poi));
-            else success = googleMap.setMapStyle(MapStyleOptions
-                .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.map_style_no_poi_dark));
-            if (!success) {
-                Timber.e("MapsActivityRaw", "Style parsing failed.");
-            }
+            boolean success = true;
+            if (!DisplayUtility.isDay()) success = googleMap.setMapStyle(MapStyleOptions
+                .loadRawResourceStyle(getActivity().getBaseContext(), R.raw.map_style_dark));
+            if (!success) Timber.e("MapsActivityRaw", "Style parsing failed.");
         } catch (Resources.NotFoundException e) {
             Timber.e("MapsActivityRaw", "Can't find style.", e);
         }
@@ -201,23 +201,26 @@ public class MapsListFragment extends Fragment
         googleMap.setMinZoomPreference(11f);
         googleMap.setLatLngBoundsForCameraTarget(Consts.MALANG_BOUNDS);
 
-        setMapsCamera(mLatLng, 13.5f, false);
-        compositeDisposable.add(setMapsCameraCompletable(13.5f, false).subscribe());
-        initiateMapsMode();
+        if (!initialLatLng) {
+            setMapsCamera(mLatLng, 13.5f, false);
+            compositeDisposable.add(setMapsCameraCompletable(13.5f, false).subscribe());
+        } else {
+            setMapsCamera(mLatLng, 16, false);
+        }
+        compositeDisposable.add(mapEventListenerFlowable().subscribe());
     }
 
     private Flowable<DataSnapshot> mapEventListenerFlowable(){
         return RxFirebaseDatabase.observeValueEvent(dbMapsRef, BackpressureStrategy.LATEST)
             .doOnNext(snaps -> {
-                Timber.d("ValListn onDataChange,");
                 if (snaps.exists()) {
                     if (mapItems != null) mapItems.clear();
                     for (DataSnapshot snap : snaps.getChildren()) {
                         if (!snap.getValue(Report.class).getFixed())
                             mapItems.put(snap.getKey(), snap.getValue(Report.class));
-                        Timber.d("ValListn, key : " + snap.getKey() + " -> val : " + snap.getValue());
                     }
-                    if (populated) refreshMapsMode();
+                    if (populated) refreshMapsData();
+                    else initiateMapsMode();
                 }
             })
             .doOnCancel(() -> Timber.d("RxFirebase ValueEventListener onCancel triggered!"));
@@ -231,16 +234,15 @@ public class MapsListFragment extends Fragment
             else setupHeatMap();
             populated = true;
         }
-
     }
 
-    private void refreshMapsMode(){
+    private void refreshMapsData(){
         if (clusterMode) {
-            if (mClusterManager!=null) mClusterManager.clearItems();
+            if (mClusterManager != null) mClusterManager.clearItems();
             populateCluster();
             mClusterManager.cluster();
         } else {
-            if (heatMapList!=null) heatMapList.clear();
+            if (heatMapList != null) heatMapList.clear();
             populateHeatMap();
             heatMapProvider.setWeightedData(heatMapList);
             heatMapOverlay.clearTileCache();
@@ -248,7 +250,6 @@ public class MapsListFragment extends Fragment
     }
 
     private void cleanMaps(){
-
         if (heatMapList != null){
             heatMapList.clear();
         }
@@ -258,7 +259,7 @@ public class MapsListFragment extends Fragment
             heatMapOverlay = null;
             heatMapProvider = null;
         }
-        if (mClusterManager!=null) {
+        if (mClusterManager != null) {
             mClusterManager.clearItems();
             mClusterManager.getMarkerCollection().setOnInfoWindowAdapter(null);
             mClusterManager.setOnClusterClickListener(null);

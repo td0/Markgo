@@ -38,6 +38,7 @@ import android.view.View;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.CompositeDisposable;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -244,6 +245,13 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     public void showBlockedSnackbar(View view) {
         Snackbar.make(view, R.string.snackbar_blocked, Snackbar.LENGTH_SHORT)
             .show();
+    }
+    public void startMapsActivity(LatLng latLng){
+        Bundle extras = new Bundle();
+        Intent mapsIntent = new Intent(MainActivity.this, MapsActivity.class);
+        extras.putParcelable(Consts.LATLNG_EXTRA, latLng);
+        mapsIntent.putExtras(extras);
+        startActivity(mapsIntent);
     }
 
     @Override

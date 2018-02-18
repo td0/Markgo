@@ -83,10 +83,9 @@ public class ClusterInfoWindowAdapter
         String key = marker.getTitle();
         Report item = mReports.get(key);
         String vote = String.valueOf(item.getUpvoteCount()+1);
-        String desc = mContext.getString(R.string.info_window_description)+item.getDescription();
+        String desc = item.getDescription();
 
         tvTitle.setText(item.getReporterName());
-//        tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         tvUpvotes.setText(vote);
         tvDesc.setText(desc);
         if (item.getDescription().isEmpty()) tvDesc.setVisibility(View.GONE);

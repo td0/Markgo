@@ -45,6 +45,7 @@ import com.firebase.ui.common.ChangeEventType;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -222,6 +223,10 @@ public abstract class ReportListFragment extends Fragment{
                     .makeSceneTransitionAnimation(getActivity(), v,
                         getActivity().getString(R.string.animation_photo_view));
                 startActivity(intent, options.toBundle());
+            } else if (v.getId() == R.id.report_street_name) {
+                Timber.d("Streetname clicked");
+                LatLng latLng = new LatLng(report.getLatitude(), report.getLongitude());
+                ((MainActivity)getActivity()).startMapsActivity(latLng);
             }
         };
     }

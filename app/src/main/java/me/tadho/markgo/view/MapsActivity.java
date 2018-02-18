@@ -57,6 +57,7 @@ public class MapsActivity extends AppCompatActivity {
         char mapsMode = 0;
         extras = getIntent().getExtras();
         if (extras != null) {
+            mLatLng = extras.getParcelable(Consts.LATLNG_EXTRA);
             mapsMode = extras.getChar(Consts.MAPS_MODE);
         }
         loadMapsMode(mapsMode);
@@ -78,7 +79,7 @@ public class MapsActivity extends AppCompatActivity {
                 setTitle(getString(R.string.title_maps_picker));
                 Timber.d("Maps location picker mode");
                 fragment = new MapsPickerFragment();
-                mLatLng = extras.getParcelable(Consts.LATLNG_EXTRA);
+
                 if (mLatLng!=null) setFragmentLatLng(fragment);
                 loadFragment(fragment);
                 break;
@@ -89,6 +90,8 @@ public class MapsActivity extends AppCompatActivity {
                 setTitle(getString(R.string.title_maps));
                 Timber.d("Maps location list mode");
                 fragment = new MapsListFragment();
+
+                if (mLatLng!=null) setFragmentLatLng(fragment);
                 loadFragment(fragment);
         }
     }

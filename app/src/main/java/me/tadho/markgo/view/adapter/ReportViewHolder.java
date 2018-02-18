@@ -87,6 +87,7 @@ public class ReportViewHolder extends RecyclerView.ViewHolder {
         menuIV.setOnClickListener(null);
         photoIV.setOnClickListener(null);
         photoIV.setOnClickListener(onClickListener);
+        streetNameTV.setOnClickListener(onClickListener);
         if (!report.getFixed()) {
             if (upvoted) upvoteIconIV.setImageResource(R.drawable.ic_star_yellow_24dp);
             else upvoteIconIV.setImageResource(R.drawable.ic_star_border_yellow_24dp);
