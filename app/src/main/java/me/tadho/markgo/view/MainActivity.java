@@ -26,6 +26,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -36,6 +37,10 @@ import android.view.MenuItem;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.CompositeDisposable;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.jakewharton.rxbinding2.view.RxView;
 import com.mikepenz.aboutlibraries.Libs;
 import com.mikepenz.aboutlibraries.LibsBuilder;
@@ -45,12 +50,13 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.firebase.auth.FirebaseAuth;
 
+import me.tadho.markgo.data.FbPersistence;
 import me.tadho.markgo.data.enumeration.Consts;
 import me.tadho.markgo.R;
+import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.utils.DisplayUtility;
 import me.tadho.markgo.view.adapter.ViewPagerAdapter;
 import timber.log.Timber;
-
 
 public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSelectedListener {
 
@@ -61,20 +67,27 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
     private ViewPager viewPager;
     private TabLayout tabLayout;
     private ViewPagerAdapter viewPagerAdapter;
+    private DatabaseReference userStatusRef;
+    private int userStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
+        mAuth = FirebaseAuth.getInstance();
+        String uid = mAuth.getUid();
+        userStatus = 0;
+        userStatusRef = FbPersistence.getDatabase().getReference()
+            .child(Prefs.FD_REF_USERS).child(uid).child("status");
         setupTab();
         setupFab();
-        mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        userStatusRef.removeEventListener(statusListener());
         if (compositeDisposable!=null){
             if(!compositeDisposable.isDisposed()){
                 Timber.d("RxTest onDestroy, disposing");
@@ -85,9 +98,11 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupFab() {
+        mFam = findViewById(R.id.mFam);
+        userStatusRef.addValueEventListener(statusListener());
+
         compositeDisposable = new CompositeDisposable();
         Timber.d("Setting up Floating Action Menu");
-        mFam = findViewById(R.id.mFam);
         FloatingActionButton fabGallery = findViewById(R.id.fabGallery);
         FloatingActionButton fabCamera = findViewById(R.id.fabCamera);
         mFam.setClosedOnTouchOutside(true);
@@ -199,6 +214,37 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                 startActivity(new Intent(this, IntroActivity.class));
                 finish();
             }).setNegativeButton(R.string.dialog_cancel, null).show();
+    }
+
+    private ValueEventListener statusListener() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                setUserStatus(dataSnapshot.getValue(Integer.class));
+                if (getUserStatus() > 0) {
+                    mFam.setMenuButtonColorNormalResId(R.color.colorSecondary);
+                    mFam.setMenuButtonColorPressedResId(R.color.colorSecondaryDark);
+                    mFam.setMenuButtonColorRippleResId(R.color.colorSecondaryDark);
+                    mFam.setOnMenuButtonClickListener(view -> mFam.toggle(true));
+                } else {
+                    mFam.setMenuButtonColorNormalResId(R.color.grey_500);
+                    mFam.setMenuButtonColorPressedResId(R.color.grey_500);
+                    mFam.setMenuButtonColorRippleResId(R.color.grey_500);
+                    mFam.setOnMenuButtonClickListener(view -> Snackbar
+                        .make(view, R.string.snackbar_blocked, Snackbar.LENGTH_SHORT)
+                        .show());
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+    }
+
+    private void setUserStatus(int status) {
+        userStatus = status;
+    }
+    public int getUserStatus() {
+        return userStatus;
     }
 
     @Override
