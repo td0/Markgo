@@ -33,6 +33,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import io.reactivex.disposables.Disposable;
 import io.reactivex.disposables.CompositeDisposable;
@@ -230,9 +231,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
                     mFam.setMenuButtonColorNormalResId(R.color.grey_500);
                     mFam.setMenuButtonColorPressedResId(R.color.grey_500);
                     mFam.setMenuButtonColorRippleResId(R.color.grey_500);
-                    mFam.setOnMenuButtonClickListener(view -> Snackbar
-                        .make(view, R.string.snackbar_blocked, Snackbar.LENGTH_SHORT)
-                        .show());
+                    mFam.setOnMenuButtonClickListener(view -> showBlockedSnackbar(view));
                 }
             }
             @Override
@@ -240,11 +239,11 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         };
     }
 
-    private void setUserStatus(int status) {
-        userStatus = status;
-    }
-    public int getUserStatus() {
-        return userStatus;
+    private void setUserStatus(int status) { userStatus = status; }
+    public int getUserStatus() { return userStatus; }
+    public void showBlockedSnackbar(View view) {
+        Snackbar.make(view, R.string.snackbar_blocked, Snackbar.LENGTH_SHORT)
+            .show();
     }
 
     @Override

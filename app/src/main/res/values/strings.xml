@@ -22,7 +22,7 @@
     <!--FAB-->
     <string name="fab_gallery">Gallery</string>
     <string name="fab_camera">Camera</string>
-    <string name="snackbar_blocked">You are blocked. Can\'t make a new report</string>
+    <string name="snackbar_blocked">Error: You are blocked!</string>
 
     <!--Dialog-->
     <string name="dialog_exit">Do you want to quit the app?</string>

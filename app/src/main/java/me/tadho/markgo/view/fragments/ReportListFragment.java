@@ -63,6 +63,7 @@ import me.tadho.markgo.data.enumeration.Prefs;
 import me.tadho.markgo.data.enumeration.RefPaths;
 import me.tadho.markgo.data.model.Report;
 import me.tadho.markgo.utils.DisplayUtility;
+import me.tadho.markgo.view.MainActivity;
 import me.tadho.markgo.view.PhotoViewerActivity;
 import me.tadho.markgo.view.adapter.ReportViewHolder;
 import timber.log.Timber;
@@ -81,6 +82,8 @@ public abstract class ReportListFragment extends Fragment{
     private FirebaseRecyclerAdapter<Report, ReportViewHolder> mAdapter;
     private HashMap<String, Boolean> userUpvotes;
     private HashMap<String, Boolean> userFixedIssue;
+
+    private View rootView;
 
     private Report report;
 
@@ -136,7 +139,7 @@ public abstract class ReportListFragment extends Fragment{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main_timeline, container, false);
+        rootView = inflater.inflate(R.layout.fragment_main_timeline, container, false);
 
         mRecycler = rootView.findViewById(R.id.recycler_timeline);
         mRecycler.setHasFixedSize(true);
@@ -188,7 +191,11 @@ public abstract class ReportListFragment extends Fragment{
         String reporterId = report.getReporterId();
         return v -> {
             if (v.getId() == R.id.report_menu){
-                Timber.d("Report Menu clicked! -> "+reportKey);
+                Timber.d("Report Menu clicked! -> " + reportKey);
+                if (isUserBlocked()) {
+                    showBlockedSnackbar();
+                    return;
+                }
                 Context wrapper = new ContextThemeWrapper(getActivity(), R.style.popupMenuStyle);
                 PopupMenu popup = new PopupMenu(wrapper, v);
                 int menuResId;
@@ -200,6 +207,10 @@ public abstract class ReportListFragment extends Fragment{
                 popup.setOnMenuItemClickListener(onMenuItemClickListener(reportKey, report));
                 popup.show();
             } else if (v.getId() == R.id.upvote_icon) {
+                if (isUserBlocked()) {
+                    showBlockedSnackbar();
+                    return;
+                }
                 if (!reporterId.equals(getUid()))
                     updateVote(reporterId, reportKey, userUpvotes.get(reportKey) == null);
             } else if (v.getId() == R.id.report_photo) {
@@ -287,6 +298,14 @@ public abstract class ReportListFragment extends Fragment{
                 dbRef.updateChildren(abuseIssuePaths);
             })
             .show();
+    }
+
+    private boolean isUserBlocked() {
+        return ((MainActivity)getActivity()).getUserStatus() == 0;
+    }
+
+    private void showBlockedSnackbar() {
+        ((MainActivity)getActivity()).showBlockedSnackbar(rootView);
     }
 
     @Override
