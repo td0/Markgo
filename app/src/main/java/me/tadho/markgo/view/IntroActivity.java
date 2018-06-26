@@ -67,6 +67,7 @@ public class IntroActivity extends MaterialIntroActivity {
 
     private FirebaseAuth mAuth;
     private String verificationId;
+    private String phoneNumber;
     private DatabaseReference rootRef;
     private FormIntroSlide formSlide;
     private Task<AuthResult> signInTask;
@@ -122,6 +123,7 @@ public class IntroActivity extends MaterialIntroActivity {
     public void onBackPressed() {}
 
     public void getVerificationCode(String phone){
+        phoneNumber = phone;
         PhoneAuthProvider
             .getInstance()
             .verifyPhoneNumber(phone, Consts.VERIFY_PHONE_TIMEOUT,
@@ -195,7 +197,7 @@ public class IntroActivity extends MaterialIntroActivity {
     public void onAuthSuccess(FirebaseUser userAuth, String name){
         Timber.d("Running onAuthSuccess");
         String uid = userAuth.getUid();
-        User user = new User(name);
+        User user = new User(name, phoneNumber);
         DatabaseReference userListRef = rootRef.child("UsersList").child(uid);
 
         Completable userRegisterCompletable = RxFirebaseDatabase
@@ -230,10 +232,7 @@ public class IntroActivity extends MaterialIntroActivity {
         DatabaseReference userRef = rootRef.child(Prefs.FD_REF_USERS).child(uid);
         DatabaseReference nameRef = userRef.child(Prefs.FD_REF_NAME);
         return RxFirebaseDatabase.observeSingleValueEvent(nameRef)
-            .map(snap -> {
-                String registeredName = snap.getValue(String.class);
-                return registeredName;
-            })
+            .map(snap -> snap.getValue(String.class))
             .flatMapCompletable(registeredName -> Completable.complete()
                 .doOnComplete(() -> {
                     Timber.d("Registered name -> " + registeredName);

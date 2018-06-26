@@ -35,6 +35,7 @@ public class User {
     private String name;
     private int reportCount;
     private int status;
+    private String phoneNumber;
     private HashMap<String, Object> joinDate;
 
     public User(){
@@ -43,6 +44,13 @@ public class User {
 
     public User(String name){
         this.name = name;
+        reportCount = 0;
+        status = 1;
+    }
+
+    public User(String name, String phoneNumber){
+        this.name = name;
+        this.phoneNumber = phoneNumber;
         reportCount = 0;
         status = 1;
     }
@@ -57,6 +65,10 @@ public class User {
 
     public int getStatus() {
         return status;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
     public HashMap<String, Object> getJoinDate(){

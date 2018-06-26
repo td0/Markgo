@@ -26,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -61,6 +62,12 @@ public class MapsActivity extends AppCompatActivity {
             mapsMode = extras.getChar(Consts.MAPS_MODE);
         }
         loadMapsMode(mapsMode);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_maps_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

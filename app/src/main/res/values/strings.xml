@@ -105,5 +105,7 @@
     <string name="menu_issue_abuse">Issue Abusive Post</string>
     <string name="fixed_flair">FIXED</string>
 
-
+    <string name="maps_action_menu_filter">Filter</string>
+    <string name="maps_action_filter_fixed">Fixed</string>
+    <string name="maps_action_filter_unfixed">Unfixed</string>
 </resources>

@@ -8,6 +8,16 @@ if (keystorePropsFile.exists()) {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('/Users/tdh/Dev/androidCode/Markgo/.signing/debug.keystore')
+            storePassword 'android'
+            keyAlias 'markgoDebug'
+            keyPassword 'android'
+        }
+        release {
+        }
+    }
     buildToolsVersion '26.0.3'
     compileSdkVersion 27
     defaultConfig {
@@ -25,21 +35,13 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    signingConfigs {
-        markgoDebug {
-            storeFile file(keystoreProps['STORE_FILE_DEBUG'])
-            storePassword keystoreProps['STORE_PASSWORD_DEBUG']
-            keyAlias keystoreProps['KEY_ALIAS_DEBUG']
-            keyPassword keystoreProps['KEY_PASSWORD_DEBUG']
-        }
-    }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.markgoDebug
+            signingConfig signingConfigs.debug
         }
     }
     productFlavors {}
