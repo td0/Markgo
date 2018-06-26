@@ -23,20 +23,27 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/menuSort"
-        android:title="@string/maps_action_menu_filter"
-        android:icon="@drawable/ic_filter_list_white_24dp"
-        app:showAsAction="ifRoom" >
-        <menu>
-            <item
-                android:id="@+id/maps_filter_fixed"
-                android:title="@string/about_submenu"
-                app:showAsAction="never"/>
-            <item
-                android:id="@+id/maps_filter_unfixed"
-                android:title="@string/logout_submenu"
-                app:showAsAction="never"/>
-        </menu>
-    </item>
+    <group
+        android:id="@+id/maps_menu_filter_group">
+        <item
+            android:id="@+id/menuSort"
+            android:title="@string/maps_action_menu_filter"
+            android:icon="@drawable/ic_filter_list_white_24dp"
+            app:showAsAction="ifRoom" >
+            <menu>
+                <item
+                    android:id="@+id/maps_filter_all"
+                    android:title="@string/maps_action_filter_all"
+                    app:showAsAction="never"/>
+                <item
+                    android:id="@+id/maps_filter_broken"
+                    android:title="@string/maps_action_filter_unfixed"
+                    app:showAsAction="never"/>
+                <item
+                    android:id="@+id/maps_filter_fixed"
+                    android:title="@string/maps_action_filter_fixed"
+                    app:showAsAction="never"/>
+            </menu>
+        </item>
+    </group>
 </menu>

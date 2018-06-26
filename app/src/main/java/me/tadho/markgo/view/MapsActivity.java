@@ -40,8 +40,11 @@ import timber.log.Timber;
 public class MapsActivity extends AppCompatActivity {
 
     private FragmentManager mFragmentManager;
+    private Menu menu;
     private LatLng mLatLng;
     private Bundle extras;
+    private Fragment fragment;
+    private char mapsMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,39 +57,59 @@ public class MapsActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-
-        char mapsMode = 0;
+        mapsMode = Consts.MAPS_LIST;
         extras = getIntent().getExtras();
         if (extras != null) {
             mLatLng = extras.getParcelable(Consts.LATLNG_EXTRA);
             mapsMode = extras.getChar(Consts.MAPS_MODE);
         }
-        loadMapsMode(mapsMode);
+        Timber.d("mapsMode = "+ mapsMode);
+        loadMapsMode();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
         getMenuInflater().inflate(R.menu.activity_maps_menu, menu);
+        if (mapsMode != Consts.MAPS_LIST)
+            menu.setGroupVisible(R.id.maps_menu_filter_group, false);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            super.onBackPressed();
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home :
+                super.onBackPressed();
+                return true;
+            case R.id.maps_filter_all :
+                Timber.d("All filter selected");
+                if (fragment != null) ((MapsListFragment)fragment).setFilterMode(Consts.MAPS_FILTER_ALL);
+                break;
+            case R.id.maps_filter_broken:
+                Timber.d("Broken filter selected");
+                if (fragment != null) ((MapsListFragment)fragment).setFilterMode(Consts.MAPS_FILTER_BROKEN);
+                break;
+            case R.id.maps_filter_fixed :
+                Timber.d("Fixed filter selected");
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void loadMapsMode(char mapsMode){
-        Fragment fragment;
+
+
+    private void loadMapsMode(){
         switch (mapsMode){
             case Consts.MAPS_PICKER:
                 setTitle(getString(R.string.title_maps_picker));
                 Timber.d("Maps location picker mode");
                 fragment = new MapsPickerFragment();
-
                 if (mLatLng!=null) setFragmentLatLng(fragment);
                 loadFragment(fragment);
                 break;
@@ -97,7 +120,6 @@ public class MapsActivity extends AppCompatActivity {
                 setTitle(getString(R.string.title_maps));
                 Timber.d("Maps location list mode");
                 fragment = new MapsListFragment();
-
                 if (mLatLng!=null) setFragmentLatLng(fragment);
                 loadFragment(fragment);
         }

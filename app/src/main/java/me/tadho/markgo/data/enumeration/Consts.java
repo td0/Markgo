@@ -60,14 +60,18 @@ public final class Consts {
     public static final int REG_STATE_GET_AUTH = 2;
     public static final long DEBOUNCE_TIMEOUT = 500;
     public static final long VERIFY_PHONE_TIMEOUT = 60;
-
+    //    Maps Modes
     public static final String MAPS_MODE = "mapsMode";
     public static final char MAPS_PICKER = 'p';
     public static final char MAPS_VIEWER = 'v';
     public static final char MAPS_LIST = 'n';
+    //    Maps Filters
+    public static final int MAPS_FILTER_ALL = 1;
+    public static final int MAPS_FILTER_BROKEN = 2;
+    public static final int MAPS_FILTER_FIXED = 3;
 
 
-//    TODO : can't figure out how I could take string resource frome outside of the Activity/Fragment
+    //    TODO : can't figure out how I could take string resource frome outside of the Activity/Fragment
     public static final String STRING_INFO_WINDOW_DESCRIPTION = "Description : ";
 
 }

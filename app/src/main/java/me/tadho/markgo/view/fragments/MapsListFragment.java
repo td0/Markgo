@@ -35,6 +35,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.OvershootInterpolator;
@@ -103,6 +104,7 @@ public class MapsListFragment extends Fragment
     private FloatingActionButton fabMyLocation;
     private FloatingActionMenu mFam;
 
+    private int filterMode = 1;
     private Boolean clusterMode = true;
     private Boolean populated = false;
     private Boolean initialLatLng = false;
@@ -125,6 +127,7 @@ public class MapsListFragment extends Fragment
             Timber.d("Argument found -> "+mLatLng);
         }
         DatabaseReference dbRef = FbPersistence.getDatabase().getReference();
+//        setFilterMode(dbRef, 1);
         dbMapsRef = dbRef.child(Prefs.FD_REF_REPORTS);
         dbMapsRef.keepSynced(true);
         compositeDisposable = new CompositeDisposable();
@@ -150,6 +153,9 @@ public class MapsListFragment extends Fragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setupFab();
+    }
+
+    public void setFilterMode(int filterMode) {
     }
 
     @Override
@@ -192,7 +198,6 @@ public class MapsListFragment extends Fragment
         } catch (Resources.NotFoundException e) {
             Timber.e("MapsActivityRaw", "Can't find style.", e);
         }
-
         googleMap.getUiSettings().setMapToolbarEnabled(false);
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.getUiSettings().setCompassEnabled(true);
@@ -216,8 +221,16 @@ public class MapsListFragment extends Fragment
                 if (snaps.exists()) {
                     if (mapItems != null) mapItems.clear();
                     for (DataSnapshot snap : snaps.getChildren()) {
-                        if (!snap.getValue(Report.class).getFixed())
+                        if (filterMode == Consts.MAPS_FILTER_ALL) {
                             mapItems.put(snap.getKey(), snap.getValue(Report.class));
+                        } else if (filterMode == Consts.MAPS_FILTER_BROKEN) {
+                            if (!snap.getValue(Report.class).getFixed())
+                                mapItems.put(snap.getKey(), snap.getValue(Report.class));
+                        } else {
+                            if (snap.getValue(Report.class).getFixed())
+                                mapItems.put(snap.getKey(), snap.getValue(Report.class));
+                        }
+
                     }
                     if (populated) refreshMapsData();
                     else initiateMapsMode();
