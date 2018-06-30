@@ -100,11 +100,8 @@ public class ReportViewHolder extends RecyclerView.ViewHolder {
             upvoteIconIV.setImageResource(R.drawable.ic_star_green_24dp);
             fixedFlairTV.setVisibility(View.VISIBLE);
             upvoteIconIV.setOnClickListener(null);
-            streetNameTV.setOnClickListener(null);
             menuIV.setVisibility(View.GONE);
         }
-
-
     }
 
     private String getDate(long time) {

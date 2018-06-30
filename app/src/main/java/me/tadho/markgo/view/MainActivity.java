@@ -250,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements TabLayout.OnTabSe
         Bundle extras = new Bundle();
         Intent mapsIntent = new Intent(MainActivity.this, MapsActivity.class);
         extras.putParcelable(Consts.LATLNG_EXTRA, latLng);
+        extras.putChar(Consts.MAPS_MODE, Consts.MAPS_LIST);
         mapsIntent.putExtras(extras);
         startActivity(mapsIntent);
     }

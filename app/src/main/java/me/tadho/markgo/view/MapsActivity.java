@@ -68,7 +68,6 @@ public class MapsActivity extends AppCompatActivity {
             mLatLng = extras.getParcelable(Consts.LATLNG_EXTRA);
             mapsMode = extras.getChar(Consts.MAPS_MODE);
         }
-        Timber.d("mapsMode = "+ mapsMode);
         loadMapsMode();
     }
 
@@ -121,8 +120,6 @@ public class MapsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
-
     private void loadMapsMode(){
         switch (mapsMode){
             case Consts.MAPS_PICKER:
@@ -132,10 +129,7 @@ public class MapsActivity extends AppCompatActivity {
                 if (mLatLng!=null) setFragmentLatLng(fragment);
                 loadFragment(fragment);
                 break;
-            case Consts.MAPS_VIEWER:
-                Timber.d("Maps location viewer mode");
-                break;
-            default:
+            case Consts.MAPS_LIST:
                 setTitle(getString(R.string.title_maps));
                 Timber.d("Maps location list mode");
                 fragment = new MapsListFragment();

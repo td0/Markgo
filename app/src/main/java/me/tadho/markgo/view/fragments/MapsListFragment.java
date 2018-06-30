@@ -317,7 +317,7 @@ public class MapsListFragment extends Fragment
             } else if (filterMode == Consts.MAPS_FILTER_BROKEN) {
                 if (!mapItem.getValue().getFixed())
                     mClusterManager.addItem(new ClusterMarker(lat, lng, mapItem.getKey()));
-            } else {
+            } else if (filterMode == Consts.MAPS_FILTER_FIXED) {
                 if (mapItem.getValue().getFixed())
                     mClusterManager.addItem(new ClusterMarker(lat, lng, mapItem.getKey()));
             }
@@ -334,7 +334,7 @@ public class MapsListFragment extends Fragment
             } else if (filterMode == Consts.MAPS_FILTER_BROKEN) {
                 if (!mapItem.getValue().getFixed())
                     heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
-            } else {
+            } else if (filterMode == Consts.MAPS_FILTER_FIXED) {
                 if (mapItem.getValue().getFixed())
                     heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
             }
