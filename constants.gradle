@@ -25,7 +25,7 @@ project.ext {
     targetSdk = 26
     minSdk = 19
 
-    buildTools = '26.0.2' // Remember to also update in .travis.yml
+    buildTools = '27.0.3' // Remember to also update in .travis.yml
 
     gmsVersion = '11.8.0'
     firebaseUIVersion = '3.1.0'
