@@ -156,6 +156,9 @@ public class MapsListFragment extends Fragment
     }
 
     public void setFilterMode(int filterMode) {
+        Timber.d("MapsListFragment : filter selected -> "+filterMode);
+        this.filterMode = filterMode;
+        initiateMapsMode();
     }
 
     @Override
@@ -221,16 +224,7 @@ public class MapsListFragment extends Fragment
                 if (snaps.exists()) {
                     if (mapItems != null) mapItems.clear();
                     for (DataSnapshot snap : snaps.getChildren()) {
-                        if (filterMode == Consts.MAPS_FILTER_ALL) {
-                            mapItems.put(snap.getKey(), snap.getValue(Report.class));
-                        } else if (filterMode == Consts.MAPS_FILTER_BROKEN) {
-                            if (!snap.getValue(Report.class).getFixed())
-                                mapItems.put(snap.getKey(), snap.getValue(Report.class));
-                        } else {
-                            if (snap.getValue(Report.class).getFixed())
-                                mapItems.put(snap.getKey(), snap.getValue(Report.class));
-                        }
-
+                        mapItems.put(snap.getKey(), snap.getValue(Report.class));
                     }
                     if (populated) refreshMapsData();
                     else initiateMapsMode();
@@ -318,7 +312,15 @@ public class MapsListFragment extends Fragment
         for (HashMap.Entry<String,Report> mapItem : mapItems.entrySet()) {
             Double lat = mapItem.getValue().getLatitude();
             Double lng = mapItem.getValue().getLongitude();
-            mClusterManager.addItem(new ClusterMarker(lat,lng,mapItem.getKey()));
+            if (filterMode == Consts.MAPS_FILTER_ALL) {
+                mClusterManager.addItem(new ClusterMarker(lat, lng, mapItem.getKey()));
+            } else if (filterMode == Consts.MAPS_FILTER_BROKEN) {
+                if (!mapItem.getValue().getFixed())
+                    mClusterManager.addItem(new ClusterMarker(lat, lng, mapItem.getKey()));
+            } else {
+                if (mapItem.getValue().getFixed())
+                    mClusterManager.addItem(new ClusterMarker(lat, lng, mapItem.getKey()));
+            }
         }
     }
 
@@ -327,7 +329,15 @@ public class MapsListFragment extends Fragment
             Double lat = mapItem.getValue().getLatitude();
             Double lng = mapItem.getValue().getLongitude();
             Double intensity = Double.valueOf(mapItem.getValue().getUpvoteCount())+1d;
-            heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
+            if (filterMode == Consts.MAPS_FILTER_ALL) {
+                heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
+            } else if (filterMode == Consts.MAPS_FILTER_BROKEN) {
+                if (!mapItem.getValue().getFixed())
+                    heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
+            } else {
+                if (mapItem.getValue().getFixed())
+                    heatMapList.add(new WeightedLatLng(new LatLng(lat, lng), intensity));
+            }
         }
     }
 
@@ -446,21 +456,21 @@ public class MapsListFragment extends Fragment
                 compositeDisposable.dispose();
             compositeDisposable = null;
         }
-        if (mapItems!=null) {
+        if (mapItems != null) {
             mapItems.clear();
             mapItems = null;
         }
-        if (mClusterManager!=null) {
+        if (mClusterManager != null) {
             mClusterManager.setOnClusterClickListener(null);
             mClusterManager.clearItems();
             mClusterManager = null;
         }
-        if (heatMapList!=null) {
+        if (heatMapList != null) {
             heatMapProvider = null;
             heatMapList.clear();
             heatMapList = null;
         }
-        if (heatMapOverlay!=null) {
+        if (heatMapOverlay != null) {
             heatMapOverlay.clearTileCache();
             heatMapOverlay.remove();
             heatMapOverlay = null;
@@ -521,6 +531,5 @@ public class MapsListFragment extends Fragment
         return new Gradient(ALT_HEATMAP_GRADIENT_COLORS,
             ALT_HEATMAP_GRADIENT_START_POINTS);
     }
-
 
 }

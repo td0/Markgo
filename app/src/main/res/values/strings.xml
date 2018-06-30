@@ -109,4 +109,9 @@
     <string name="maps_action_filter_all">All</string>
     <string name="maps_action_filter_fixed">Fixed</string>
     <string name="maps_action_filter_unfixed">Broken</string>
+    <string-array name="maps_filter_spinner">
+        <item>ALL</item>
+        <item>NOT FIXED</item>
+        <item>FIXED</item>
+    </string-array>
 </resources>

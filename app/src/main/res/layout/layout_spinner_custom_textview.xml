@@ -21,16 +21,12 @@
   ~ SOFTWARE.
   -->
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <group
-        android:id="@+id/maps_menu_filter_group">
-        <item
-            android:id="@+id/maps_menu_filter"
-            android:title="@string/maps_action_menu_filter"
-            android:actionLayout="@layout/support_simple_spinner_dropdown_item"
-            app:actionViewClass="android.widget.Spinner"
-            app:showAsAction="ifRoom">
-        </item>
-    </group>
-</menu>
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textSize="20sp"
+    android:gravity="end"
+    android:textColor="@color/text_white"
+    android:padding="5dip"
+    />

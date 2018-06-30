@@ -24,10 +24,15 @@ package me.tadho.markgo.view;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -76,6 +81,31 @@ public class MapsActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
         getMenuInflater().inflate(R.menu.activity_maps_menu, menu);
+
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this,
+            R.array.maps_filter_spinner, R.layout.layout_spinner_custom_textview);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        MenuItem menuItem = menu.findItem(R.id.maps_menu_filter);
+        Spinner spinner = (Spinner) menuItem.getActionView();
+        spinner.setAdapter(arrayAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position+1) {
+                    case Consts.MAPS_FILTER_ALL :
+                        if (fragment != null) ((MapsListFragment)fragment).setFilterMode(Consts.MAPS_FILTER_ALL);
+                        break;
+                    case Consts.MAPS_FILTER_BROKEN :
+                        if (fragment != null) ((MapsListFragment)fragment).setFilterMode(Consts.MAPS_FILTER_BROKEN);
+                        break;
+                    case Consts.MAPS_FILTER_FIXED :
+                        if (fragment != null) ((MapsListFragment)fragment).setFilterMode(Consts.MAPS_FILTER_FIXED);
+                        break;
+                }
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
         if (mapsMode != Consts.MAPS_LIST)
             menu.setGroupVisible(R.id.maps_menu_filter_group, false);
         return super.onCreateOptionsMenu(menu);
@@ -87,17 +117,6 @@ public class MapsActivity extends AppCompatActivity {
             case android.R.id.home :
                 super.onBackPressed();
                 return true;
-            case R.id.maps_filter_all :
-                Timber.d("All filter selected");
-                if (fragment != null) ((MapsListFragment)fragment).setFilterMode(Consts.MAPS_FILTER_ALL);
-                break;
-            case R.id.maps_filter_broken:
-                Timber.d("Broken filter selected");
-                if (fragment != null) ((MapsListFragment)fragment).setFilterMode(Consts.MAPS_FILTER_BROKEN);
-                break;
-            case R.id.maps_filter_fixed :
-                Timber.d("Fixed filter selected");
-                break;
         }
         return super.onOptionsItemSelected(item);
     }
